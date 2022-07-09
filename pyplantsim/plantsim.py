@@ -189,3 +189,53 @@ class Plantsim:
             time after the instrance quits in seconds   
         """
         self.instance.QuitAfterTime(time)
+
+    def reset_simulation(self, eventcontroller_object: str = None) -> None:
+        """
+        Resets the simulation
+
+        Attributes:
+        ----------
+        eventcontroller_object : str, optional
+            path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)
+        """
+        self.instance.ResetSimulation(eventcontroller_object)
+
+    def save_model(self, name: str) -> None:
+        """Saves the current model as the given name"""
+        self.instance.SaveModel(name)
+
+    def set_value(self, object: str, value: any) -> None:
+        """
+        Sets a value to an given attribute
+
+        Attributes:
+        ----------
+        object : str
+            path to the attribute
+        value : any
+            the new value the attribute should be assigned to
+        """
+        self.instance.SetValue(object, value)
+
+    def start_simulation(self, eventcontroller_object: str = None) -> None:
+        """
+        Starts the simulation
+
+        Attributes:
+        ----------
+        eventcontroller_object : str, optional
+            path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)
+        """
+        self.instance.StartSimulation(eventcontroller_object)
+
+    def stop_simulation(self, eventcontroller_object: str = None) -> None:
+        """
+        Stops the simulation
+
+        Attributes:
+        ----------
+        eventcontroller_object : str, optional
+            path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)
+        """
+        self.instance.StopSimulation(eventcontroller_object)
