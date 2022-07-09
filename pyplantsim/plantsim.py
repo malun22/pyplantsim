@@ -1,4 +1,3 @@
-from genericpath import exists
 import os
 import logging
 import win32com.client
