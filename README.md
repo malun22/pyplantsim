@@ -23,3 +23,6 @@ There are further examples in the [example folder](https://github.com/malun22/py
 
 ## Further documentation
 Here is the official [COM Interface documentation](https://docs.plm.automation.siemens.com/content/plant_sim_help/15.1/plant_sim_all_in_one_html/en_US/tecnomatix_plant_simulation_help/add_ins_reference_help/inter_process_communication_interfaces/com.html)
+
+## Notice
+This is a private project and still in progress. This is not associated to Siemens in any way.
