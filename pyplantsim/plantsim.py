@@ -49,7 +49,7 @@ class Plantsim:
         return self
 
     def __init__(self, version: PlantsimVersion = PlantsimVersion.V_MJ_22_MI_1, visible: bool = True, trusted: bool = True,
-                 license: PlantsimLicense = PlantsimLicense.VIEWER, supress_3d: bool = False, show_msg_box: bool = False, relative_path: str = "") -> None:
+                 license: PlantsimLicense = PlantsimLicense.VIEWER, supress_3d: bool = False, show_msg_box: bool = False) -> None:
         """
         Initializes the Siemens Tecnomatix Plant Simulation instance.
 
