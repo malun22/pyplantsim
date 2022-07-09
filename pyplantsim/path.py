@@ -21,10 +21,10 @@ class PlantsimPath:
             if isinstance(append, PlantsimPath):
                 append = str(append)
 
-            if entry.startswith("."):
-                path += entry
+            if append.startswith("."):
+                path += append
             else:
-                path += f".{entry}"
+                path += f".{append}"
 
         self.path = path
 
