@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 import win32com.client
-import pywintypes
 
 from typing import Union
 from loguru import logger
