@@ -33,7 +33,7 @@ class Plantsim:
     # Defaults
     _dispatch_id: str = "Tecnomatix.PlantSimulationRemoteControl"
     _instance_running: bool = False
-    _event_controller: str = None
+    _event_controller: PlantsimPath = None
     _visible: bool = None
     _trusted: bool = None
     _license: PlantsimLicense = None
@@ -155,7 +155,7 @@ class Plantsim:
         """Closes the active model"""
         self.instance.CloseModel()
 
-    def set_eventcontroller(self, path: str = None) -> None:
+    def set_eventcontroller(self, path: PlantsimPath = None) -> None:
         """
         Sets the path of the Event Controller
 
@@ -167,8 +167,8 @@ class Plantsim:
         if path:
             self._event_controller = path
         elif self._relative_path:
-            self._event_controller = str(PlantsimPath(
-                self._relative_path, "EventController"))
+            self._event_controller = PlantsimPath(
+                self._relative_path, "EventController")
 
     def execute_sim_talk(self, source_code: str, *parameters: any) -> any:
         """
@@ -183,11 +183,40 @@ class Plantsim:
         """
         return self.instance.ExecuteSimTalk(source_code, parameters)
 
-    def get_value(self, object_name: str) -> any:
+    def get_value(self, object_name: str, is_absolute: bool = False) -> any:
         """
         returns the value of an attribute of a Plant Simulation object
+
+        Attributes:
+        ----------
+        object_name : str
+            path to the attribute
+        is_absolute : bool
+            Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
         """
-        return self.instance.GetValue(object_name)
+        if is_absolute:
+            return self.instance.GetValue(object_name)
+
+        return self.instance.GetValue(str(PlantsimPath(self._relative_path, object_name)))
+
+    def set_value(self, object_name: str, value: any, is_absolute: bool = False) -> None:
+        """
+        Sets a value to a given attribute
+
+        Attributes:
+        ----------
+        object_name : str
+            path to the attribute
+        value : any
+            the new value the attribute should be assigned to
+        is_absolute : bool
+            Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
+        """
+        if is_absolute:
+            self.instance.SetValue(object_name, value)
+        else:
+            self.instance.SetValue(
+                str(PlantsimPath(self._relative_path, object_name)), value)
 
     @property
     def is_simulation_running(self) -> bool:
@@ -254,19 +283,6 @@ class Plantsim:
     def save_model(self, name: str) -> None:
         """Saves the current model as the given name"""
         self.instance.SaveModel(name)
-
-    def set_value(self, object: str, value: any) -> None:
-        """
-        Sets a value to an given attribute
-
-        Attributes:
-        ----------
-        object : str
-            path to the attribute
-        value : any
-            the new value the attribute should be assigned to
-        """
-        self.instance.SetValue(object, value)
 
     def start_simulation(self, eventcontroller_object: str = None) -> None:
         """
