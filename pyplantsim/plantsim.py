@@ -4,6 +4,8 @@ import win32com.client
 
 from pyplantsim.versions import PlantsimVersion
 from pyplantsim.licenses import PlantsimLicense
+from pyplantsim.errors import PlantsimErrors
+from pyplantsim.path import PlantsimPath
 
 
 class Plantsim:
@@ -29,8 +31,15 @@ class Plantsim:
     """
 
     # Defaults
-    dispatch_id: str = "Tecnomatix.PlantSimulationRemoteControl"
-    instance_running = False
+    _dispatch_id: str = "Tecnomatix.PlantSimulationRemoteControl"
+    _instance_running: bool = False
+    _event_controller: str = None
+    _visible: bool = None
+    _trusted: bool = None
+    _license: PlantsimLicense = None
+    _supress_3d: bool = None
+    _show_msg_box: bool = None
+    _relative_path: str = None
 
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         if self.instance_running:
@@ -63,52 +72,79 @@ class Plantsim:
         """
 
         # Inits
-        self.version: PlantsimVersion = version
-        self.visible: bool = visible
-        self.trusted: bool = trusted
-        self.license: PlantsimLicense = license
-        self.supress_3d = supress_3d
-        self.show_msg_box = show_msg_box
-        self.relative_path = relative_path
+        self._version: PlantsimVersion = version
 
-        self.instance_running: bool = False
+        self._instance_running: bool = False
 
         logging.info(
-            f"Initializing Siemens Tecnomatix Plant Simulation {version.value} instance.")
+            f"Initializing Siemens Tecnomatix Plant Simulation {self._version.value} instance.")
 
         # Changing dispatch_id regarding requested version
-        if version:
-            self.dispatch_id += f"{self.dispatch_id}.{version.value}"
+        if self._version:
+            self._dispatch_id += f".{self._version.value}"
 
-        self.instance = win32com.client.Dispatch(self.dispatch_id)
+        self.instance = win32com.client.Dispatch(self._dispatch_id)
 
         # Should the instance window be visible on screen
-        self.instance.SetVisible(self.visible)
+        self.set_visible(visible)
 
         # Should the instance have access to the computer or not
-        self.instance.SetTrustModels(self.trusted)
+        self.set_trust_models(trusted)
 
         # Set license
-        self.instance.SetLicenseType(self.license.value)
+        self.set_license(license)
 
         # Should the instance supress the start of 3D
-        self.instance.SetSupressStartOf3D(self.supress_3d)
+        self.set_supress_start_of_3d(supress_3d)
 
         # Should the instance show a message box
-        self.instance.SetNoMessageBox(self.show_msg_box)
-
-        # Set the start of relative paths
-        self.instance.SetPathContext(self.relative_path)
+        self.set_show_message_box(show_msg_box)
 
         # Init was succesful
-        self.instance_running = True
+        self._instance_running = True
+
+    def set_path_context(self, path: PlantsimPath) -> None:
+        """Sets the relative path. (For instance .Models.Model)"""
+        if self._relative_path != path:
+            self._relative_path != path
+            self.instance.SetPathContext(str(self._relative_path))
+
+    def set_show_message_box(self, show: bool) -> None:
+        """Should the instance show a message box"""
+        if self._show_msg_box != show:
+            self._show_msg_box = show
+            self.instance.SetNoMessageBox(self._show_msg_box)
+
+    def set_supress_start_of_3d(self, supress: bool) -> None:
+        """Should the instance supress the start of 3D"""
+        if self._supress_3d != supress:
+            self._supress_3d = supress
+            self.instance.SetSupressStartOf3D(self._supress_3d)
+
+    def set_license(self, license: PlantsimLicense) -> None:
+        """Sets the license for the instance"""
+        if self._license != license:
+            self._license = license
+            self.instance.SetLicenseType(self._license.value)
+
+    def set_visible(self, visible: bool) -> None:
+        """Should the instance window be visible on screen"""
+        if self._visible != visible:
+            self._visible = visible
+            self.instance.SetVisible(self._visible)
+
+    def set_trust_models(self, trusted: bool) -> None:
+        """Should the instance have access to the computer or not"""
+        if self._trusted != trusted:
+            self._trusted = trusted
+            self.instance.SetTrustModels(self._trusted)
 
     def quit(self) -> None:
         """Quits the current instance."""
-        if not self.instance_running:
+        if not self._instance_running:
             ...
 
-        self.instance_running = False
+        self._instance_running = False
 
         logging.info(
             "Closing Siemens Tecnomatix Plant Simulation {version.value} instance.")
@@ -118,6 +154,21 @@ class Plantsim:
     def close_model(self) -> None:
         """Closes the active model"""
         self.instance.CloseModel()
+
+    def set_eventcontroller(self, path: str = None) -> None:
+        """
+        Sets the path of the Event Controller
+
+        Attributes:
+        ----------
+        path : str, optional
+            Path to the EventController object. If not give, it defaults to the defaul relative paths EventController (default: None)
+        """
+        if path:
+            self._event_controller = path
+        elif self._relative_path:
+            self._event_controller = str(PlantsimPath(
+                self._relative_path, "EventController"))
 
     def execute_sim_talk(self, source_code: str, *parameters: any) -> any:
         """
