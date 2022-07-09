@@ -153,7 +153,7 @@ class Plantsim:
     def quit(self) -> None:
         """Quits the current instance."""
         if not self._instance:
-            print("")
+            raise Exception("Instance has been closed before already.")
 
         logger.info(
             f"Closing Siemens Tecnomatix Plant Simulation {self._version.value if isinstance(self._version, PlantsimVersion) else self._version} instance.")
