@@ -1,5 +1,5 @@
 <h1 align="center">
-# pyplantsim
+pyplantsim
 </h1>
 
 <h4 align="center">A python wrapper for <a href="https://www.dex.siemens.com/plm/tecnomatix/plant-simulation" target="_blank">Siemens Tecnomatix Plant Simulation</a> COM Interface.</h4>
