@@ -371,3 +371,50 @@ class Plantsim:
             path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)
         """
         self._instance.StopSimulation(eventcontroller_object)
+
+    # Experimentals
+    def get_current_process_id(self) -> int:
+        """
+        Returns the ID of the current instance. Not sure what the id is for yet.
+        """
+        return self._instance.GetCurrentProcessId()
+
+    def get_ids_of_names(self):
+        return self._instance.GetIDsOfNames(".Models.Model.Eventcontroller")
+
+    def get_jte_export(self):
+        """
+        Takes one argument. An object in the simulation. Gives the 3D JTE Export. Not sure how it works yet.
+        """
+        return self._instance.GetJTExport()
+
+    def get_type_info(self):
+        """Takes one argument"""
+        return self._instance.GetTypeInfo()
+
+    def get_type_info_count(self):
+        return self._instance.GetTypeInfoCount()
+
+    def has_simulation_error(self):
+        return self._instance.HasSimulationError()
+
+    def invoke(self):
+        return self._instance.Invoke()
+
+    def load_model_without_state(self):
+        return self._instance.LoadModelWithoutState()
+
+    def query_interface(self):
+        return self._instance.QueryInterface()
+
+    def release(self):
+        return self._instance.Release()
+
+    def set_crash_stack_file(self):
+        return self._instance.SetCrashStackFile()
+
+    def set_stop_simulation_on_error(self):
+        return self._instance.SetStopSimulationOnError()
+
+    def tranfer_model(self):
+        return self._instance.TransferModel()
