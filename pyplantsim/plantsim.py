@@ -4,6 +4,7 @@ import win32com.client
 
 from typing import Union
 from loguru import logger
+from pyplantsim.datatypes import PlantsimDatatype, PlantsimDatatypes
 
 from pyplantsim.versions import PlantsimVersion
 from pyplantsim.licenses import PlantsimLicense
@@ -196,9 +197,38 @@ class Plantsim:
         *parameters : any
             Parameters to pass
         """
-        return self._instance.ExecuteSimTalk(source_code, parameters)
+        if parameters:
+            return self._instance.ExecuteSimTalk(source_code, *parameters)
 
-    def get_value(self, object_name: PlantsimPath, is_absolute: bool = False) -> any:
+        return self._instance.ExecuteSimTalk(source_code)
+
+    def get_attribute_type(self, object_name: PlantsimPath, attribute_name: str, is_absolute: bool = False) -> PlantsimDatatypes:
+        """
+        Return the type of an attribute
+
+        Attributes:
+        ----------
+        object_name : str
+            path to the attribute
+        is_absolute : bool
+            Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
+        """
+
+        type_string: str = self.execute_sim_talk("""
+                              param obj_as_str, attribute: string -> string
+                              
+                              var obj: object := str_to_obj(obj_as_str)
+                              var value: any := obj.getAttribute(attribute)
+                              var type := getSimTalkTypename(value)
+                              return type
+                              """, str(object_name) if is_absolute else str(
+            PlantsimPath(self._relative_path, object_name)), attribute_name)
+
+        type = PlantsimDatatypes[type_string.upper()]
+
+        return type
+
+    def get_value(self, object: PlantsimPath, attribute: str, is_absolute: bool = False, auto_typing: bool = True) -> Union[PlantsimDatatype, any]:
         """
         returns the value of an attribute of a Plant Simulation object
 
@@ -209,10 +239,19 @@ class Plantsim:
         is_absolute : bool
             Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
         """
-        return self._instance.GetValue(str(object_name) if is_absolute else str(
-            PlantsimPath(self._relative_path, object_name)))
+        value = self._instance.GetValue(str(PlantsimPath(object, attribute)) if is_absolute else str(
+            PlantsimPath(self._relative_path, object, attribute)))
 
-    def set_value(self, object_name: PlantsimPath, value: any, is_absolute: bool = False) -> None:
+        if auto_typing:
+            type = self.get_attribute_type(
+                object_name=object, attribute_name=attribute, is_absolute=is_absolute)
+
+            value = PlantsimDatatype.convert_enum_to_plantsim_datatype(
+                type).from_plant(value)
+
+        return value
+
+    def set_value(self, object_name: PlantsimPath, value: PlantsimDatatype, is_absolute: bool = False) -> None:
         """
         Sets a value to a given attribute
 
@@ -226,7 +265,7 @@ class Plantsim:
             Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
         """
         self._instance.SetValue(str(object_name) if is_absolute else str(
-            PlantsimPath(self._relative_path, object_name)), value)
+            PlantsimPath(self._relative_path, object_name)), value.to_plant() if isinstance(value, PlantsimDatatype) else value)
 
     def is_simulation_running(self) -> bool:
         """
