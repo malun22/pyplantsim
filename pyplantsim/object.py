@@ -1,5 +1,11 @@
+from enum import Enum
 from pyplantsim import PlantsimPath, Plantsim
 from dataclasses import dataclass
+
+
+class MaterialflowObjects(Enum):
+    CONNECTOR = ".Materialflow.Connector"
+    EVENT_CONTROLLER = ".Materialflow.EventController"
 
 
 @dataclass
