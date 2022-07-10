@@ -1,6 +1,8 @@
+<h1 align="center">
 # pyplantsim
+</h1>
 
-A python wrapper for [Siemens Tecnomatix Plant Simulation](https://www.dex.siemens.com/plm/tecnomatix/plant-simulation) COM Interface.
+<h4 align="center">A python wrapper for <a href="https://www.dex.siemens.com/plm/tecnomatix/plant-simulation" target="_blank">Siemens Tecnomatix Plant Simulation</a> COM Interface.</h4>
 
 <p align="center">
   <a href="#setup">Setup</a> •
