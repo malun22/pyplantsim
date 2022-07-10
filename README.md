@@ -34,7 +34,7 @@ with Plantsim(license=PlantsimLicense.STUDENT, version=PlantsimVersion.V_MJ_22_M
         plantsim.new_model()
 
         plantsim.save_model(
-            folder_path=r"S:\Coding\Projects\pyplantsim", file_name="MyNewModel")
+            folder_path=r"C:\users\documents\plantsimmodels", file_name="MyNewModel")
 ```
 
 There are further examples in the [example folder](https://github.com/malun22/pyplantsim/tree/main/examples).
