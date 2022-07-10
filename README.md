@@ -2,16 +2,22 @@
 
 A python wrapper for [Siemens Tecnomatix Plant Simulation](https://www.dex.siemens.com/plm/tecnomatix/plant-simulation) COM Interface.
 
-## Table of Contents
+<p align="center">
+  <a href="#setup">Setup</a> •
+  <a href="#examples">Examples</a> •
+  <a href="#further-documentation">Further documentation</a> •
+  <a href="#notice">Notice</a>
+</p>
 
-- [Setup](#setup)
+<!-- - [Setup](#setup)
 - [Examples](#examples)
 - [Further documentation](#further-documentation)
-- [Notice](#notice)
+- [Notice](#notice) -->
 
 ## Setup
 
 ```
+Install via pip:
 pip install git+https://github.com/malun22/pyplantsim.git
 ```
 
