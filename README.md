@@ -29,7 +29,7 @@ pip install git+https://github.com/malun22/pyplantsim.git
 import pyplantsim
 
 with Plantsim(license=PlantsimLicense.STUDENT, version=PlantsimVersion.V_MJ_22_MI_1,
-                             visible=True, trusted=True, suppress_3d=False, show_msg_box=False) as plantsim:
+                    visible=True, trusted=True, suppress_3d=False, show_msg_box=False) as plantsim:
 
         plantsim.new_model()
 
