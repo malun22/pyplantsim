@@ -171,6 +171,8 @@ class Plantsim:
         logger.info(f"Closing model.")
         self._instance.CloseModel()
 
+        self._model_loaded = False
+
     def set_eventcontroller(self, path: PlantsimPath = None) -> None:
         """
         Sets the path of the Event Controller
@@ -297,13 +299,20 @@ class Plantsim:
         except Exception as e:
             raise PlantsimException(e)
 
+        self._model_loaded = True
+
     def new_model(self, close_other: bool = False) -> None:
         """Creates a new simulation model in the current instance"""
         if close_other:
             self.close_model()
 
         logger.info("Creating a new model.")
-        self._instance.NewModel()
+        try:
+            self._instance.NewModel()
+        except Exception as e:
+            raise PlantsimException(e)
+
+        self._model_loaded = False
 
     def open_console_log_file(self, filepath: str) -> None:
         """Routes the Console output to a file"""
@@ -372,6 +381,11 @@ class Plantsim:
         """
         self._instance.StopSimulation(eventcontroller_object)
 
+    @property
+    def model_loaded(self) -> bool:
+        """Attribute holding true, when the instance has a model loaded, false, when it not"""
+        return self._model_loaded
+
     # Experimentals
     def get_current_process_id(self) -> int:
         """
@@ -380,6 +394,9 @@ class Plantsim:
         return self._instance.GetCurrentProcessId()
 
     def get_ids_of_names(self):
+        """
+        Further documentation: https://docs.microsoft.com/en-us/windows/win32/api/oaidl/nf-oaidl-idispatch-getidsofnames
+        """
         return self._instance.GetIDsOfNames(".Models.Model.Eventcontroller")
 
     def get_jte_export(self):
