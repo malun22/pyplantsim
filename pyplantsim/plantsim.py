@@ -45,6 +45,7 @@ class Plantsim:
 
     # State management
     _model_loaded: bool = False
+    _model_path: str = None
 
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         if self._instance:
@@ -172,6 +173,7 @@ class Plantsim:
         self._instance.CloseModel()
 
         self._model_loaded = False
+        self._model_path = None
 
     def set_eventcontroller(self, path: PlantsimPath = None) -> None:
         """
@@ -300,6 +302,7 @@ class Plantsim:
             raise PlantsimException(e)
 
         self._model_loaded = True
+        self._model_path = filepath
 
     def new_model(self, close_other: bool = False) -> None:
         """Creates a new simulation model in the current instance"""
@@ -357,7 +360,12 @@ class Plantsim:
         """
         full_path = str(Path(folder_path, f"{file_name}.spp"))
         logger.info(f"Saving the model to: {full_path}")
-        self._instance.SaveModel(full_path)
+        try:
+            self._instance.SaveModel(full_path)
+        except Exception as e:
+            raise PlantsimException(e)
+
+        self._model_path = full_path
 
     def start_simulation(self, eventcontroller_object: str = None) -> None:
         """
@@ -385,6 +393,41 @@ class Plantsim:
     def model_loaded(self) -> bool:
         """Attribute holding true, when the instance has a model loaded, false, when it not"""
         return self._model_loaded
+
+    @property
+    def model_path(self) -> Union[str, None]:
+        """Attribute holding the path to current model file"""
+        return self._model_path
+
+    @property
+    def visible(self) -> bool:
+        """Attribute holding true, when the instance is visible, false, when it's not"""
+        return self._visible
+
+    @property
+    def trusted(self) -> bool:
+        """Attribute holding true, when the instance is trusted, false, when it's not"""
+        return self._trusted
+
+    @property
+    def suppress_3d(self) -> bool:
+        """Attribute holding true, when the instance is suppressed, false, when it's not"""
+        return self._suppress_3d
+
+    @property
+    def license(self) -> Union[PlantsimLicense, str]:
+        """Attribute holding the license of the current instance"""
+        return self._license
+
+    @property
+    def version(self) -> Union[PlantsimVersion, str]:
+        """Attribute holding the version of the current instance"""
+        return self._version
+
+    @property
+    def show_msg_box(self) -> bool:
+        """Attribute holding true, when the instance is showing a message box, false, when it's not"""
+        return self._show_msg_box
 
     # Experimentals
     def get_current_process_id(self) -> int:
