@@ -1,6 +1,3 @@
-from typing import Union
-
-
 class PlantsimPath:
     """
     Create a PlantsimPath
@@ -15,18 +12,14 @@ class PlantsimPath:
 
     def __init__(self, *entries: str) -> None:
         """Initialize a path"""
-        path = ""
+        self.path = ""
+
         for entry in entries:
             append = entry
             if isinstance(append, PlantsimPath):
                 append = str(append)
 
-            if append.startswith("."):
-                path += append
-            else:
-                path += f".{append}"
-
-        self.path = path
+            self.append(append)
 
     def __str__(self) -> str:
         """Returns the path as a string"""
@@ -45,7 +38,9 @@ class PlantsimPath:
 
     def append(self, entry: str) -> None:
         """Appends a path entry"""
-        if entry.startswith(".") or str(self).endswith("."):
+        if entry.startswith(".") and str(self).endswith("."):
+            self.path += entry[1:]
+        elif entry.startswith(".") or str(self).endswith("."):
             self.path += entry
         else:
             self.path += f".{entry}"
