@@ -12,7 +12,8 @@ class PlantsimPath:
 
     def __init__(self, *entries: str) -> None:
         """Initialize a path"""
-        path = ""
+        self.path = ""
+
         for entry in entries:
             append = entry
             if isinstance(append, PlantsimPath):
