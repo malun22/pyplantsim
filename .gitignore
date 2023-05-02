@@ -145,3 +145,6 @@ dmypy.json
 # Plantsim files
 *.spp
 *.spp.bak
+
+# VS Code thins
+.vscode/
