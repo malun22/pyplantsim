@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 from enum import Enum
 from typing import Dict
 
@@ -57,7 +57,7 @@ class PlantsimTime(timedelta, PlantsimDatatype):
         return PlantsimTime(seconds=value)
 
 
-class PlantsimDateTime(date, PlantsimDatatype):
+class PlantsimDateTime(datetime, PlantsimDatatype):
     """Abstraction class for plantsim datetime datatype"""
 
     def to_plant(self):
