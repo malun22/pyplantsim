@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import timedelta, date
 from enum import Enum
 from typing import Dict
 
@@ -55,6 +55,193 @@ class PlantsimTime(timedelta, PlantsimDatatype):
     @staticmethod
     def from_plant(value: float) -> PlantsimTime:
         return PlantsimTime(seconds=value)
+
+
+class PlantsimDateTime(date, PlantsimDatatype):
+    """Abstraction class for plantsim datetime datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimAcceleration(float, PlantsimDatatype):
+    """Abstraction class for plantsim acceleration datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimArray(list, PlantsimDatatype):
+    """Abstraction class for plantsim array datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimBoolean(int, PlantsimDatatype):
+    """Abstraction class for plantsim boolean datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimDate(date, PlantsimDatatype):
+    """Abstraction class for plantsim date datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimJson(dict, PlantsimDatatype):
+    """Abstraction class for plantsim json datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimLength(float, PlantsimDatatype):
+    """Abstraction class for plantsim length datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimList(list, PlantsimDatatype):
+    """Abstraction class for plantsim list datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimListrange(list, PlantsimDatatype):
+    """Abstraction class for plantsim listrange datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimObject(dict, PlantsimDatatype):
+    """Abstraction class for plantsim object datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimQueue(list, PlantsimDatatype):
+    """Abstraction class for plantsim queue datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimReal(float, PlantsimDatatype):
+    """Abstraction class for plantsim real datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimSpeed(float, PlantsimDatatype):
+    """Abstraction class for plantsim speed datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimStack(list, PlantsimDatatype):
+    """Abstraction class for plantsim stack datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimString(str, PlantsimDatatype):
+    """Abstraction class for plantsim string datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimTable(dict, PlantsimDatatype):
+    """Abstraction class for plantsim table datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
+
+
+class PlantsimWeight(float, PlantsimDatatype):
+    """Abstraction class for plantsim weight datatype"""
+
+    def to_plant(self):
+        ...
+
+    @staticmethod
+    def from_plant(value) -> PlantsimDateTime:
+        ...
 
 
 enum_class_switch: Dict[PlantsimDatatype] = {
