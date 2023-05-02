@@ -1,6 +1,3 @@
-from typing import Union
-
-
 class PlantsimPath:
     """
     Create a PlantsimPath
