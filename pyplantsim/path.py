@@ -8,7 +8,7 @@ class PlantsimPath:
         The entries to be concatinated together to a path
     """
 
-    path: str = ""
+    _path: str = ""
 
     def __init__(self, *entries: str) -> None:
         """Initialize a path"""
@@ -23,11 +23,11 @@ class PlantsimPath:
             else:
                 path += f".{append}"
 
-        self.path = path
+        self._path = path
 
     def __str__(self) -> str:
         """Returns the path as a string"""
-        return self.path
+        return self._path
 
     def __eq__(self, other):
         """Compares two PlantsimPath objects"""
@@ -43,6 +43,6 @@ class PlantsimPath:
     def append(self, entry: str) -> None:
         """Appends a path entry"""
         if entry.startswith(".") or str(self).endswith("."):
-            self.path += entry
+            self._path += entry
         else:
-            self.path += f".{entry}"
+            self._path += f".{entry}"
