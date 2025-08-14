@@ -6,10 +6,10 @@ from typing import Union
 from loguru import logger
 from pyplantsim.datatypes import PlantsimDatatype, PlantsimDatatypes
 
-from pyplantsim.versions import PlantsimVersion
-from pyplantsim.licenses import PlantsimLicense
-from pyplantsim.exception import PlantsimException
-from pyplantsim.path import PlantsimPath
+from .versions import PlantsimVersion
+from .licenses import PlantsimLicense
+from .exception import PlantsimException
+from .path import PlantsimPath
 
 
 class Plantsim:

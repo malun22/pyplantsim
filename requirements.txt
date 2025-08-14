@@ -1,12 +1,5 @@
-autopep8==1.6.0
-colorama==0.4.5
-loguru==0.6.0
-numpy==1.23.1
-pandas==1.4.3
-pycodestyle==2.8.0
-python-dateutil==2.8.2
-pytz==2022.1
-pywin32==304
-six==1.16.0
-toml==0.10.2
-win32-setctime==1.1.0
+colorama==0.4.6
+loguru==0.7.3
+pywin32==311
+setuptools==80.9.0
+win32_setctime==1.2.0

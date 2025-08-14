@@ -1,13 +1,12 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
-    name="pyplantsim",
-    packages=["pyplantsim"],
-    version=["0.1"],
+    name='pyplantsim',
+    version='0.1.0',
     description="A Python wrapper to Siemens Tecnomatix Plant Simulation COM Interface",
-    author="Luca Bernstiel",
-    author_email="luca.bernstiel@protonmail.com",
-    url="https://github.com/malun22/pyplantsim",
     keywords=["plant", "siemens", "simulation", "COM"],
+    author="Luca Bernstiel",
+    author_email="bernstiel@gmx.de",
+    packages=find_packages(),
     install_requires=[],
 )

@@ -1,5 +1,6 @@
 from enum import Enum
-from pyplantsim import PlantsimPath, Plantsim
+from .path import PlantsimPath
+from .plantsim import Plantsim
 from dataclasses import dataclass
 
 

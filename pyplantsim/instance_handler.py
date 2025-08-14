@@ -1,6 +1,6 @@
-from pyplantsim import Plantsim
-from pyplantsim.licenses import PlantsimLicense
-from pyplantsim.versions import PlantsimVersion
+from .plantsim import Plantsim
+from .licenses import PlantsimLicense
+from .versions import PlantsimVersion
 
 from typing import List
 
