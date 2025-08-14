@@ -14,8 +14,8 @@ class PlantsimException(Exception):
         """
         super().__init__(args)
 
-        self._message = e.args[2][2]
-        self._id = e.args[2][5]
+        self._message = e.args[1]
+        self._id = e.args[0]
 
     def __str__(self):
         return f"Plantsim Message: {self._message} - Plantsim Exception ID: {self._id}."
