@@ -169,7 +169,7 @@ class Plantsim:
 
     def close_model(self) -> None:
         """Closes the active model"""
-        logger.info(f"Closing model.")
+        logger.info("Closing model.")
         self._instance.CloseModel()
 
         self._model_loaded = False
@@ -367,16 +367,13 @@ class Plantsim:
 
         self._model_path = full_path
 
-    def start_simulation(self, eventcontroller_object: str = None) -> None:
+    def start_simulation(self) -> None:
         """
         Starts the simulation
-
-        Attributes:
-        ----------
-        eventcontroller_object : str, optional
-            path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)
         """
-        self._instance.StartSimulation(eventcontroller_object)
+        if not self._event_controller:
+            raise Exception("EventController needs to be set.")
+        self._instance.StartSimulation(self._event_controller)
 
     def stop_simulation(self, eventcontroller_object: str = None) -> None:
         """
