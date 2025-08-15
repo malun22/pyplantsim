@@ -1,5 +1,4 @@
 import pyplantsim
-import time
 import os
 
 
@@ -10,12 +9,9 @@ def run_model():
         plantsim.load_model(model_path)
 
         plantsim.set_event_controller(".Models.Model.EventController")
-        plantsim.start_simulation()
+        plantsim.run_simulation(without_animation=False)
 
-        while plantsim.is_simulation_running():
-            time.sleep(1)
-
-        value = plantsim.get_value_by_path('.Models.Model.DataTable["Amount",1]')
+        value = plantsim.get_value('.Models.Model.DataTable["Amount",1]')
 
         print(value)
 
