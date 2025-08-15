@@ -264,7 +264,7 @@ class Plantsim:
 
         try:
             self._instance.Quit()
-        except Exception as e:
+        except Exception:
             raise Exception("Instance has been closed before already.")
 
         del(self._instance)
