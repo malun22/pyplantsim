@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import win32com.client
 
-from typing import Union
+from typing import Union, Any
 from loguru import logger
 from pyplantsim.datatypes import PlantsimDatatype, PlantsimDatatypes
 
@@ -175,7 +175,7 @@ class Plantsim:
         self._model_loaded = False
         self._model_path = None
 
-    def set_eventcontroller(self, path: PlantsimPath = None) -> None:
+    def set_event_controller(self, path: PlantsimPath = None) -> None:
         """
         Sets the path of the Event Controller
 
@@ -232,7 +232,7 @@ class Plantsim:
 
         return type
 
-    def get_value(self, object: PlantsimPath, attribute: str, is_absolute: bool = False, auto_typing: bool = True) -> Union[PlantsimDatatype, any]:
+    def get_value(self, path: PlantsimPath) -> Any:
         """
         returns the value of an attribute of a Plant Simulation object
 
@@ -243,19 +243,11 @@ class Plantsim:
         is_absolute : bool
             Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
         """
-        value = self._instance.GetValue(str(PlantsimPath(object, attribute)) if is_absolute else str(
-            PlantsimPath(self._relative_path, object, attribute)))
-
-        if auto_typing:
-            type = self.get_attribute_type(
-                object_name=object, attribute_name=attribute, is_absolute=is_absolute)
-
-            value = PlantsimDatatype.convert_enum_to_plantsim_datatype(
-                type).from_plant(value)
+        value = self._instance.GetValue(str(path))
 
         return value
 
-    def set_value(self, object_name: PlantsimPath, value: PlantsimDatatype, is_absolute: bool = False) -> None:
+    def set_value(self, path: PlantsimPath, value: Any) -> None:
         """
         Sets a value to a given attribute
 
@@ -268,8 +260,7 @@ class Plantsim:
         is_absolute : bool
             Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
         """
-        self._instance.SetValue(str(object_name) if is_absolute else str(
-            PlantsimPath(self._relative_path, object_name)), value.to_plant() if isinstance(value, PlantsimDatatype) else value)
+        self._instance.SetValue(str(path), value)
 
     def is_simulation_running(self) -> bool:
         """
