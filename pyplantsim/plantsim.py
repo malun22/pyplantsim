@@ -13,10 +13,9 @@ from typing import Callable, Optional
 
 from .versions import PlantsimVersion
 from .licenses import PlantsimLicense
-from .exception import PlantsimException
+from .exception import PlantsimException, SimulationException
 from .path import PlantsimPath
 from .events import PlantSimEvents
-
 
 
 class Plantsim:
@@ -50,9 +49,6 @@ class Plantsim:
     _show_msg_box: bool = None
     _relative_path: str = None
     _event_thread = None
-    _user_simulation_finished_cb: Optional[Callable[[], None]] = None
-    _user_simtalk_msg_cb: Optional[Callable[[str], None]] = None
-    _user_fire_simtalk_msg_cb: Optional[Callable[[str], None]] = None
     _event_handler: PlantSimEvents = None
 
     # State management
@@ -62,10 +58,16 @@ class Plantsim:
     _simulation_finished: bool = False
     _simulation_error: dict | None = None
 
+    # Callbacks
+    _user_simulation_finished_cb: Optional[Callable[[], None]] = None
+    _user_simtalk_msg_cb: Optional[Callable[[str], None]] = None
+    _user_fire_simtalk_msg_cb: Optional[Callable[[str], None]] = None
+    _user_simulation_error_cb: Optional[Callable[[SimulationException], None]] = None
+
     def __init__(self, version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1, visible: bool = True, trusted: bool = True,
                  license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER, suppress_3d: bool = False, show_msg_box: bool = False,
                  simulation_finished_callback: Optional[Callable[[], None]] = None, simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-                 fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None) -> None:
+                 fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None, simulation_error_callback: Optional[Callable[[SimulationException], None]] = None) -> None:
         """
         Initializes the Siemens Tecnomatix Plant Simulation instance.
 
@@ -96,6 +98,7 @@ class Plantsim:
         self.register_on_simulation_finished(simulation_finished_callback)
         self.register_on_simtalk_message(simtalk_msg_callback)
         self.register_on_fire_simtalk_message(fire_simtalk_msg_callback)
+        self.register_on_simulation_error(simulation_error_callback)
 
     def __enter__(self):
         logger.info(
@@ -222,7 +225,11 @@ class Plantsim:
         payload = json.loads(msg)
 
         if payload["status"] == "error":
-            self._simulation_error = payload["error"]
+            exception = SimulationException(payload["error"]["method_path"], payload["error"]["line_number"])
+            if self._user_simulation_error_cb:
+                self._user_simulation_error_cb(exception)
+
+            self._simulation_error = exception
 
     def _is_json(self, msg: str):
         try:
@@ -240,6 +247,9 @@ class Plantsim:
         self._user_fire_simtalk_msg_cb = callback
         if self._event_handler:
             self._event_handler.on_fire_simtalk_message = callback
+
+    def register_on_simulation_error(self, callback: Callable[[SimulationException], None] | None):
+        self._user_simulation_error_cb = callback
 
     def _close_event_thread(self):
         """Closes the Event Thread when the instance is terminated."""
@@ -275,6 +285,7 @@ class Plantsim:
 
         self._model_loaded = False
         self._model_path = None
+        self._simulation_error = None
         self._simulation_finished = False
 
     def set_event_controller(self, path: PlantsimPath = None) -> None:
@@ -395,6 +406,7 @@ class Plantsim:
 
         self._model_loaded = True
         self._model_path = filepath
+        self._simulation_error = None
         self._simulation_finished = False
 
     def install_error_handler(self, model_path: PlantsimPath):
@@ -451,6 +463,7 @@ class Plantsim:
         except Exception as e:
             raise PlantsimException(e)
 
+        self._simulation_error = None
         self._simulation_finished = False
         self._model_loaded = False
 
@@ -482,6 +495,7 @@ class Plantsim:
         eventcontroller_object : str, optional
             path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)
         """
+        self._simulation_error = None
         self._simulation_finished = False
         self._instance.ResetSimulation(eventcontroller_object)
 
@@ -513,19 +527,20 @@ class Plantsim:
             raise Exception("EventController needs to be set.")
         
         self._simulation_finished = False
+        self._simulation_error = None
         self._instance.StartSimulation(self._event_controller, without_animation)
 
     def run_simulation(self, without_animation: bool = True) -> None:
         """
         Makes a full simulation run and returns after the run is over. Throws in case the simulation ends without finishing.
         """
-        self.start_simulation(without_animation=without_animation)
+        self.start_simulation(without_animation)
 
         while self.simulation_running:
             time.sleep(0.1)
 
             if self._simulation_error:
-                raise Exception("Simulation crashed.")
+                raise self._simulation_error
 
         if not self._simulation_finished:
             raise Exception("Simulation ended without finishing.")
