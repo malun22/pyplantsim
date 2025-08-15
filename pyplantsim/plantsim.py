@@ -3,6 +3,7 @@ import threading
 import win32com.client
 import pythoncom
 import time
+import json
 
 from pathlib import Path
 from typing import Union, Any
@@ -14,33 +15,9 @@ from .versions import PlantsimVersion
 from .licenses import PlantsimLicense
 from .exception import PlantsimException
 from .path import PlantsimPath
+from .events import PlantSimEvents
 
-class PlantSimEvents:
-    on_simulation_finished: Optional[Callable[[], None]]
-    on_simtalk_message: Optional[Callable[[str], None]]
-    on_fire_simtalk_message: Optional[Callable[[str], None]]
 
-    def __init__(
-        self,
-        on_simulation_finished: Optional[Callable[[], None]] = None,
-        on_simtalk_message: Optional[Callable[[str], None]] = None,
-        on_fire_simtalk_message: Optional[Callable[[str], None]] = None,
-    ) -> None:
-        self.on_simulation_finished = on_simulation_finished
-        self.on_simtalk_message = on_simtalk_message
-        self.on_fire_simtalk_message = on_fire_simtalk_message
-
-    def OnSimulationFinished(self):
-        if self.on_simulation_finished:
-            self.on_simulation_finished()
-
-    def OnSimTalkMessage(self, msg: str):
-        if self.on_simtalk_message:
-            self.on_simtalk_message(msg)
-
-    def FireSimTalkMessage(self, msg: str):
-        if self.on_fire_simtalk_message:
-            self.on_fire_simtalk_message(msg)
 
 class Plantsim:
     """
@@ -82,7 +59,8 @@ class Plantsim:
     _model_loaded: bool = False
     _model_path: str = None
     _running: str = False
-    _simulation_finished = False
+    _simulation_finished: bool = False
+    _simulation_error: dict | None = None
 
     def __init__(self, version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1, visible: bool = True, trusted: bool = True,
                  license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER, suppress_3d: bool = False, show_msg_box: bool = False,
@@ -115,7 +93,6 @@ class Plantsim:
         self._suppress_3d = suppress_3d
         self._show_msg_box = show_msg_box
 
-        self._simulation_finished_event = threading.Event()
         self.register_on_simulation_finished(simulation_finished_callback)
         self.register_on_simtalk_message(simtalk_msg_callback)
         self.register_on_fire_simtalk_message(fire_simtalk_msg_callback)
@@ -143,7 +120,7 @@ class Plantsim:
             raise PlantsimException(e)
         
         self._instance.on_simulation_finished = self._internal_simulation_finished
-        self._instance.on_simtalk_message = self._user_simtalk_msg_cb
+        self._instance.on_simtalk_message = self._internal_on_simtalk_message
         self._instance.on_fire_simtalk_message = self._user_fire_simtalk_msg_cb
         
         # Initialize Event Listening
@@ -178,11 +155,13 @@ class Plantsim:
         if self._instance:
             self.quit()
 
-    def set_path_context(self, path: PlantsimPath, force=False) -> None:
-        """Sets the relative path. (For instance .Models.Model)"""
-        if self._relative_path != path or force:
-            self._relative_path = path
-            self._instance.SetPathContext(str(self._relative_path))
+    def set_model(self, path: PlantsimPath, install_error_handler: bool = True) -> None:
+        """Set the active model."""
+        self._relative_path = path
+        self._instance.SetPathContext(str(self._relative_path))
+
+        if install_error_handler:
+            self.install_error_handler(path)
 
     def set_show_message_box(self, show: bool, force=False) -> None:
         """Should the instance show a message box"""
@@ -222,6 +201,7 @@ class Plantsim:
         self._event_thread.start()
 
     def _internal_simulation_finished(self):
+        """Gets called when the simulation finishes."""
         self._simulation_finished = True
         if self._user_simulation_finished_cb:
             self._user_simulation_finished_cb()
@@ -230,11 +210,30 @@ class Plantsim:
         """Set Callback for OnSimulationFinished Event."""
         self._user_simulation_finished_cb = callback
 
+    def _internal_on_simtalk_message(self, msg: str):
+        """Gets called when the model sends a SimTalk message."""
+        if self._is_json(msg):
+            self._handle_simtalk_message(msg)
+
+        if self._user_simtalk_msg_cb:
+            self._user_simtalk_msg_cb()
+
+    def _handle_simtalk_message(self, msg: str):
+        payload = json.loads(msg)
+
+        if payload["status"] == "error":
+            self._simulation_error = payload["error"]
+
+    def _is_json(self, msg: str):
+        try:
+            json.loads(msg)
+        except ValueError:
+            return False
+        return True
+
     def register_on_simtalk_message(self, callback: Callable[[str], None] | None):
         """Set Callback for OnSimTalkMessage Event."""
         self._user_simtalk_msg_cb = callback
-        if self._event_handler:
-            self._event_handler.on_simtalk_message = callback
 
     def register_on_fire_simtalk_message(self, callback: Callable[[str], None] | None):
         """Set Callback for FireSimTalkMessage Event."""
@@ -290,8 +289,7 @@ class Plantsim:
         if path:
             self._event_controller = path
         elif self._relative_path:
-            self._event_controller = PlantsimPath(
-                self._relative_path, "EventController")
+            self._event_controller = PlantsimPath(self._relative_path, "EventController")
 
     def execute_sim_talk(self, source_code: str, *parameters: any) -> any:
         """
@@ -399,6 +397,49 @@ class Plantsim:
         self._model_path = filepath
         self._simulation_finished = False
 
+    def install_error_handler(self, model_path: PlantsimPath):
+        """Installs the Error handler in the model"""
+        simtalk = """
+        //
+        // Installs an error handler in the given model network
+        // Returns, if the operation was succesful
+        param model_path:string -> boolean
+
+        // Check if the network exists
+        if not existsObject(model_path)
+            return false
+        end
+        var model:object := str_to_obj(model_path)
+
+        // Check if there already is an error handler
+        if existsMethod(to_str(model, ".ErrorHandler"))
+            return false
+        end
+
+        // Create the error handler
+        if not model.createAttr("ErrorHandler", "method")
+            return false
+        end
+
+        // Set the code
+        model.&ErrorHandler.program := "param byref error: string,\\
+            method_path: string,\\
+            line_number: integer\\
+        \\
+        error := \\"\\"\\
+        \\
+        var errorPayload:json := { \\"method_path\\": method_path, \\"line_number\\": line_number }\\
+        var message:json := { \\"status\\": \\"error\\", \\"error\\" : errorPayload }\\
+        fireSimTalkMessage(message.asString())"
+
+        return true
+        """
+
+        response = self.execute_sim_talk(simtalk, model_path)
+
+        if not response:
+            raise Exception("Could not create Error Handler")
+
     def new_model(self, close_other: bool = False) -> None:
         """Creates a new simulation model in the current instance"""
         if close_other:
@@ -482,6 +523,9 @@ class Plantsim:
 
         while self.simulation_running:
             time.sleep(0.1)
+
+            if self._simulation_error:
+                raise Exception("Simulation crashed.")
 
         if not self._simulation_finished:
             raise Exception("Simulation ended without finishing.")
