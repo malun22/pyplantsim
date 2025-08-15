@@ -8,8 +8,7 @@ def run_model():
         model_path = os.path.join(os.path.dirname(__file__), "testModel.spp")
         plantsim.load_model(model_path)
 
-        plantsim.set_model(".Models.Model")
-        plantsim.set_event_controller()
+        plantsim.set_model(path=".Models.Model", set_event_controller=True)
         plantsim.run_simulation(without_animation=True)
 
         value = plantsim.get_value('.Models.Model.DataTable["Amount",1]')

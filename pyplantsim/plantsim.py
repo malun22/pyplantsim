@@ -158,13 +158,16 @@ class Plantsim:
         if self._instance:
             self.quit()
 
-    def set_model(self, path: PlantsimPath, install_error_handler: bool = True) -> None:
+    def set_model(self, path: PlantsimPath, install_error_handler: bool = False, set_event_controller: bool = False) -> None:
         """Set the active model."""
         self._relative_path = path
         self._instance.SetPathContext(str(self._relative_path))
 
         if install_error_handler:
             self.install_error_handler(path)
+
+        if set_event_controller:
+            self.set_event_controller()
 
     def set_show_message_box(self, show: bool, force=False) -> None:
         """Should the instance show a message box"""
