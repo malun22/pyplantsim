@@ -1,5 +1,5 @@
 import os
-from pyplantsim import InstanceHandler, Plantsim
+from pyplantsim import InstanceHandler, Plantsim, PlantsimLicense, PlantsimVersion
 from functools import partial
 
 
@@ -22,8 +22,15 @@ def on_endsim(instance: Plantsim):
 
 
 def main():
-    with InstanceHandler() as handler:
-        handler.create_workers(2)
+    with InstanceHandler(
+        amount_instances=2,
+        license=PlantsimLicense.RESEARCH,
+        version=PlantsimVersion.V_MJ_25_MI_4,
+        visible=True,
+        trusted=True,
+        suppress_3d=False,
+        show_msg_box=False,
+    ) as handler:
         for _ in range(10):
             handler.run_simulation(
                 without_animation=True,
