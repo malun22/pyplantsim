@@ -27,7 +27,7 @@ jobs:
           python-version: "3.x"
 
       - name: Install building dependency
-        run: python -m pip install setuputils
+        run: python -m pip install setuputils wheel
 
       - name: Build release distributions
         run: |
