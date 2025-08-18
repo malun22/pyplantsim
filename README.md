@@ -45,7 +45,7 @@ There are further examples in the [example folder](https://github.com/malun22/py
 
 Here is the [documentation for pyplantsim](https://malun22.github.io/pyplantsim/)
 
-Here is the official [COM Interface documentation](https://docs.sw.siemens.com/de-DE/doc/297028302/PL20250108338137660.PlantSimulation/id47631)
+Here is the official [COM Interface documentation](https://docs.sw.siemens.com/en-US/doc/297028302/PL20250108338137660.PlantSimulation/id47631)
 
 ## Notice
 
