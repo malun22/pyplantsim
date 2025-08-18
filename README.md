@@ -7,7 +7,7 @@ pyplantsim
 <p align="center">
   <a href="#setup">Setup</a> •
   <a href="#examples">Examples</a> •
-  <a href="#further-documentation">Further documentation</a> •
+  <a href="https://malun22.github.io/pyplantsim/" target="_blank">Further documentation</a> •
   <a href="#notice">Notice</a>
 </p>
 
