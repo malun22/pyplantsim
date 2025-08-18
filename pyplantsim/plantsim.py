@@ -166,6 +166,17 @@ class Plantsim:
     def __enter__(self) -> "Plantsim":
         return self
 
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"version={self._version!r}, "
+            f"visible={self._visible!r}, "
+            f"trusted={self._trusted!r}, "
+            f"license={self._license!r}, "
+            f"suppress_3d={self._suppress_3d!r}, "
+            f"show_msg_box={self._show_msg_box!r}, "
+        )
+
     def start(self) -> "Plantsim":
         if self._running:
             raise Exception("Plant Simulation already running.")
