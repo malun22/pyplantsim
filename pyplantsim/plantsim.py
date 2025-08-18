@@ -19,22 +19,52 @@ from .events import PlantSimEvents
 
 class Plantsim:
     """
-    A wrapper class for Siemens Tecnomatix Plant Simulation COM Interface
+    Wrapper class for the Siemens Tecnomatix Plant Simulation COM interface.
 
     Attributes:
     ----------
-    version : PlantsimVersion or str
-        the version to be used (default PlantsimVersion.V_MJ_22_MI_1)
-    visible : bool
-        whether the instance window be visible on screen (default True)
-    trusted : bool
-        whether the instance should have access to the computer or not (default True)
-    license : PlantsimLicense
-        the license to be used (default PlantsimLicense.VIEWER)
-    suppress_3d : bool
-        whether the instance should suppress the start of 3D (default False)
-    show_msg_box : bool
-        whether the instance should show a message box (default False)
+    _dispatch_id : str
+        COM dispatch identifier for the RemoteControl interface.
+    _event_controller : PlantsimPath
+        Path to the event controller.
+    _version : PlantsimVersion or str
+        Plant Simulation version to be used.
+    _visible : bool
+        Whether the instance window is visible.
+    _trusted : bool
+        Whether the instance has access to the computer.
+    _license : PlantsimLicense or str
+        License to be used.
+    _suppress_3d : bool
+        Suppresses the start of the 3D view.
+    _show_msg_box : bool
+        Whether to show a message box.
+    _relative_path : str
+        Relative model path.
+    _event_thread
+        Event thread object.
+    _event_handler : PlantSimEvents
+        Handler for Plant Simulation events.
+    _event_polling_interval : float
+        Interval for polling events.
+    _model_loaded : bool
+        Whether a model has been loaded.
+    _model_path : str
+        Path to the loaded model.
+    _running : str
+        Simulation status.
+    _simulation_error : dict | None
+        Simulation error details.
+    _simulation_finished_event : threading.Event
+        Event triggered when the simulation finishes.
+    _user_simulation_finished_cb : Optional[Callable[[], None]]
+        Callback for when the simulation finishes.
+    _user_simtalk_msg_cb : Optional[Callable[[str], None]]
+        Callback for SimTalk messages.
+    _user_fire_simtalk_msg_cb : Optional[Callable[[str], None]]
+        Callback to fire SimTalk messages.
+    _user_simulation_error_cb : Optional[Callable[[SimulationException], None]]
+        Callback for simulation errors.
     """
 
     # Defaults
@@ -84,20 +114,32 @@ class Plantsim:
         """
         Initializes the Siemens Tecnomatix Plant Simulation instance.
 
-        Attributes:
+        Parameters:
         ----------
-        version : PlantsimVersion
-            the version to be used (default PlantsimVersion.V_MJ_22_MI_1)
-        visible : bool
-            whether the instance window be visible on screen (default True)
-        trusted : bool
-            whether the instance should have access to the computer or not (default True)
-        license : PlantsimLicense
-            the license to be used (default PlantsimLicense.VIEWER)
-        suppress_3d : bool
-            whether the instance should suppress the start of 3D (default False)
-        show_msg_box : bool
-            whether the instance should show a message box (default False)
+        version : PlantsimVersion or str, optional
+            Plant Simulation version to use (default: PlantsimVersion.V_MJ_22_MI_1).
+        visible : bool, optional
+            Whether the instance window is visible (default: True).
+        trusted : bool, optional
+            Whether the instance should have access to the computer (default: True).
+        license : PlantsimLicense or str, optional
+            License to use (default: PlantsimLicense.VIEWER).
+        suppress_3d : bool, optional
+            Suppress the start of 3D view (default: False).
+        show_msg_box : bool, optional
+            Show a message box (default: False).
+        simulation_finished_callback : Callable[[], None], optional
+            Callback function when simulation finishes.
+        simtalk_msg_callback : Callable[[str], None], optional
+            Callback for received SimTalk messages.
+        fire_simtalk_msg_callback : Callable[[str], None], optional
+            Callback to trigger SimTalk messages.
+        simulation_error_callback : Callable[[SimulationException], None], optional
+            Callback for simulation errors.
+        event_polling_interval : float, optional
+            Interval (in seconds) for polling events (default: 0.05).
+        disable_log_message : bool, optional
+            Disable log messages (default: False).
         """
 
         # Inits
