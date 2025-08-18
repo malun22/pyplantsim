@@ -9,6 +9,7 @@ pyplantsim
   <a href="#examples">Examples</a> •
   <a href="https://malun22.github.io/pyplantsim/" target="_blank">Further documentation</a> •
   <a href="#notice">Notice</a>
+  <a href="#license">License</a>
 </p>
 
 <!-- - [Setup](#setup)
@@ -42,8 +43,15 @@ There are further examples in the [example folder](https://github.com/malun22/py
 
 ## Further documentation
 
-Here is the official [COM Interface documentation](https://docs.plm.automation.siemens.com/content/plant_sim_help/15.1/plant_sim_all_in_one_html/en_US/tecnomatix_plant_simulation_help/add_ins_reference_help/inter_process_communication_interfaces/com.html)
+Here is the [documentation for pyplantsim](https://malun22.github.io/pyplantsim/)
+
+Here is the official [COM Interface documentation](https://docs.sw.siemens.com/de-DE/doc/297028302/PL20250108338137660.PlantSimulation/id47631)
 
 ## Notice
 
-This is a private project and still in progress. This is not associated to Siemens in any way.
+This package is not developed, endorsed, or maintained by Siemens AG.
+The names "SimTalk" and "Plant Simulation" are trademarks of Siemens AG.
+
+## License
+
+This package is distributed under the MIT License.
