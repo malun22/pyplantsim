@@ -21,7 +21,7 @@ pyplantsim
 Install via pip:
 
 ```
-pip install git+https://github.com/malun22/pyplantsim.git
+pip install pyplantsim
 ```
 
 ## Examples
