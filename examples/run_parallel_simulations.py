@@ -1,9 +1,10 @@
 import os
 from pyplantsim import InstanceHandler, Plantsim, SimulationException
+from functools import partial
 
 
-def on_init(instance: Plantsim):
-    # z.B. Modelldaten laden
+def on_init(instance: Plantsim, additional_parameter: str):
+    print(additional_parameter)
     model_path = os.path.join(os.path.dirname(__file__), "testModel.spp")
     if not instance.model_loaded:
         instance.load_model(model_path)
@@ -32,7 +33,7 @@ def main():
         for _ in range(10):
             handler.run_simulation(
                 without_animation=True,
-                on_init=on_init,
+                on_init=partial(on_init, additional_parameter="Plantsim Rocks!"),
                 on_endsim=on_endsim,
                 on_simulation_error=on_sim_error,
             )
