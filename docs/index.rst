@@ -15,8 +15,7 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: pyplantsim
+.. automodule:: pyplantsim.plantsim
    :members:
    :undoc-members:
    :show-inheritance:
-
