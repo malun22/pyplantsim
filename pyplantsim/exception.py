@@ -1,6 +1,6 @@
-
 class PlantsimException(Exception):
     """Thrown when dispatching the plantsim instance fails"""
+
     _message: str
     _id: int
 
@@ -20,8 +20,10 @@ class PlantsimException(Exception):
     def __str__(self):
         return f"Plantsim Message: {self._message} - Plantsim Exception ID: {self._id}."
 
+
 class SimulationException(Exception):
     """Thrown when there is an error thrown in the simulation run"""
+
     _method_path: str
     _line_number: int
 

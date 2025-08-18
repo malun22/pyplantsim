@@ -1,5 +1,6 @@
 from typing import Callable, Optional
 
+
 class PlantSimEvents:
     on_simulation_finished: Optional[Callable[[], None]]
     on_simtalk_message: Optional[Callable[[str], None]]

@@ -34,7 +34,7 @@ class Plantsim:
         the license to be used (default PlantsimLicense.VIEWER)
     suppress_3d : bool
         whether the instance should suppress the start of 3D (default False)
-    show_msg_box : bool 
+    show_msg_box : bool
         whether the instance should show a message box (default False)
     """
 
@@ -65,11 +65,23 @@ class Plantsim:
     _user_fire_simtalk_msg_cb: Optional[Callable[[str], None]] = None
     _user_simulation_error_cb: Optional[Callable[[SimulationException], None]] = None
 
-    def __init__(self, version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1, visible: bool = True, trusted: bool = True,
-                 license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER, suppress_3d: bool = False, show_msg_box: bool = False,
-                 simulation_finished_callback: Optional[Callable[[], None]] = None, simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-                 fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None, simulation_error_callback: Optional[Callable[[SimulationException], None]] = None,
-                 event_polling_interval: float = 0.05, disable_log_message: bool = False) -> None:
+    def __init__(
+        self,
+        version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1,
+        visible: bool = True,
+        trusted: bool = True,
+        license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER,
+        suppress_3d: bool = False,
+        show_msg_box: bool = False,
+        simulation_finished_callback: Optional[Callable[[], None]] = None,
+        simtalk_msg_callback: Optional[Callable[[str], None]] = None,
+        fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None,
+        simulation_error_callback: Optional[
+            Callable[[SimulationException], None]
+        ] = None,
+        event_polling_interval: float = 0.05,
+        disable_log_message: bool = False,
+    ) -> None:
         """
         Initializes the Siemens Tecnomatix Plant Simulation instance.
 
@@ -85,14 +97,14 @@ class Plantsim:
             the license to be used (default PlantsimLicense.VIEWER)
         suppress_3d : bool
             whether the instance should suppress the start of 3D (default False)
-        show_msg_box : bool 
+        show_msg_box : bool
             whether the instance should show a message box (default False)
         """
 
         # Inits
         if disable_log_message:
             logger.disable(__name__)
-            
+
         self._version: PlantsimVersion = version
         self._visible = visible
         self._trusted = trusted
@@ -108,9 +120,18 @@ class Plantsim:
         self.register_on_fire_simtalk_message(fire_simtalk_msg_callback)
         self.register_on_simulation_error(simulation_error_callback)
 
-    def __enter__(self):
+        self.start()
+
+    def __enter__(self) -> "Plantsim":
+        return self
+
+    def start(self) -> "Plantsim":
+        if self._running:
+            raise Exception("Plant Simulation already running.")
+
         logger.info(
-            f"Initializing Siemens Tecnomatix Plant Simulation {self._version.value if isinstance(self._version, PlantsimVersion) else self._version} instance.")
+            f"Starting Siemens Tecnomatix Plant Simulation {self._version.value if isinstance(self._version, PlantsimVersion) else self._version} instance."
+        )
 
         # Changing dispatch_id regarding requested version
         if self._version:
@@ -126,16 +147,18 @@ class Plantsim:
 
         # Dispatch the Instance
         try:
-            self._instance = win32com.client.DispatchWithEvents(self._dispatch_id, type(self._event_handler))
+            self._instance = win32com.client.DispatchWithEvents(
+                self._dispatch_id, type(self._event_handler)
+            )
+            self._running = True
         except Exception as e:
             raise PlantsimException(e)
-        
+
         self._instance.on_simulation_finished = self._internal_simulation_finished
         self._instance.on_simtalk_message = self._internal_on_simtalk_message
         self._instance.on_fire_simtalk_message = self._user_fire_simtalk_msg_cb
-        
+
         # Initialize Event Listening
-        self._running = True
         self._start_event_thread()
 
         # Set license
@@ -158,15 +181,23 @@ class Plantsim:
         self.set_show_message_box(self._show_msg_box, force=True)
 
         return self
-    
+
     def __exit__(self, _, __, ___) -> None:
+        self.stop()
+
+    def stop(self) -> None:
         self._running = False
         self._close_event_thread()
 
         if self._instance:
             self.quit()
 
-    def set_model(self, path: PlantsimPath, install_error_handler: bool = False, set_event_controller: bool = False) -> None:
+    def set_model(
+        self,
+        path: PlantsimPath,
+        install_error_handler: bool = False,
+        set_event_controller: bool = False,
+    ) -> None:
         """Set the active model."""
         self._relative_path = path
         self._instance.SetPathContext(str(self._relative_path))
@@ -194,8 +225,11 @@ class Plantsim:
         if self._license != license or force:
             self._license = license
 
-            self._instance.SetLicenseType(self._license.value if isinstance(
-                self._license, PlantsimLicense) else self._license)
+            self._instance.SetLicenseType(
+                self._license.value
+                if isinstance(self._license, PlantsimLicense)
+                else self._license
+            )
 
     def set_visible(self, visible: bool, force=False) -> None:
         """Should the instance window be visible on screen"""
@@ -236,7 +270,9 @@ class Plantsim:
         payload = json.loads(msg)
 
         if payload["status"] == "error":
-            exception = SimulationException(payload["error"]["method_path"], payload["error"]["line_number"])
+            exception = SimulationException(
+                payload["error"]["method_path"], payload["error"]["line_number"]
+            )
             self._simulation_error_event.error = exception
             self._simulation_error_event.set()
 
@@ -263,14 +299,16 @@ class Plantsim:
         if self._event_handler:
             self._event_handler.on_fire_simtalk_message = callback
 
-    def register_on_simulation_error(self, callback: Callable[[SimulationException], None] | None):
+    def register_on_simulation_error(
+        self, callback: Callable[[SimulationException], None] | None
+    ):
         self._user_simulation_error_cb = callback
 
     def _close_event_thread(self):
         """Closes the Event Thread when the instance is terminated."""
         if self._event_thread:
             self._event_thread.join(timeout=1)
-    
+
     def _event_loop(self):
         """Listen to Events."""
         pythoncom.CoInitialize()
@@ -284,14 +322,15 @@ class Plantsim:
             raise Exception("Instance has been closed before already.")
 
         logger.info(
-            f"Closing Siemens Tecnomatix Plant Simulation {self._version.value if isinstance(self._version, PlantsimVersion) else self._version} instance.")
+            f"Closing Siemens Tecnomatix Plant Simulation {self._version.value if isinstance(self._version, PlantsimVersion) else self._version} instance."
+        )
 
         try:
             self._instance.Quit()
         except Exception:
             raise Exception("Instance has been closed before already.")
 
-        del(self._instance)
+        del self._instance
 
     def close_model(self) -> None:
         """Closes the active model"""
@@ -314,7 +353,9 @@ class Plantsim:
         if path:
             self._event_controller = path
         elif self._relative_path:
-            self._event_controller = PlantsimPath(self._relative_path, "EventController")
+            self._event_controller = PlantsimPath(
+                self._relative_path, "EventController"
+            )
 
     def execute_sim_talk(self, source_code: str, *parameters: any) -> any:
         """
@@ -332,7 +373,9 @@ class Plantsim:
 
         return self._instance.ExecuteSimTalk(source_code)
 
-    def get_attribute_type(self, object_name: PlantsimPath, attribute_name: str, is_absolute: bool = False) -> PlantsimDatatypes:
+    def get_attribute_type(
+        self, object_name: PlantsimPath, attribute_name: str, is_absolute: bool = False
+    ) -> PlantsimDatatypes:
         """
         Return the type of an attribute
 
@@ -344,15 +387,20 @@ class Plantsim:
             Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
         """
 
-        type_string: str = self.execute_sim_talk("""
+        type_string: str = self.execute_sim_talk(
+            """
                               param obj_as_str, attribute: string -> string
                               
                               var obj: object := str_to_obj(obj_as_str)
                               var value: any := obj.getAttribute(attribute)
                               var type := getSimTalkTypename(value)
                               return type
-                              """, str(object_name) if is_absolute else str(
-            PlantsimPath(self._relative_path, object_name)), attribute_name)
+                              """,
+            str(object_name)
+            if is_absolute
+            else str(PlantsimPath(self._relative_path, object_name)),
+            attribute_name,
+        )
 
         type = PlantsimDatatypes[type_string.upper()]
 
@@ -394,19 +442,24 @@ class Plantsim:
         """
         return self._instance.IsSimulationRunning()
 
-    def load_model(self, filepath: str, password: str = None, close_other: bool = False) -> None:
+    def load_model(
+        self, filepath: str, password: str = None, close_other: bool = False
+    ) -> None:
         """
         Loading a model into the current instance
 
         Attributes:
         ----------
         filepath : str
-            The full path to the model file (.spp) 
+            The full path to the model file (.spp)
         password : str, optional
             designates the password that is used for loading an encrypted model (default is None)
         """
         if close_other:
             self.close_model()
+
+        if self._model_loaded:
+            raise Exception("Another model is opened already.")
 
         if not os.path.exists(filepath):
             raise Exception("File does not exists.")
@@ -424,7 +477,9 @@ class Plantsim:
 
     def _load_simtalk_script(self, script_name: str) -> str:
         """Loads a SimTalk script"""
-        file_path: str = Path(__file__).parent / "sim_talk_scripts" / f"{script_name}.st"
+        file_path: str = (
+            Path(__file__).parent / "sim_talk_scripts" / f"{script_name}.st"
+        )
         txt = Path(file_path).read_text()
         return txt
 
@@ -466,11 +521,11 @@ class Plantsim:
         Attributes:
         ----------
         time : int
-            time after the instrance quits in seconds   
+            time after the instrance quits in seconds
         """
         self._instance.QuitAfterTime(time)
 
-    def reset_simulation(self, eventcontroller_object: str = None) -> None:
+    def reset_simulation(self) -> None:
         """
         Resets the simulation
 
@@ -479,8 +534,11 @@ class Plantsim:
         eventcontroller_object : str, optional
             path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)
         """
+        if not self._event_controller:
+            raise Exception("EventController needs to be set.")
+
         self._simulation_error = None
-        self._instance.ResetSimulation(eventcontroller_object)
+        self._instance.ResetSimulation(self._event_controller)
 
     def save_model(self, folder_path: str, file_name: str) -> None:
         """
@@ -508,24 +566,43 @@ class Plantsim:
         """
         if not self._event_controller:
             raise Exception("EventController needs to be set.")
-        
+
         self._simulation_error = None
         self._simulation_finished_event.clear()
         self._simulation_error_event.clear()
         self._instance.StartSimulation(self._event_controller, without_animation)
 
-    def run_simulation(self, without_animation: bool = True) -> None:
+    def run_simulation(
+        self,
+        without_animation: bool = True,
+        on_init: Optional[Callable[["Plantsim"], None]] = None,
+        on_endsim: Optional[Callable[["Plantsim"], None]] = None,
+        on_simulation_error: Optional[
+            Callable[["Plantsim", SimulationException], None]
+        ] = None,
+    ) -> None:
         """
         Makes a full simulation run and returns after the run is over. Throws in case the simulation ends without finishing.
         """
+        if on_init:
+            on_init(self)
+
         self.start_simulation(without_animation)
 
-        while not self._simulation_finished_event.is_set() and not self._simulation_error_event.is_set():
+        while (
+            not self._simulation_finished_event.is_set()
+            and not self._simulation_error_event.is_set()
+        ):
             pythoncom.PumpWaitingMessages()
             time.sleep(self._event_polling_interval)
 
         if self._simulation_error_event.is_set():
+            if on_simulation_error:
+                on_simulation_error(self, self._simulation_error_event.error)
             raise self._simulation_error_event.error
+
+        if on_endsim:
+            on_endsim(self)
 
     def stop_simulation(self, eventcontroller_object: str = None) -> None:
         """
