@@ -50,13 +50,14 @@ class Plantsim:
     _relative_path: str = None
     _event_thread = None
     _event_handler: PlantSimEvents = None
+    _event_polling_interval: float = 0.05
 
     # State management
     _model_loaded: bool = False
     _model_path: str = None
     _running: str = False
-    _simulation_finished: bool = False
     _simulation_error: dict | None = None
+    _simulation_finished_event: threading.Event = None
 
     # Callbacks
     _user_simulation_finished_cb: Optional[Callable[[], None]] = None
@@ -67,7 +68,8 @@ class Plantsim:
     def __init__(self, version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1, visible: bool = True, trusted: bool = True,
                  license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER, suppress_3d: bool = False, show_msg_box: bool = False,
                  simulation_finished_callback: Optional[Callable[[], None]] = None, simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-                 fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None, simulation_error_callback: Optional[Callable[[SimulationException], None]] = None) -> None:
+                 fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None, simulation_error_callback: Optional[Callable[[SimulationException], None]] = None,
+                 event_polling_interval: float = 0.05, disable_log_message: bool = False) -> None:
         """
         Initializes the Siemens Tecnomatix Plant Simulation instance.
 
@@ -88,12 +90,18 @@ class Plantsim:
         """
 
         # Inits
+        if disable_log_message:
+            logger.disable(__name__)
+            
         self._version: PlantsimVersion = version
         self._visible = visible
         self._trusted = trusted
         self._license = license
         self._suppress_3d = suppress_3d
         self._show_msg_box = show_msg_box
+        self._event_polling_interval = event_polling_interval
+        self._simulation_finished_event = threading.Event()
+        self._simulation_error_event = threading.Event()
 
         self.register_on_simulation_finished(simulation_finished_callback)
         self.register_on_simtalk_message(simtalk_msg_callback)
@@ -202,13 +210,13 @@ class Plantsim:
             self._instance.SetTrustModels(self._trusted)
 
     def _start_event_thread(self):
-        """Starts the event thread to liste to COM Events."""
+        """Starts the event thread to listen to COM Events."""
         self._event_thread = threading.Thread(target=self._event_loop, daemon=True)
         self._event_thread.start()
 
     def _internal_simulation_finished(self):
         """Gets called when the simulation finishes."""
-        self._simulation_finished = True
+        self._simulation_finished_event.set()
         if self._user_simulation_finished_cb:
             self._user_simulation_finished_cb()
 
@@ -222,17 +230,21 @@ class Plantsim:
             self._handle_simtalk_message(msg)
 
         if self._user_simtalk_msg_cb:
-            self._user_simtalk_msg_cb()
+            self._user_simtalk_msg_cb(msg)
 
     def _handle_simtalk_message(self, msg: str):
         payload = json.loads(msg)
 
         if payload["status"] == "error":
             exception = SimulationException(payload["error"]["method_path"], payload["error"]["line_number"])
+            self._simulation_error_event.error = exception
+            self._simulation_error_event.set()
+
             if self._user_simulation_error_cb:
                 self._user_simulation_error_cb(exception)
-
-            self._simulation_error = exception
+        else:
+            if self._user_simtalk_msg_cb:
+                self._user_simtalk_msg_cb(msg)
 
     def _is_json(self, msg: str):
         try:
@@ -264,7 +276,7 @@ class Plantsim:
         pythoncom.CoInitialize()
         while self._running:
             pythoncom.PumpWaitingMessages()
-            time.sleep(0.05)
+            time.sleep(self._event_polling_interval)
 
     def quit(self) -> None:
         """Quits the current instance."""
@@ -289,7 +301,6 @@ class Plantsim:
         self._model_loaded = False
         self._model_path = None
         self._simulation_error = None
-        self._simulation_finished = False
 
     def set_event_controller(self, path: PlantsimPath = None) -> None:
         """
@@ -410,45 +421,16 @@ class Plantsim:
         self._model_loaded = True
         self._model_path = filepath
         self._simulation_error = None
-        self._simulation_finished = False
+
+    def _load_simtalk_script(self, script_name: str) -> str:
+        """Loads a SimTalk script"""
+        file_path: str = Path(__file__).parent / "sim_talk_scripts" / f"{script_name}.st"
+        txt = Path(file_path).read_text()
+        return txt
 
     def install_error_handler(self, model_path: PlantsimPath):
         """Installs the Error handler in the model"""
-        simtalk = """
-        //
-        // Installs an error handler in the given model network
-        // Returns, if the operation was succesful
-        param model_path:string -> boolean
-
-        // Check if the network exists
-        if not existsObject(model_path)
-            return false
-        end
-        var model:object := str_to_obj(model_path)
-
-        // Check if there already is an error handler
-        if existsMethod(to_str(model, ".ErrorHandler"))
-            return false
-        end
-
-        // Create the error handler
-        if not model.createAttr("ErrorHandler", "method")
-            return false
-        end
-
-        // Set the code
-        model.&ErrorHandler.program := "param byref error: string,\\
-            method_path: string,\\
-            line_number: integer\\
-        \\
-        error := \\"\\"\\
-        \\
-        var errorPayload:json := { \\"method_path\\": method_path, \\"line_number\\": line_number }\\
-        var message:json := { \\"status\\": \\"error\\", \\"error\\" : errorPayload }\\
-        fireSimTalkMessage(message.asString())"
-
-        return true
-        """
+        simtalk = self._load_simtalk_script("install_error_handler")
 
         response = self.execute_sim_talk(simtalk, model_path)
 
@@ -467,7 +449,6 @@ class Plantsim:
             raise PlantsimException(e)
 
         self._simulation_error = None
-        self._simulation_finished = False
         self._model_loaded = False
 
     def open_console_log_file(self, filepath: str) -> None:
@@ -499,7 +480,6 @@ class Plantsim:
             path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)
         """
         self._simulation_error = None
-        self._simulation_finished = False
         self._instance.ResetSimulation(eventcontroller_object)
 
     def save_model(self, folder_path: str, file_name: str) -> None:
@@ -529,8 +509,9 @@ class Plantsim:
         if not self._event_controller:
             raise Exception("EventController needs to be set.")
         
-        self._simulation_finished = False
         self._simulation_error = None
+        self._simulation_finished_event.clear()
+        self._simulation_error_event.clear()
         self._instance.StartSimulation(self._event_controller, without_animation)
 
     def run_simulation(self, without_animation: bool = True) -> None:
@@ -539,14 +520,12 @@ class Plantsim:
         """
         self.start_simulation(without_animation)
 
-        while self.simulation_running:
-            time.sleep(0.1)
+        while not self._simulation_finished_event.is_set() and not self._simulation_error_event.is_set():
+            pythoncom.PumpWaitingMessages()
+            time.sleep(self._event_polling_interval)
 
-            if self._simulation_error:
-                raise self._simulation_error
-
-        if not self._simulation_finished:
-            raise Exception("Simulation ended without finishing.")
+        if self._simulation_error_event.is_set():
+            raise self._simulation_error_event.error
 
     def stop_simulation(self, eventcontroller_object: str = None) -> None:
         """
@@ -563,11 +542,6 @@ class Plantsim:
     def simulation_running(self) -> bool:
         """Returns if the simulation is currently running."""
         return self._is_simulation_running()
-
-    @property
-    def simulation_finished(self) -> bool:
-        """Attribute holding true, when a simulation run is finished"""
-        return self._simulation_finished
 
     @property
     def model_loaded(self) -> bool:
