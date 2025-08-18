@@ -102,14 +102,14 @@ class Plantsim:
         license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER,
         suppress_3d: bool = False,
         show_msg_box: bool = False,
+        event_polling_interval: float = 0.05,
+        disable_log_message: bool = False,
         simulation_finished_callback: Optional[Callable[[], None]] = None,
         simtalk_msg_callback: Optional[Callable[[str], None]] = None,
         fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None,
         simulation_error_callback: Optional[
             Callable[[SimulationException], None]
         ] = None,
-        event_polling_interval: float = 0.05,
-        disable_log_message: bool = False,
     ) -> None:
         """
         Initializes the Siemens Tecnomatix Plant Simulation instance.
