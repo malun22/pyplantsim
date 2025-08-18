@@ -20,13 +20,16 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install sphinx sphinx-autodoc-typehints
+          pip install sphinx sphinx-autodoc-typehints sphinx-rtd-theme
           pip install .  # Damit autodoc deine Module findet
 
       - name: Build Sphinx docs
         working-directory: docs
         run: |
           make html
+
+      - name: Generate API docs
+        run: sphinx-apidoc -o docs pyplantsim/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
