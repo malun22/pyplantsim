@@ -1,5 +1,5 @@
 import os
-from pyplantsim import InstanceHandler, Plantsim, SimulationException
+from pyplantsim import InstanceHandler, Plantsim
 from functools import partial
 
 
