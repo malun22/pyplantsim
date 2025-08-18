@@ -83,27 +83,26 @@ class InstanceHandler:
         pythoncom.CoInitialize()
         from .plantsim import Plantsim
 
-        instance = Plantsim(**plantsim_args)
-        while True:
-            job = self._job_queue.get()
-            if job is None:
-                # Stop-Signal
-                self._job_queue.task_done()
-                break
-            without_animation, on_init, on_endsim, on_simulation_error = job
-            try:
-                if on_init:
-                    on_init(instance)
+        with Plantsim(**plantsim_args) as instance:
+            while True:
+                job = self._job_queue.get()
+                if job is None:
+                    # Stop-Signal
+                    self._job_queue.task_done()
+                    break
+                without_animation, on_init, on_endsim, on_simulation_error = job
                 try:
-                    instance.run_simulation(without_animation=without_animation)
-                    if on_endsim:
-                        on_endsim(instance)
-                except SimulationException as ex:
-                    if on_simulation_error:
-                        on_simulation_error(instance, ex)
-            finally:
-                self._job_queue.task_done()
-        instance.quit()
+                    if on_init:
+                        on_init(instance)
+                    try:
+                        instance.run_simulation(without_animation=without_animation)
+                        if on_endsim:
+                            on_endsim(instance)
+                    except SimulationException as ex:
+                        if on_simulation_error:
+                            on_simulation_error(instance, ex)
+                finally:
+                    self._job_queue.task_done()
 
     def run_simulation(
         self,
