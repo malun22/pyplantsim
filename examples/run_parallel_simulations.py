@@ -14,17 +14,11 @@ def on_init(instance: Plantsim, additional_parameter: str):
 
 
 def on_endsim(instance: Plantsim):
-    print("Simulation beendet in Instanz", instance)
-
     value = instance.get_value('.Models.Model.DataTable["Amount",1]')
 
     print("The result is: ", value)
 
     instance.reset_simulation()
-
-
-def on_sim_error(instance, ex: SimulationException):
-    print("Fehler in Instanz:", instance, "Exception:", ex)
 
 
 def main():
@@ -35,7 +29,6 @@ def main():
                 without_animation=True,
                 on_init=partial(on_init, additional_parameter="Plantsim Rocks!"),
                 on_endsim=on_endsim,
-                on_simulation_error=on_sim_error,
             )
         handler.wait_all()
 
