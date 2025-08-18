@@ -39,8 +39,8 @@ class Plantsim:
         Suppresses the start of the 3D view.
     _show_msg_box : bool
         Whether to show a message box.
-    _relative_path : str
-        Relative model path.
+    _network_path : str
+        Network path.
     _event_thread
         Event thread object.
     _event_handler : PlantSimEvents
@@ -76,7 +76,7 @@ class Plantsim:
     _license: Union[PlantsimLicense, str] = None
     _suppress_3d: bool = None
     _show_msg_box: bool = None
-    _relative_path: str = None
+    _network_path: str = None
     _event_thread = None
     _event_handler: PlantSimEvents = None
     _event_polling_interval: float = 0.05
@@ -244,15 +244,15 @@ class Plantsim:
         if self._instance:
             self.quit()
 
-    def set_model(
+    def set_network(
         self,
         path: PlantsimPath,
-        install_error_handler: bool = False,
         set_event_controller: bool = False,
+        install_error_handler: bool = False,
     ) -> None:
-        """Set the active model."""
-        self._relative_path = path
-        self._instance.SetPathContext(str(self._relative_path))
+        """Set the active network."""
+        self._network_path = path
+        self._instance.SetPathContext(str(self._network_path))
 
         if install_error_handler:
             self.install_error_handler(path)
@@ -404,10 +404,8 @@ class Plantsim:
         """
         if path:
             self._event_controller = path
-        elif self._relative_path:
-            self._event_controller = PlantsimPath(
-                self._relative_path, "EventController"
-            )
+        elif self._network_path:
+            self._event_controller = PlantsimPath(self._network_path, "EventController")
 
     def execute_sim_talk(self, source_code: str, *parameters: any) -> any:
         """
@@ -648,6 +646,11 @@ class Plantsim:
     def model_path(self) -> Union[str, None]:
         """Attribute holding the path to current model file"""
         return self._model_path
+
+    @property
+    def network_path(self) -> Union[str, None]:
+        """Attribute holding the current active network path"""
+        return self._network_path
 
     @property
     def visible(self) -> bool:

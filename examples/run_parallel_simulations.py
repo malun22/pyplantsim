@@ -5,11 +5,12 @@ from functools import partial
 
 def on_init(instance: Plantsim, additional_parameter: str):
     print(additional_parameter)
-    model_path = os.path.join(os.path.dirname(__file__), "testModel.spp")
-    if not instance.model_loaded:
+    network_path = ".Models.Model"
+    if instance.network_path != network_path:
+        model_path = os.path.join(os.path.dirname(__file__), "testModel.spp")
         instance.load_model(model_path)
-        instance.set_model(
-            path=".Models.Model", set_event_controller=True, install_error_handler=True
+        instance.set_network(
+            path=network_path, set_event_controller=True, install_error_handler=True
         )
 
 

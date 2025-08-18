@@ -14,7 +14,7 @@ def run_model():
         model_path = os.path.join(os.path.dirname(__file__), "testModel.spp")
         plantsim.load_model(model_path)
 
-        plantsim.set_model(
+        plantsim.set_network(
             path=".Models.Model", set_event_controller=True, install_error_handler=True
         )
         try:
