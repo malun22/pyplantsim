@@ -1,16 +1,19 @@
+from typing import Union
+
+
 class PlantsimPath:
     """
     Create a PlantsimPath
 
     Attributes:
     ----------
-    *entries : str | PlantsimPath
+    *entries : Union[str, PlantsimPath]
         The entries to be concatinated together to a path
     """
 
     _path: str = ""
 
-    def __init__(self, *entries: str) -> None:
+    def __init__(self, *entries: Union[str, "PlantsimPath"]) -> None:
         """Initialize a path"""
         path: str = ""
         for entry in entries:

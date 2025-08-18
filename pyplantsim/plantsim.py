@@ -53,7 +53,7 @@ class Plantsim:
         Path to the loaded model.
     _running : str
         Simulation status.
-    _simulation_error : dict | None
+    _simulation_error : Optional[dict]
         Simulation error details.
     _simulation_finished_event : threading.Event
         Event triggered when the simulation finishes.
@@ -85,7 +85,7 @@ class Plantsim:
     _model_loaded: bool = False
     _model_path: str = None
     _running: str = False
-    _simulation_error: dict | None = None
+    _simulation_error: Optional[dict] = None
     _simulation_finished_event: threading.Event = None
 
     # Callbacks
@@ -306,7 +306,7 @@ class Plantsim:
         if self._user_simulation_finished_cb:
             self._user_simulation_finished_cb()
 
-    def register_on_simulation_finished(self, callback: Callable[[], None] | None):
+    def register_on_simulation_finished(self, callback: Optional[Callable[[], None]]):
         """Set Callback for OnSimulationFinished Event."""
         self._user_simulation_finished_cb = callback
 
@@ -341,18 +341,20 @@ class Plantsim:
             return False
         return True
 
-    def register_on_simtalk_message(self, callback: Callable[[str], None] | None):
+    def register_on_simtalk_message(self, callback: Optional[Callable[[str], None]]):
         """Set Callback for OnSimTalkMessage Event."""
         self._user_simtalk_msg_cb = callback
 
-    def register_on_fire_simtalk_message(self, callback: Callable[[str], None] | None):
+    def register_on_fire_simtalk_message(
+        self, callback: Optional[Callable[[str], None]]
+    ):
         """Set Callback for FireSimTalkMessage Event."""
         self._user_fire_simtalk_msg_cb = callback
         if self._event_handler:
             self._event_handler.on_fire_simtalk_message = callback
 
     def register_on_simulation_error(
-        self, callback: Callable[[SimulationException], None] | None
+        self, callback: Optional[Callable[[SimulationException], None]]
     ):
         self._user_simulation_error_cb = callback
 
