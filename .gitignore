@@ -146,5 +146,5 @@ dmypy.json
 *.spp
 *.spp.bak
 
-# VS Code thins
+# VS Code things
 .vscode/
