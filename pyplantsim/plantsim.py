@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 from typing import Union, Any
 from loguru import logger
-from pyplantsim.datatypes import PlantsimDatatypes
 from typing import Callable, Optional
 
 from .versions import PlantsimVersion
@@ -372,39 +371,6 @@ class Plantsim:
             return self._instance.ExecuteSimTalk(source_code, *parameters)
 
         return self._instance.ExecuteSimTalk(source_code)
-
-    def get_attribute_type(
-        self, object_name: PlantsimPath, attribute_name: str, is_absolute: bool = False
-    ) -> PlantsimDatatypes:
-        """
-        Return the type of an attribute
-
-        Attributes:
-        ----------
-        object_name : str
-            path to the attribute
-        is_absolute : bool
-            Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
-        """
-
-        type_string: str = self.execute_sim_talk(
-            """
-                              param obj_as_str, attribute: string -> string
-                              
-                              var obj: object := str_to_obj(obj_as_str)
-                              var value: any := obj.getAttribute(attribute)
-                              var type := getSimTalkTypename(value)
-                              return type
-                              """,
-            str(object_name)
-            if is_absolute
-            else str(PlantsimPath(self._relative_path, object_name)),
-            attribute_name,
-        )
-
-        type = PlantsimDatatypes[type_string.upper()]
-
-        return type
 
     def get_value(self, path: PlantsimPath) -> Any:
         """
