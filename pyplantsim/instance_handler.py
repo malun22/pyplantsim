@@ -1,6 +1,7 @@
 import queue
 import threading
-from typing import Callable, Optional, Union
+import uuid
+from typing import Callable, Optional, Union, Dict
 
 from .exception import SimulationException
 from .licenses import PlantsimLicense
@@ -64,6 +65,7 @@ class InstanceHandler:
         self._shutdown_event = threading.Event()
         self._workers = []
         self._num_workers = 0
+        self._results: Dict[str, threading.Event] = {}
 
         plantsim_kwargs = dict(
             version=version,
@@ -97,7 +99,7 @@ class InstanceHandler:
         """
         self.shutdown()
 
-    def _create_workers(self, amount_workers: int, **plantsim_kwargs):
+    def _create_workers(self, amount_workers: int, **plantsim_kwargs) -> None:
         """
         Create worker threads for simulation.
 
@@ -113,7 +115,7 @@ class InstanceHandler:
             t.start()
             self._workers.append(t)
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """
         Shut down all workers and wait until all jobs are finished.
         """
@@ -126,7 +128,7 @@ class InstanceHandler:
         for t in self._workers:
             t.join()
 
-    def _worker(self, plantsim_args):
+    def _worker(self, plantsim_args) -> None:
         """
         Worker thread that processes simulation jobs.
 
@@ -145,6 +147,7 @@ class InstanceHandler:
                     self._job_queue.task_done()
                     break
                 (
+                    job_id,
                     without_animation,
                     on_init,
                     on_endsim,
@@ -160,6 +163,9 @@ class InstanceHandler:
                         on_simulation_error=on_simulation_error,
                     )
                 finally:
+                    finished_event = self._results.get(job_id)
+                    if finished_event:
+                        finished_event.set()
                     self._job_queue.task_done()
 
     def run_simulation(
@@ -169,7 +175,7 @@ class InstanceHandler:
         on_endsim: Optional[Callable] = None,
         on_simulation_error: Optional[Callable] = None,
         on_progress: Optional[Callable] = None,
-    ) -> None:
+    ) -> str:
         """
         Queue a simulation to be run by an available worker.
 
@@ -183,12 +189,38 @@ class InstanceHandler:
         :type on_simulation_error: Optional[Callable]
         :param on_progress: Progress callback.
         :type on_progress: Optional[Callable]
+        :return: Unique job id for this simulation.
+        :rtype: str
         """
+        job_id = str(uuid.uuid4())
+        finished_event = threading.Event()
+        self._results[job_id] = finished_event
         self._job_queue.put(
-            (without_animation, on_init, on_endsim, on_simulation_error, on_progress)
+            (
+                job_id,
+                without_animation,
+                on_init,
+                on_endsim,
+                on_simulation_error,
+                on_progress,
+            )
         )
+        return job_id
 
-    def wait_all(self):
+    def wait_for(self, job_id: str):
+        """
+        Block until the simulation with the given job id is finished.
+
+        :param job_id: The job id returned by run_simulation.
+        :type job_id: str
+        """
+        event = self._results.get(job_id)
+        if event is not None:
+            event.wait()
+        else:
+            raise ValueError(f"No such job id: {job_id}")
+
+    def wait_all(self) -> None:
         """
         Block until all queued simulation jobs are finished.
         """

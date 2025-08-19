@@ -34,7 +34,7 @@ def on_error(instance: Plantsim, error: SimulationException):
 
 def main():
     with InstanceHandler(
-        amount_instances=1,
+        amount_instances=2,
         license=PlantsimLicense.RESEARCH,
         version=PlantsimVersion.V_MJ_25_MI_4,
         visible=True,
@@ -42,14 +42,19 @@ def main():
         suppress_3d=False,
         show_msg_box=False,
     ) as handler:
+        ids = []
         for _ in range(10):
-            handler.run_simulation(
+            job_id = handler.run_simulation(
                 without_animation=False,
                 on_init=partial(on_init, additional_parameter="Plantsim Rocks!"),
                 on_endsim=on_endsim,
                 on_simulation_error=on_error,
             )
-        handler.wait_all()
+            ids.append(job_id)
+
+        for job_id in ids:
+            handler.wait_for(job_id)
+        # Alternative: handler.wait_all()
 
 
 if __name__ == "__main__":
