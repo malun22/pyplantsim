@@ -617,6 +617,7 @@ class Plantsim:
         if self._simulation_error_event.is_set():
             if on_simulation_error:
                 on_simulation_error(self, self._simulation_error_event.error)
+                return
             raise self._simulation_error_event.error
 
         if on_endsim:
