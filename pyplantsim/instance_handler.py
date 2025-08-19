@@ -90,17 +90,21 @@ class InstanceHandler:
                     # Stop-Signal
                     self._job_queue.task_done()
                     break
-                without_animation, on_init, on_endsim, on_simulation_error = job
+                (
+                    without_animation,
+                    on_init,
+                    on_endsim,
+                    on_simulation_error,
+                    on_progress,
+                ) = job
                 try:
-                    if on_init:
-                        on_init(instance)
-                    try:
-                        instance.run_simulation(without_animation=without_animation)
-                        if on_endsim:
-                            on_endsim(instance)
-                    except SimulationException as ex:
-                        if on_simulation_error:
-                            on_simulation_error(instance, ex)
+                    instance.run_simulation(
+                        without_animation=without_animation,
+                        on_progress=on_progress,
+                        on_endsim=on_endsim,
+                        on_init=on_init,
+                        on_simulation_error=on_simulation_error,
+                    )
                 finally:
                     self._job_queue.task_done()
 
@@ -110,9 +114,10 @@ class InstanceHandler:
         on_init: Optional[Callable] = None,
         on_endsim: Optional[Callable] = None,
         on_simulation_error: Optional[Callable] = None,
+        on_progress: Optional[Callable] = None,
     ) -> None:
         self._job_queue.put(
-            (without_animation, on_init, on_endsim, on_simulation_error)
+            (without_animation, on_init, on_endsim, on_simulation_error, on_progress)
         )
 
     def wait_all(self):
