@@ -99,7 +99,7 @@ class Plantsim:
         self,
         version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1,
         visible: bool = True,
-        trusted: bool = True,
+        trusted: bool = False,
         license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER,
         suppress_3d: bool = False,
         show_msg_box: bool = False,
