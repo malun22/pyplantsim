@@ -1,5 +1,11 @@
 import os
-from pyplantsim import InstanceHandler, Plantsim, PlantsimLicense, PlantsimVersion
+from pyplantsim import (
+    InstanceHandler,
+    Plantsim,
+    PlantsimLicense,
+    PlantsimVersion,
+    SimulationException,
+)
 from functools import partial
 
 
@@ -13,18 +19,22 @@ def on_init(instance: Plantsim, additional_parameter: str):
             path=network_path, set_event_controller=True, install_error_handler=True
         )
 
+    instance.reset_simulation()
+
 
 def on_endsim(instance: Plantsim):
     value = instance.get_value('.Models.Model.DataTable["Amount",1]')
 
     print("The result is: ", value)
 
-    instance.reset_simulation()
+
+def on_error(instance: Plantsim, error: SimulationException):
+    print(error)
 
 
 def main():
     with InstanceHandler(
-        amount_instances=2,
+        amount_instances=1,
         license=PlantsimLicense.RESEARCH,
         version=PlantsimVersion.V_MJ_25_MI_4,
         visible=True,
@@ -34,9 +44,10 @@ def main():
     ) as handler:
         for _ in range(10):
             handler.run_simulation(
-                without_animation=True,
+                without_animation=False,
                 on_init=partial(on_init, additional_parameter="Plantsim Rocks!"),
                 on_endsim=on_endsim,
+                on_simulation_error=on_error,
             )
         handler.wait_all()
 
