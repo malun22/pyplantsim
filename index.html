@@ -47,9 +47,12 @@
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.close_console_log_file"><code class="docutils literal notranslate"><span class="pre">Plantsim.close_console_log_file()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.close_model"><code class="docutils literal notranslate"><span class="pre">Plantsim.close_model()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.execute_sim_talk"><code class="docutils literal notranslate"><span class="pre">Plantsim.execute_sim_talk()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_abs_sim_time"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_abs_sim_time()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_current_process_id"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_current_process_id()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_end_time"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_end_time()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_ids_of_names"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_ids_of_names()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_jte_export"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_jte_export()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_start_date"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_start_date()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_type_info"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_type_info()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_type_info_count"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_type_info_count()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_value"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_value()</span></code></a></li>
@@ -79,6 +82,7 @@
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_event_controller"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_event_controller()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_license"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_license()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_network"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_network()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_seed"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_seed()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_show_message_box"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_show_message_box()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_stop_simulation_on_error"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_stop_simulation_on_error()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_suppress_start_of_3d"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_suppress_start_of_3d()</span></code></a></li>
@@ -227,12 +231,34 @@ documentation for details.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_abs_sim_time">
+<span class="sig-name descname"><span class="pre">get_abs_sim_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_abs_sim_time" title="Link to this definition"></a></dt>
+<dd><p>Gets the current simulation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_current_process_id">
 <span class="sig-name descname"><span class="pre">get_current_process_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_current_process_id" title="Link to this definition"></a></dt>
 <dd><p>Returns the ID of the current instance. Not sure what the id is for yet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_end_time">
+<span class="sig-name descname"><span class="pre">get_end_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_end_time" title="Link to this definition"></a></dt>
+<dd><p>Extracts the end time of the event controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -247,6 +273,17 @@ documentation for details.</p>
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_jte_export">
 <span class="sig-name descname"><span class="pre">get_jte_export</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_jte_export" title="Link to this definition"></a></dt>
 <dd><p>Takes one argument. An object in the simulation. Gives the 3D JTE Export. Not sure how it works yet.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_start_date">
+<span class="sig-name descname"><span class="pre">get_start_date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_start_date" title="Link to this definition"></a></dt>
+<dd><p>Extracts the start date from the event controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -449,7 +486,7 @@ documentation for details.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.run_simulation">
-<span class="sig-name descname"><span class="pre">run_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">without_animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_endsim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_simulation_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.run_simulation" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">without_animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_endsim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_simulation_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.run_simulation" title="Link to this definition"></a></dt>
 <dd><p>Makes a full simulation run and returns after the run is over. Throws in case the simulation ends without finishing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -516,6 +553,17 @@ documentation for details.</p>
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_network">
 <span class="sig-name descname"><span class="pre">set_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_event_controller</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">install_error_handler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_network" title="Link to this definition"></a></dt>
 <dd><p>Set the active network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_seed">
+<span class="sig-name descname"><span class="pre">set_seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_seed" title="Link to this definition"></a></dt>
+<dd><p>Sets the Seed on the event controller.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
@@ -639,7 +687,7 @@ documentation for details.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.stop_simulation">
-<span class="sig-name descname"><span class="pre">stop_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eventcontroller_object</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.stop_simulation" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stop_simulation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.stop_simulation" title="Link to this definition"></a></dt>
 <dd><p>Stops the simulation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
