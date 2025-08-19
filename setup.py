@@ -9,7 +9,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="pyplantsim",
-    version="0.1.6",
+    version="0.1.7",
     description="A Python wrapper for Siemens Tecnomatix Plant Simulation COM Interface",
     keywords=["plant", "siemens", "simulation", "COM"],
     url="https://github.com/malun22/pyplantsim",
