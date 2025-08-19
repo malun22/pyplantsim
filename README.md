@@ -8,7 +8,7 @@ pyplantsim
   <a href="#setup">Setup</a> •
   <a href="#examples">Examples</a> •
   <a href="https://malun22.github.io/pyplantsim/" target="_blank">Further documentation</a> •
-  <a href="#notice">Notice</a>
+  <a href="#notice">Notice</a> •
   <a href="#license">License</a>
 </p>
 
@@ -24,6 +24,8 @@ Install via pip:
 ```
 pip install pyplantsim
 ```
+
+Find this package on [Pypi](https://pypi.org/project/pyplantsim/).
 
 ## Examples
 
