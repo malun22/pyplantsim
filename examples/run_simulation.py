@@ -2,6 +2,11 @@ import os
 from pyplantsim import SimulationException, Plantsim, PlantsimLicense, PlantsimVersion
 
 
+def on_progress(
+    instance: Plantsim, progress: float
+): ...  # Here a progressbar could be created
+
+
 def run_model():
     with Plantsim(
         license=PlantsimLicense.RESEARCH,
@@ -18,7 +23,7 @@ def run_model():
             path=".Models.Model", set_event_controller=True, install_error_handler=True
         )
         try:
-            plantsim.run_simulation(without_animation=False)
+            plantsim.run_simulation(without_animation=False, on_progress=on_progress)
         except SimulationException:
             print("Simulation threw an Error")
             return

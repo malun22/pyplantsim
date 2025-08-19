@@ -4,12 +4,13 @@ import win32com.client
 import pythoncom
 import time
 import json
+import importlib.resources
 
 from pathlib import Path
-import importlib.resources
 from typing import Union, Any
 from loguru import logger
 from typing import Callable, Optional
+from datetime import datetime, timedelta
 
 from .versions import PlantsimVersion
 from .licenses import PlantsimLicense
@@ -598,6 +599,7 @@ class Plantsim:
         on_simulation_error: Optional[
             Callable[["Plantsim", SimulationException], None]
         ] = None,
+        on_progress: Optional[Callable[["Plantsim", float], None]] = None,
     ) -> None:
         """
         Makes a full simulation run and returns after the run is over. Throws in case the simulation ends without finishing.
@@ -606,6 +608,8 @@ class Plantsim:
             on_init(self)
 
         self.start_simulation(without_animation)
+
+        self._run_simulation_event_loop(on_progress)
 
         while (
             not self._simulation_finished_event.is_set()
@@ -623,7 +627,61 @@ class Plantsim:
         if on_endsim:
             on_endsim(self)
 
-    def stop_simulation(self, eventcontroller_object: str = None) -> None:
+    def _run_simulation_event_loop(
+        self, on_progress: Optional[Callable[["Plantsim", float], None]] = None
+    ):
+        """"""
+        start_date = self.get_start_date()
+        end_time = self.get_end_time()
+        last_progress_update = time.time()
+
+        while (
+            not self._simulation_finished_event.is_set()
+            and not self._simulation_error_event.is_set()
+        ):
+            pythoncom.PumpWaitingMessages()
+            time.sleep(self._event_polling_interval)
+
+            if on_progress:
+                now = time.time()
+                if now - last_progress_update >= 1:
+                    last_progress_update = now
+                    current_simulation_time = self.get_abs_sim_time()
+                    progress = ((current_simulation_time - start_date) / end_time) * 100
+                    on_progress(self, progress)
+
+    def get_abs_sim_time(self) -> datetime:
+        """Gets the current simulation time"""
+        if not self._event_controller:
+            raise Exception("EventController needs to be set.")
+
+        return self._str_to_datetime(
+            self.get_value(PlantsimPath(self._event_controller, "AbsSimTime"))
+        )
+
+    def _str_to_datetime(self, date_str: str) -> datetime:
+        """Converts a string into a datetime"""
+        return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f")
+
+    def get_start_date(self) -> datetime:
+        """Extracts the start date from the event controller."""
+        if not self._event_controller:
+            raise Exception("EventController needs to be set.")
+
+        return self._str_to_datetime(
+            self.get_value(PlantsimPath(self._event_controller, "StartDate"))
+        )
+
+    def get_end_time(self) -> timedelta:
+        """Extracts the end time of the event controller."""
+        if not self._event_controller:
+            raise Exception("EventController needs to be set.")
+
+        return timedelta(
+            seconds=self.get_value(PlantsimPath(self._event_controller, "EndTime"))
+        )
+
+    def stop_simulation(self) -> None:
         """
         Stops the simulation
 
@@ -632,7 +690,22 @@ class Plantsim:
         eventcontroller_object : str, optional
             path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)
         """
-        self._instance.StopSimulation(eventcontroller_object)
+        if not self._event_controller:
+            raise Exception("EventController needs to be set.")
+
+        self._instance.StopSimulation(self._event_controller)
+
+    def set_seed(self, seed: int) -> None:
+        """Sets the Seed on the event controller."""
+        if not self._event_controller:
+            raise Exception("EventController needs to be set")
+
+        if seed > 2147483647 or seed < -2147483647:
+            raise Exception("Seed must be between -2147483647 and 2147483647")
+
+        self.set_value(
+            PlantsimPath(self._event_controller, "RandomNumbersVariant"), seed
+        )
 
     @property
     def simulation_running(self) -> bool:
