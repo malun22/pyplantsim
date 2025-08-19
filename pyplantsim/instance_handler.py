@@ -122,3 +122,7 @@ class InstanceHandler:
 
     def wait_all(self):
         self._job_queue.join()
+
+    @property
+    def number_instances(self) -> int:
+        return self._num_workers
