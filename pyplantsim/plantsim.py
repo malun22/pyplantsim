@@ -687,7 +687,7 @@ class Plantsim:
 
         match language:
             case 0:  # German
-                self._datetime_format = "%d-%m-%Y %H:%M:%S.%f"
+                self._datetime_format = "%d.%m.%Y %H:%M:%S.%f"
             case 1:  # English
                 self._datetime_format = "%Y-%m-%d %H:%M:%S.%f"
             case _:
