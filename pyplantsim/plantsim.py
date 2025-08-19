@@ -49,6 +49,8 @@ class Plantsim:
         Handler for Plant Simulation events.
     _event_polling_interval : float
         Interval for polling events.
+    _datetime_format : str
+        Format for datetime strings
     _model_loaded : bool
         Whether a model has been loaded.
     _model_path : str
@@ -82,6 +84,7 @@ class Plantsim:
     _event_thread = None
     _event_handler: PlantSimEvents = None
     _event_polling_interval: float = 0.05
+    _datetime_format: str
 
     # State management
     _model_loaded: bool = False
@@ -492,6 +495,8 @@ class Plantsim:
         except Exception as e:
             raise PlantsimException(e)
 
+        self._set_datetime_format()
+
         self._model_loaded = True
         self._model_path = filepath
         self._simulation_error = None
@@ -661,7 +666,7 @@ class Plantsim:
 
     def _str_to_datetime(self, date_str: str) -> datetime:
         """Converts a string into a datetime"""
-        return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f")
+        return datetime.strptime(date_str, self._datetime_format)
 
     def get_start_date(self) -> datetime:
         """Extracts the start date from the event controller."""
@@ -671,6 +676,22 @@ class Plantsim:
         return self._str_to_datetime(
             self.get_value(PlantsimPath(self._event_controller, "StartDate"))
         )
+
+    def get_model_language(self) -> int:
+        """Returns the model language."""
+        return self.execute_sim_talk("-> integer return language()")
+
+    def _set_datetime_format(self) -> None:
+        """Sets the datetime format based on the the loaded model."""
+        language = self.get_model_language()
+
+        match language:
+            case 0:  # German
+                self._datetime_format = "%d-%m-%Y %H:%M:%S.%f"
+            case 1:  # English
+                self._datetime_format = "%Y-%m-%d %H:%M:%S.%f"
+            case _:
+                raise NotImplementedError()
 
     def get_end_time(self) -> timedelta:
         """Extracts the end time of the event controller."""
