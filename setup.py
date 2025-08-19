@@ -26,4 +26,8 @@ setup(
     ],
     long_description=long_description,
     long_description_content_type="text/markdown",
+    include_package_data=True,
+    package_data={
+        "pyplantsim": ["sim_talk_scripts/*.st"],
+    },
 )

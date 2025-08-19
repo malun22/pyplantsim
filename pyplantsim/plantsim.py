@@ -6,6 +6,7 @@ import time
 import json
 
 from pathlib import Path
+import importlib.resources
 from typing import Union, Any
 from loguru import logger
 from typing import Callable, Optional
@@ -496,11 +497,9 @@ class Plantsim:
 
     def _load_simtalk_script(self, script_name: str) -> str:
         """Loads a SimTalk script"""
-        file_path: str = (
-            Path(__file__).parent / "sim_talk_scripts" / f"{script_name}.st"
-        )
-        txt = Path(file_path).read_text()
-        return txt
+        package = __package__
+        resource = f"sim_talk_scripts/{script_name}.st"
+        return importlib.resources.files(package).joinpath(resource).read_text()
 
     def install_error_handler(self, model_path: PlantsimPath):
         """Installs the Error handler in the model"""
