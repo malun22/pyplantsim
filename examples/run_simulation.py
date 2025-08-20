@@ -28,6 +28,8 @@ def run_model():
             print("Simulation threw an Error")
             return
 
+        plantsim.remove_error_handler()
+
         value = plantsim.get_value('.Models.Model.DataTable["Amount",1]')
 
         print("The result is: ", value)

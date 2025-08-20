@@ -1,26 +1,39 @@
 //
-// Installs an error handler in the given model network
+// Installs an error handler in the model file under basis.ErrorHandler
 // Returns, if the operation was succesful
-param model_path:string -> boolean
+-> boolean
 
 // Check if the network exists
-if not existsObject(model_path)
-    return false
-end
-var model:object := str_to_obj(model_path)
-
-// Check if there already is an error handler
-if existsMethod(to_str(model, ".ErrorHandler"))
+if existsObject("basis.ErrorHandler")
     return false
 end
 
-// Create the error handler
-if not model.createAttr("ErrorHandler", "method")
-    return false
+// Search for a method in the file
+var folders:object[] := [basis]
+var method:object
+while folders.dim > 0
+	var parent:object := folders.pop()
+
+	for var i := 1 to parent.NumNodes
+		var node:object := parent.node(i)
+
+		if node.InternalClassType = "Method" and not node.encrypted
+			method := node
+			exitloop 2
+		elseif node.InternalClassType = "Folder"
+			folders.append(node)
+		end
+	next
 end
+
+if not isObject(method)
+	return false
+end
+
+var errorHandler:object := method.duplicate(basis, "ErrorHandler")
 
 // Set the code
-model.&ErrorHandler.program := "param byref error: string,\
+errorHandler.program := "param byref error: string,\
     method_path: string,\
     line_number: integer\
 \
@@ -32,6 +45,9 @@ errorPayload[\"method_path\"] := method_path\
 errorPayload[\"line_number\"] := line_number\
 message[\"status\"] := \"error\"\
 message[\"error\"] := errorPayload\
+\
 fireSimTalkMessage(message.asString())"
+
+setErrorHandler(errorHandler)
 
 return true

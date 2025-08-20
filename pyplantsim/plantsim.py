@@ -262,7 +262,7 @@ class Plantsim:
         self._instance.SetPathContext(str(self._network_path))
 
         if install_error_handler:
-            self.install_error_handler(path)
+            self.install_error_handler()
 
         if set_event_controller:
             self.set_event_controller()
@@ -509,14 +509,30 @@ class Plantsim:
         resource = f"sim_talk_scripts/{script_name}.st"
         return importlib.resources.files(package).joinpath(resource).read_text()
 
-    def install_error_handler(self, model_path: PlantsimPath):
-        """Installs the Error handler in the model"""
+    def install_error_handler(self):
+        """Installs an error handler in the model file under basis.ErrorHandler. Searches for any method object and duplicates that."""
         simtalk = self._load_simtalk_script("install_error_handler")
 
-        response = self.execute_sim_talk(simtalk, model_path)
+        response = self.execute_sim_talk(simtalk)
 
         if not response:
             raise Exception("Could not create Error Handler")
+
+        self._error_handler = "basis.ErrorHandler"
+
+    def remove_error_handler(self):
+        """Removes the installed error handler from basis.ErrorHandler."""
+        if not self._error_handler:
+            raise Exception("Not error handler has been installed")
+
+        simtalk = self._load_simtalk_script("remove_error_handler")
+
+        response = self.execute_sim_talk(simtalk)
+
+        if not response:
+            raise Exception("Could not remove the error handler")
+
+        self._error_handler = None
 
     def new_model(self, close_other: bool = False) -> None:
         """Creates a new simulation model in the current instance"""
