@@ -61,6 +61,8 @@ class Plantsim:
         Simulation error details.
     _simulation_finished_event : threading.Event
         Event triggered when the simulation finishes.
+    _error_handler : Optional[str]
+        The path to the installed error handler
     _user_simulation_finished_cb : Optional[Callable[[], None]]
         Callback for when the simulation finishes.
     _user_simtalk_msg_cb : Optional[Callable[[str], None]]
@@ -92,6 +94,7 @@ class Plantsim:
     _running: str = False
     _simulation_error: Optional[dict] = None
     _simulation_finished_event: threading.Event = None
+    _error_handler: Optional[str] = None
 
     # Callbacks
     _user_simulation_finished_cb: Optional[Callable[[], None]] = None
