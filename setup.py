@@ -18,7 +18,6 @@ setup(
         "colorama>=0.4.6",
         "loguru>=0.7.3",
         "pywin32>=311; platform_system=='Windows'",
-        "setuptools>=80.9.0",
         "win32_setctime>=1.2.0; platform_system=='Windows'",
     ],
     long_description=long_description,
