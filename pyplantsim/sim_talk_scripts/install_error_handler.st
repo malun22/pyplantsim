@@ -32,7 +32,6 @@ errorPayload[\"method_path\"] := method_path\
 errorPayload[\"line_number\"] := line_number\
 message[\"status\"] := \"error\"\
 message[\"error\"] := errorPayload\
-
 fireSimTalkMessage(message.asString())"
 
 return true
