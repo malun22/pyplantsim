@@ -1,5 +1,4 @@
 colorama==0.4.6
 loguru==0.7.3
 pywin32==311
-setuptools==80.9.0
 win32_setctime==1.2.0
