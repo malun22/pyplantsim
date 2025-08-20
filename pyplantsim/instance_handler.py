@@ -1,8 +1,13 @@
 import queue
 import threading
 import uuid
+import time
+import gc
+import pythoncom
+
 from typing import Callable, Optional, Union, Dict
 
+from .plantsim import Plantsim
 from .exception import SimulationException
 from .licenses import PlantsimLicense
 from .versions import PlantsimVersion
@@ -128,45 +133,48 @@ class InstanceHandler:
         for t in self._workers:
             t.join()
 
+        time.sleep(0.1)
+        gc.collect()
+
     def _worker(self, plantsim_args) -> None:
         """
         Worker thread that processes simulation jobs.
 
         :param plantsim_args: Arguments for the Plantsim instance.
         """
-        import pythoncom
-
         pythoncom.CoInitialize()
-        from .plantsim import Plantsim
 
-        with Plantsim(**plantsim_args) as instance:
-            while True:
-                job = self._job_queue.get()
-                if job is None:
-                    # Stop-Signal
-                    self._job_queue.task_done()
-                    break
-                (
-                    job_id,
-                    without_animation,
-                    on_init,
-                    on_endsim,
-                    on_simulation_error,
-                    on_progress,
-                ) = job
-                try:
-                    instance.run_simulation(
-                        without_animation=without_animation,
-                        on_progress=on_progress,
-                        on_endsim=on_endsim,
-                        on_init=on_init,
-                        on_simulation_error=on_simulation_error,
-                    )
-                finally:
-                    finished_event = self._results.get(job_id)
-                    if finished_event:
-                        finished_event.set()
-                    self._job_queue.task_done()
+        try:
+            with Plantsim(**plantsim_args) as instance:
+                while True:
+                    job = self._job_queue.get()
+                    if job is None:
+                        # Stop-Signal
+                        self._job_queue.task_done()
+                        break
+                    (
+                        job_id,
+                        without_animation,
+                        on_init,
+                        on_endsim,
+                        on_simulation_error,
+                        on_progress,
+                    ) = job
+                    try:
+                        instance.run_simulation(
+                            without_animation=without_animation,
+                            on_progress=on_progress,
+                            on_endsim=on_endsim,
+                            on_init=on_init,
+                            on_simulation_error=on_simulation_error,
+                        )
+                    finally:
+                        finished_event = self._results.get(job_id)
+                        if finished_event:
+                            finished_event.set()
+                        self._job_queue.task_done()
+        finally:
+            pythoncom.CoUninitialize()
 
     def run_simulation(
         self,
