@@ -26,8 +26,13 @@ model.&ErrorHandler.program := "param byref error: string,\
 \
 error := \"\"\
 \
-var errorPayload:json := { \"method_path\": method_path, \"line_number\": line_number }\
-var message:json := { \"status\": \"error\", \"error\" : errorPayload }\
+var errorPayload:json\
+var message:json\
+errorPayload[\"method_path\"] := method_path\
+errorPayload[\"line_number\"] := line_number\
+message[\"status\"] := \"error\"\
+message[\"error\"] := errorPayload\
+
 fireSimTalkMessage(message.asString())"
 
 return true
