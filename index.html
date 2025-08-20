@@ -76,6 +76,7 @@
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.register_on_simulation_error"><code class="docutils literal notranslate"><span class="pre">Plantsim.register_on_simulation_error()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.register_on_simulation_finished"><code class="docutils literal notranslate"><span class="pre">Plantsim.register_on_simulation_finished()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.release"><code class="docutils literal notranslate"><span class="pre">Plantsim.release()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.remove_error_handler"><code class="docutils literal notranslate"><span class="pre">Plantsim.remove_error_handler()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.reset_simulation"><code class="docutils literal notranslate"><span class="pre">Plantsim.reset_simulation()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.run_simulation"><code class="docutils literal notranslate"><span class="pre">Plantsim.run_simulation()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.save_model"><code class="docutils literal notranslate"><span class="pre">Plantsim.save_model()</span></code></a></li>
@@ -338,8 +339,8 @@ documentation for details.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.install_error_handler">
-<span class="sig-name descname"><span class="pre">install_error_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.install_error_handler" title="Link to this definition"></a></dt>
-<dd><p>Installs the Error handler in the model</p>
+<span class="sig-name descname"><span class="pre">install_error_handler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.install_error_handler" title="Link to this definition"></a></dt>
+<dd><p>Installs an error handler in the model file under basis.ErrorHandler. Searches for any method object and duplicates that.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -479,6 +480,12 @@ documentation for details.</p>
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.release">
 <span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.release" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.remove_error_handler">
+<span class="sig-name descname"><span class="pre">remove_error_handler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.remove_error_handler" title="Link to this definition"></a></dt>
+<dd><p>Removes the installed error handler from basis.ErrorHandler.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.reset_simulation">
