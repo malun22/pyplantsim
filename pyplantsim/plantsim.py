@@ -249,6 +249,8 @@ class Plantsim:
         if self._instance:
             self.quit()
 
+        pythoncom.CoUninitialize()
+
     def set_network(
         self,
         path: PlantsimPath,
