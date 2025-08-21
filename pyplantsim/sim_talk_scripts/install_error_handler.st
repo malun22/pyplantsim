@@ -4,7 +4,7 @@
 -> boolean
 
 // Check if the network exists
-if existsObject("basis.ErrorHandler")
+if existsObject(".ErrorHandler")
     return false
 end
 
