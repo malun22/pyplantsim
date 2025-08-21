@@ -71,6 +71,7 @@ class InstanceHandler:
         self._workers = []
         self._num_workers = 0
         self._results: Dict[str, threading.Event] = {}
+        self._cancel_flags: Dict[str, threading.Event] = {}
 
         plantsim_kwargs = dict(
             version=version,
@@ -160,6 +161,9 @@ class InstanceHandler:
                         on_simulation_error,
                         on_progress,
                     ) = job
+
+                    cancel_event = self._cancel_flags.get(job_id)
+
                     try:
                         instance.run_simulation(
                             without_animation=without_animation,
@@ -167,6 +171,7 @@ class InstanceHandler:
                             on_endsim=on_endsim,
                             on_init=on_init,
                             on_simulation_error=on_simulation_error,
+                            cancel_event=cancel_event,
                         )
                     finally:
                         finished_event = self._results.get(job_id)
@@ -201,8 +206,13 @@ class InstanceHandler:
         :rtype: str
         """
         job_id = str(uuid.uuid4())
+
         finished_event = threading.Event()
         self._results[job_id] = finished_event
+
+        cancel_event = threading.Event()
+        self._cancel_flags[job_id] = cancel_event
+
         self._job_queue.put(
             (
                 job_id,
@@ -233,6 +243,59 @@ class InstanceHandler:
         Block until all queued simulation jobs are finished.
         """
         self._job_queue.join()
+
+    def empty_queue(self) -> None:
+        """
+        Remove all not-yet-started jobs from the queue.
+        """
+        with self._job_queue.mutex:
+            self._job_queue.queue.clear()
+
+    def remove_queued_job(self, job_id: str) -> bool:
+        """
+        Remove a specific job from the queue by its job_id.
+
+        :param job_id: The job ID to remove.
+        :return: True if the job was found and removed, False otherwise.
+        """
+        removed = False
+        with self._job_queue.mutex:
+            new_queue = queue.deque()
+            while self._job_queue.queue:
+                job = self._job_queue.queue.popleft()
+                if job is not None and job[0] == job_id:
+                    removed = True
+                    self._results.pop(job_id, None)
+                else:
+                    new_queue.append(job)
+            self._job_queue.queue = new_queue
+        return removed
+
+    def cancel_running_job(self, job_id: str) -> bool:
+        """
+        Signal a running job to cancel, if possible.
+
+        :param job_id: The job ID to cancel.
+        :return: True if the cancel signal was sent, False otherwise.
+        """
+        cancel_event = self._cancel_flags.get(job_id)
+        if cancel_event:
+            cancel_event.set()
+            return True
+        return False
+
+    def cancel_running_jobs(self) -> int:
+        """
+        Signal all running jobs to cancel.
+
+        :return: The number of jobs that were signaled for cancellation.
+        """
+        count = 0
+        for cancel_event in self._cancel_flags.values():
+            if cancel_event is not None and not cancel_event.is_set():
+                cancel_event.set()
+                count += 1
+        return count
 
     @property
     def number_instances(self) -> int:

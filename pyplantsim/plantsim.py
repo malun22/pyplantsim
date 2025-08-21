@@ -626,6 +626,7 @@ class Plantsim:
             Callable[["Plantsim", SimulationException], None]
         ] = None,
         on_progress: Optional[Callable[["Plantsim", float], None]] = None,
+        cancel_event: Optional[threading.Event] = None,
     ) -> None:
         """
         Makes a full simulation run and returns after the run is over. Throws in case the simulation ends without finishing.
@@ -635,7 +636,9 @@ class Plantsim:
 
         self.start_simulation(without_animation)
 
-        self._run_simulation_event_loop(on_progress)
+        self._run_simulation_event_loop(
+            on_progress=on_progress, cancel_event=cancel_event
+        )
 
         while (
             not self._simulation_finished_event.is_set()
@@ -650,11 +653,17 @@ class Plantsim:
                 return
             raise self._simulation_error_event.error
 
+        if cancel_event is not None and cancel_event.is_set():
+            self.stop_simulation()
+            return
+
         if on_endsim:
             on_endsim(self)
 
     def _run_simulation_event_loop(
-        self, on_progress: Optional[Callable[["Plantsim", float], None]] = None
+        self,
+        on_progress: Optional[Callable[["Plantsim", float], None]] = None,
+        cancel_event: Optional[threading.Event] = None,
     ):
         """"""
         start_date = self.get_start_date()
@@ -664,6 +673,7 @@ class Plantsim:
         while (
             not self._simulation_finished_event.is_set()
             and not self._simulation_error_event.is_set()
+            and (cancel_event is None or not cancel_event.is_set())
         ):
             pythoncom.PumpWaitingMessages()
             time.sleep(self._event_polling_interval)
