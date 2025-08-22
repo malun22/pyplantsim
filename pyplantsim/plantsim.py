@@ -5,6 +5,7 @@ import pythoncom
 import time
 import json
 import importlib.resources
+from packaging.version import Version
 
 from pathlib import Path
 from typing import Union, Any
@@ -76,7 +77,7 @@ class Plantsim:
     # Defaults
     _dispatch_id: str = "Tecnomatix.PlantSimulation.RemoteControl"
     _event_controller: PlantsimPath = None
-    _version: Union[PlantsimVersion, str] = None
+    _version: Version = None
     _visible: bool = None
     _trusted: bool = None
     _license: Union[PlantsimLicense, str] = None
@@ -154,7 +155,7 @@ class Plantsim:
         if disable_log_message:
             logger.disable(__name__)
 
-        self._version: PlantsimVersion = version
+        self.set_version(version)
         self._visible = visible
         self._trusted = trusted
         self._license = license
@@ -170,6 +171,11 @@ class Plantsim:
         self.register_on_simulation_error(simulation_error_callback)
 
         self.start()
+
+    def set_version(self, version: Union[PlantsimVersion, str]):
+        self._version = Version(
+            version.value if isinstance(version, PlantsimVersion) else version
+        )
 
     def __enter__(self) -> "Plantsim":
         return self
@@ -190,12 +196,12 @@ class Plantsim:
             raise Exception("Plant Simulation already running.")
 
         logger.info(
-            f"Starting Siemens Tecnomatix Plant Simulation {self._version.value if isinstance(self._version, PlantsimVersion) else self._version} instance."
+            f"Starting Siemens Tecnomatix Plant Simulation {str(self._version)} instance."
         )
 
         # Changing dispatch_id regarding requested version
         if self._version:
-            self._dispatch_id += f".{self._version.value if isinstance(self._version, PlantsimVersion) else self._version}"
+            self._dispatch_id += f".{str(self._version)}"
 
         # Initialize the Event Handler
         pythoncom.CoInitialize()
@@ -704,8 +710,12 @@ class Plantsim:
         if not self._event_controller:
             raise Exception("EventController needs to be set.")
 
+        attribute_name = "StartDate"
+        if self._version < Version(PlantsimVersion.V_MJ_25_MI_4.value):
+            attribute_name = "Date"
+
         return self._str_to_datetime(
-            self.get_value(PlantsimPath(self._event_controller, "StartDate"))
+            self.get_value(PlantsimPath(self._event_controller, attribute_name))
         )
 
     def get_model_language(self) -> int:
@@ -729,8 +739,12 @@ class Plantsim:
         if not self._event_controller:
             raise Exception("EventController needs to be set.")
 
+        attribute_name = "EndTime"
+        if self._version < Version(PlantsimVersion.V_MJ_25_MI_4.value):
+            attribute_name = "End"
+
         return timedelta(
-            seconds=self.get_value(PlantsimPath(self._event_controller, "EndTime"))
+            seconds=self.get_value(PlantsimPath(self._event_controller, attribute_name))
         )
 
     def stop_simulation(self) -> None:

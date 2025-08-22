@@ -22,6 +22,10 @@ def run_model():
         plantsim.set_network(
             path=".Models.Model", set_event_controller=True, install_error_handler=True
         )
+
+        start_date = plantsim.get_start_date()
+        print("Start Date is: ", start_date)
+
         try:
             plantsim.run_simulation(without_animation=False, on_progress=on_progress)
         except SimulationException:
