@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="pyplantsim",
-    version="0.2.8",
+    version="0.2.9",
     description="A Python wrapper for Siemens Tecnomatix Plant Simulation COM Interface",
     keywords=["plant", "siemens", "simulation", "COM"],
     url="https://github.com/malun22/pyplantsim",
