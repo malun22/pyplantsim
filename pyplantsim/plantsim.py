@@ -514,24 +514,22 @@ class Plantsim:
 
     def set_table(self, path: PlantsimPath, df: pd.DataFrame) -> None:
         """
-        Setzt eine Plant Simulation Tabelle basierend auf einem DataFrame
+        Set a Plant Simulation Tabelle based on a DataFrame
 
         Attribute:
         ----------
         path : str
-            Pfad zur Tabelle
+            path to the table
         df : pd.DataFrame
-            DataFrame, dessen Werte in die Tabelle geschrieben werden
+            DataFrame, which values need to be written
         """
         y_dim, x_dim = df.shape
 
-        # Optional: Setze Spaltennamen, falls columnIndex aktiv
         col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
         if col_index_active and df.columns is not None:
             for col, name in enumerate(df.columns, 1):
                 self.set_value(f"{path}[{col},0]", name)
 
-        # Optional: Setze Indexnamen und -werte, falls rowIndex aktiv
         row_index_active = self.get_value(PlantsimPath(path, "rowIndex"))
         if row_index_active and df.index is not None:
             if df.index.name is not None and col_index_active:
@@ -539,7 +537,6 @@ class Plantsim:
             for row, idx in enumerate(df.index, 1):
                 self.set_value(f"{path}[0,{row}]", idx)
 
-        # Setze die eigentlichen Zellenwerte
         for row in range(1, y_dim + 1):
             for col in range(1, x_dim + 1):
                 value = df.iat[row - 1, col - 1]
