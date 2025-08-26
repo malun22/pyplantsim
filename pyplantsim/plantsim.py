@@ -497,6 +497,13 @@ class Plantsim:
             df.index.name = index_name
         return df
 
+    def get_table_column_data_type(self, table: PlantsimPath, column: int) -> str:
+        return self.execute_sim_talk(
+            "param t: object, column:integer -> string return t.getDataType(column)",
+            table,
+            column,
+        )
+
     def set_value(self, path: PlantsimPath, value: Any) -> None:
         """
         Sets a value to a given attribute
