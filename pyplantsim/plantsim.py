@@ -4,13 +4,13 @@ import win32com.client
 import pythoncom
 import time
 import json
+import pandas as pd
 import importlib.resources
 from packaging.version import Version
 
 from pathlib import Path
-from typing import Union, Any
+from typing import Union, Any, Optional, List, Callable
 from loguru import logger
-from typing import Callable, Optional
 from datetime import datetime, timedelta
 
 from .versions import PlantsimVersion
@@ -447,14 +447,55 @@ class Plantsim:
 
         Attributes:
         ----------
-        object_name : str
+        path : str
             path to the attribute
-        is_absolute : bool
-            Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
         """
         value = self._instance.GetValue(str(path))
 
         return value
+
+    def get_table(self, path: PlantsimPath) -> pd.DataFrame:
+        """
+        returns a dataframe based on a Plant Simulation table object
+
+        Attributes:
+        ----------
+        path : str
+            path to the table
+        """
+        # Get data dimensions
+        y_dim = self.get_value(PlantsimPath(path, "yDim"))
+        x_dim = self.get_value(PlantsimPath(path, "xDim"))
+
+        # Check if indexes are active
+        row_index_active = self.get_value(PlantsimPath(path, "rowIndex"))
+        index: Optional[List[Any]] = None
+        if row_index_active:
+            index = [self.get_value(f"{path}[0,{row}]") for row in range(1, y_dim + 1)]
+
+        col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
+        columns: Optional[List[str]] = None
+        index_name: Optional[str] = None
+        if col_index_active:
+            if row_index_active:
+                index_name = self.get_value(f"{path}[0,0]")
+
+            columns = [
+                self.get_value(f"{path}[{col},0]") for col in range(1, x_dim + 1)
+            ]
+
+        data = []
+        for row in range(1, y_dim + 1):
+            row_data = []
+            for col in range(1, x_dim + 1):
+                cell_value = self.get_value(f"{path}[{col},{row}]")
+                row_data.append(cell_value)
+            data.append(row_data)
+
+        df = pd.DataFrame(data, columns=columns, index=index)
+        if index_name is not None:
+            df.index.name = index_name
+        return df
 
     def set_value(self, path: PlantsimPath, value: Any) -> None:
         """
@@ -470,6 +511,39 @@ class Plantsim:
             Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name
         """
         self._instance.SetValue(str(path), value)
+
+    def set_table(self, path: PlantsimPath, df: pd.DataFrame) -> None:
+        """
+        Setzt eine Plant Simulation Tabelle basierend auf einem DataFrame
+
+        Attribute:
+        ----------
+        path : str
+            Pfad zur Tabelle
+        df : pd.DataFrame
+            DataFrame, dessen Werte in die Tabelle geschrieben werden
+        """
+        y_dim, x_dim = df.shape
+
+        # Optional: Setze Spaltennamen, falls columnIndex aktiv
+        col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
+        if col_index_active and df.columns is not None:
+            for col, name in enumerate(df.columns, 1):
+                self.set_value(f"{path}[{col},0]", name)
+
+        # Optional: Setze Indexnamen und -werte, falls rowIndex aktiv
+        row_index_active = self.get_value(PlantsimPath(path, "rowIndex"))
+        if row_index_active and df.index is not None:
+            if df.index.name is not None and col_index_active:
+                self.set_value(f"{path}[0,0]", df.index.name)
+            for row, idx in enumerate(df.index, 1):
+                self.set_value(f"{path}[0,{row}]", idx)
+
+        # Setze die eigentlichen Zellenwerte
+        for row in range(1, y_dim + 1):
+            for col in range(1, x_dim + 1):
+                value = df.iat[row - 1, col - 1]
+                self.set_value(f"{path}[{col},{row}]", value)
 
     def _is_simulation_running(self) -> bool:
         """
