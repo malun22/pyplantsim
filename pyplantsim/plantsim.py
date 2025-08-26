@@ -498,11 +498,8 @@ class Plantsim:
         return df
 
     def get_table_column_data_type(self, table: PlantsimPath, column: int) -> str:
-        return self.execute_sim_talk(
-            "param t: object, column:integer -> string return t.getDataType(column)",
-            table,
-            column,
-        )
+        simtalk = self._load_simtalk_script("get_table_column_data_type")
+        return self.execute_sim_talk(simtalk, table, column)
 
     def set_value(self, path: PlantsimPath, value: Any) -> None:
         """
@@ -798,7 +795,8 @@ class Plantsim:
 
     def get_model_language(self) -> int:
         """Returns the model language."""
-        return self.execute_sim_talk("-> integer return language()")
+        simtalk = self._load_simtalk_script("get_model_language")
+        return self.execute_sim_talk(simtalk)
 
     def _set_datetime_format(self) -> None:
         """Sets the datetime format based on the the loaded model."""
