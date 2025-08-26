@@ -471,24 +471,28 @@ class Plantsim:
         row_index_active = self.get_value(PlantsimPath(path, "rowIndex"))
         index: Optional[List[Any]] = None
         if row_index_active:
-            index = [self.get_value(f"{path}[0,{row}]") for row in range(1, y_dim + 1)]
+            index = [
+                self.get_value(PlantsimPath(path, f"[0,{row}]"))
+                for row in range(1, y_dim + 1)
+            ]
 
         col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
         columns: Optional[List[str]] = None
         index_name: Optional[str] = None
         if col_index_active:
             if row_index_active:
-                index_name = self.get_value(f"{path}[0,0]")
+                index_name = self.get_value(PlantsimPath(path, "[0,0]"))
 
             columns = [
-                self.get_value(f"{path}[{col},0]") for col in range(1, x_dim + 1)
+                self.get_value(PlantsimPath(path, f"[{col},0]"))
+                for col in range(1, x_dim + 1)
             ]
 
         data = []
         for row in range(1, y_dim + 1):
             row_data = []
             for col in range(1, x_dim + 1):
-                cell_value = self.get_value(f"{path}[{col},{row}]")
+                cell_value = self.get_value(PlantsimPath(path, f"[{col},{row}]"))
                 row_data.append(cell_value)
             data.append(row_data)
 
