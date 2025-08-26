@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=80.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyplantsim"
+version = "0.2.9"
+description = "A Python wrapper for Siemens Tecnomatix Plant Simulation COM Interface"
+readme = "README.md"
+requires-python = ">=3.13"
+license = "MIT"
+authors = [
+    {name = "Luca Bernstiel", email = "bernstiel@gmx.de"},
+]
+keywords = ["plant", "siemens", "simulation", "COM"]
+urls = { "Homepage" = "https://github.com/malun22/pyplantsim" }
+dependencies = [
+    "colorama>=0.4.6",
+    "loguru>=0.7.3",
+    "pywin32>=311; platform_system=='Windows'",
+    "win32_setctime>=1.2.0; platform_system=='Windows'",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pyplantsim*"]
+
+[tool.setuptools.package-data]
+pyplantsim = ["sim_talk_scripts/*.st"]
