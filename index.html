@@ -54,6 +54,8 @@
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_jte_export"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_jte_export()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_model_language"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_model_language()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_start_date"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_start_date()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_table"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_table()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_table_column_data_type"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_table_column_data_type()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_type_info"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_type_info()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_type_info_count"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_type_info_count()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_value"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_value()</span></code></a></li>
@@ -88,6 +90,7 @@
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_show_message_box"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_show_message_box()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_stop_simulation_on_error"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_stop_simulation_on_error()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_suppress_start_of_3d"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_suppress_start_of_3d()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_table"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_table()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_trust_models"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_trust_models()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_value"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_value()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_version"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_version()</span></code></a></li>
@@ -305,6 +308,34 @@ documentation for details.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_table">
+<span class="sig-name descname"><span class="pre">get_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_table" title="Link to this definition"></a></dt>
+<dd><p>returns a dataframe based on a Plant Simulation table object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+</dd>
+</dl>
+<section id="id4">
+<h3>Attributes:<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>path<span class="classifier">str</span></dt><dd><p>path to the table</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_table_column_data_type">
+<span class="sig-name descname"><span class="pre">get_table_column_data_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_table_column_data_type" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_type_info">
 <span class="sig-name descname"><span class="pre">get_type_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_type_info" title="Link to this definition"></a></dt>
 <dd><p>Takes one argument</p>
@@ -324,12 +355,10 @@ documentation for details.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
 </dd>
 </dl>
-<section id="id4">
-<h3>Attributes:<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="id5">
+<h3>Attributes:<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <dl class="simple">
-<dt>object_name<span class="classifier">str</span></dt><dd><p>path to the attribute</p>
-</dd>
-<dt>is_absolute<span class="classifier">bool</span></dt><dd><p>Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name</p>
+<dt>path<span class="classifier">str</span></dt><dd><p>path to the attribute</p>
 </dd>
 </dl>
 </section>
@@ -366,8 +395,8 @@ documentation for details.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id5">
-<h3>Attributes:<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<section id="id6">
+<h3>Attributes:<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>filepath<span class="classifier">str</span></dt><dd><p>The full path to the model file (.spp)</p>
 </dd>
@@ -447,8 +476,8 @@ documentation for details.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id6">
-<h3>Attributes:<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<section id="id7">
+<h3>Attributes:<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>time<span class="classifier">int</span></dt><dd><p>time after the instrance quits in seconds</p>
 </dd>
@@ -499,8 +528,8 @@ documentation for details.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id7">
-<h3>Attributes:<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<section id="id8">
+<h3>Attributes:<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>eventcontroller_object<span class="classifier">str, optional</span></dt><dd><p>path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)</p>
 </dd>
@@ -528,8 +557,8 @@ documentation for details.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id8">
-<h3>Attributes:<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<section id="id9">
+<h3>Attributes:<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>folder_path<span class="classifier">str</span></dt><dd><p>path to the folder the model should be saved in</p>
 </dd>
@@ -553,8 +582,8 @@ documentation for details.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id9">
-<h3>Attributes:<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<section id="id10">
+<h3>Attributes:<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>path<span class="classifier">str, optional</span></dt><dd><p>Path to the EventController object. If not giveen, it defaults to the defaul relative paths EventController (default: None)</p>
 </dd>
@@ -623,6 +652,26 @@ documentation for details.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_table">
+<span class="sig-name descname"><span class="pre">set_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_table" title="Link to this definition"></a></dt>
+<dd><p>Set a Plant Simulation Tabelle based on a DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+<section id="attribute">
+<h3>Attribute:<a class="headerlink" href="#attribute" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>path<span class="classifier">str</span></dt><dd><p>path to the table</p>
+</dd>
+<dt>df<span class="classifier">pd.DataFrame</span></dt><dd><p>DataFrame, which values need to be written</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_trust_models">
 <span class="sig-name descname"><span class="pre">set_trust_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trusted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_trust_models" title="Link to this definition"></a></dt>
 <dd><p>Should the instance have access to the computer or not</p>
@@ -642,8 +691,8 @@ documentation for details.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id10">
-<h3>Attributes:<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<section id="id11">
+<h3>Attributes:<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>object_name<span class="classifier">str</span></dt><dd><p>path to the attribute</p>
 </dd>
@@ -723,8 +772,8 @@ documentation for details.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id11">
-<h3>Attributes:<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<section id="id12">
+<h3>Attributes:<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>eventcontroller_object<span class="classifier">str, optional</span></dt><dd><p>path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)</p>
 </dd>
