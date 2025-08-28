@@ -75,6 +75,7 @@ class Plantsim:
     """
 
     # Defaults
+    _DISPATCH_ID: str = "Tecnomatix.PlantSimulation.RemoteControl"
     _dispatch_id: str = "Tecnomatix.PlantSimulation.RemoteControl"
     _event_controller: PlantsimPath = None
     _version: Version = None
@@ -200,6 +201,7 @@ class Plantsim:
         )
 
         # Changing dispatch_id regarding requested version
+        self._dispatch_id = self._DISPATCH_ID
         if self._version:
             self._dispatch_id += f".{str(self._version)}"
 
@@ -227,15 +229,15 @@ class Plantsim:
         # Initialize Event Listening
         self._start_event_thread()
 
+        # Should the instance window be visible on screen
+        self.set_visible(self._visible, force=True)
+
         # Set license
         try:
             self.set_license(self._license, force=True)
         except Exception as e:
             self.quit()
             raise PlantsimException(e)
-
-        # Should the instance window be visible on screen
-        self.set_visible(self._visible, force=True)
 
         # Should the instance have access to the computer or not
         self.set_trust_models(self._trusted, force=True)
@@ -400,7 +402,7 @@ class Plantsim:
         except Exception:
             raise Exception("Instance has been closed before already.")
 
-        del self._instance
+        self._instance = None
 
     def close_model(self) -> None:
         """Closes the active model"""
@@ -863,21 +865,27 @@ class Plantsim:
 
     def restart(self) -> None:
         """Restarts the instance and builds up the state from before again."""
-        self.quit()
+        raise NotImplementedError("This is not working yet.")
+        old_model_loaded = self.model_loaded
+        old_model_path = self.model_path
+        old_network_path = self.network_path
+        old_event_controller = self._event_controller
+        old_error_handler = self._error_handler
+
+        self.stop()
         self.start()
 
-        # Load model again
-        if self.model_loaded:
-            self.load_model(self.model_path)
+        # Wiederherstellen
+        if old_model_loaded and old_model_path:
+            self.load_model(old_model_path)
 
-        # Set network again
-        if self.network_path:
-            self.set_network(self.network_path)
+        if old_network_path:
+            self.set_network(old_network_path)
 
-        if self._event_controller:
-            self.set_event_controller(self._event_controller)
+        if old_event_controller:
+            self.set_event_controller(old_event_controller)
 
-        if self._error_handler:
+        if old_error_handler:
             self.install_error_handler()
 
     @property
