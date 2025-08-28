@@ -861,6 +861,25 @@ class Plantsim:
         simtalk = self._load_simtalk_script("exists_path")
         return self.execute_sim_talk(simtalk, path)
 
+    def restart(self) -> None:
+        """Restarts the instance and builds up the state from before again."""
+        self.quit()
+        self.start()
+
+        # Load model again
+        if self.model_loaded:
+            self.load_model(self.model_path)
+
+        # Set network again
+        if self.network_path:
+            self.set_network(self.network_path)
+
+        if self._event_controller:
+            self.set_event_controller(self._event_controller)
+
+        if self._error_handler:
+            self.install_error_handler()
+
     @property
     def simulation_running(self) -> bool:
         """Returns if the simulation is currently running."""
