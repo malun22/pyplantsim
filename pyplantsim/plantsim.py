@@ -853,6 +853,14 @@ class Plantsim:
             PlantsimPath(self._event_controller, "RandomNumbersVariant"), seed
         )
 
+    def exists_path(self, path: Union[PlantsimPath, str]) -> bool:
+        """Returns if the given path exists in the loaded model"""
+        if not self.model_loaded:
+            raise Exception("No model is loaded.")
+
+        simtalk = self._load_simtalk_script("exists_path")
+        return self.execute_sim_talk(simtalk, path)
+
     @property
     def simulation_running(self) -> bool:
         """Returns if the simulation is currently running."""
