@@ -813,6 +813,8 @@ class Plantsim:
                 self._datetime_format = "%d.%m.%Y %H:%M:%S.%f"
             case 1:  # English
                 self._datetime_format = "%Y-%m-%d %H:%M:%S.%f"
+            case 3:  # Chinese
+                self._datetime_format = "%Y/%m/%d %H:%M:%S.%f"
             case _:
                 raise NotImplementedError()
 
