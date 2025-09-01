@@ -5,13 +5,28 @@ import time
 import gc
 import pythoncom
 
-from typing import Callable, Optional, Union, Dict
+from typing import Callable, Optional, Union, Dict, Unpack, TypedDict
 from abc import ABC, abstractmethod
 
 from .plantsim import Plantsim
 from .exception import SimulationException
 from .licenses import PlantsimLicense
 from .versions import PlantsimVersion
+
+
+class BaseInstanceHandlerKwargs(TypedDict, total=False):
+    version: Union[PlantsimVersion, str]
+    visible: bool
+    trusted: bool
+    license: Union[PlantsimLicense, str]
+    suppress_3d: bool
+    show_msg_box: bool
+    event_polling_interval: float
+    disable_log_message: bool
+    simulation_finished_callback: Optional[Callable[[], None]]
+    simtalk_msg_callback: Optional[Callable[[str], None]]
+    fire_simtalk_msg_callback: Optional[Callable[[str], None]]
+    simulation_error_callback: Optional[Callable[[SimulationException], None]]
 
 
 class BaseInstanceHandler(ABC):
@@ -100,8 +115,37 @@ class BaseInstanceHandler(ABC):
         """
         self.shutdown()
 
-    def _create_worker(self, **plantsim_kwargs) -> None:
-        """"""
+    def _create_worker(
+        self, **plantsim_kwargs: Unpack[BaseInstanceHandlerKwargs]
+    ) -> None:
+        """
+        Create a new worker and adds it to the worker list.
+
+        :param version: PlantSim version to use.
+        :type version: Union[PlantsimVersion, str]
+        :param visible: Whether the PlantSim UI should be visible.
+        :type visible: bool
+        :param trusted: Whether the PlantSim instance should run in trusted mode.
+        :type trusted: bool
+        :param license: PlantSim license type.
+        :type license: Union[PlantsimLicense, str]
+        :param suppress_3d: Suppress 3D window.
+        :type suppress_3d: bool
+        :param show_msg_box: Show message box on errors.
+        :type show_msg_box: bool
+        :param event_polling_interval: Interval for event polling.
+        :type event_polling_interval: float
+        :param disable_log_message: Disable log messages.
+        :type disable_log_message: bool
+        :param simulation_finished_callback: Callback for finished simulation.
+        :type simulation_finished_callback: Optional[Callable[[], None]]
+        :param simtalk_msg_callback: Callback for SimTalk messages.
+        :type simtalk_msg_callback: Optional[Callable[[str], None]]
+        :param fire_simtalk_msg_callback: Callback for fired SimTalk messages.
+        :type fire_simtalk_msg_callback: Optional[Callable[[str], None]]
+        :param simulation_error_callback: Callback for simulation errors.
+        :type simulation_error_callback: Optional[Callable[[SimulationException], None]]
+        """
         t = threading.Thread(target=self._worker, args=(plantsim_kwargs,), daemon=True)
         t.start()
         self._workers.append(t)
@@ -298,10 +342,38 @@ class FixedInstanceHandler(BaseInstanceHandler):
 
     _amount_instances: int
 
-    def __init__(self, amount_instances: int, **kwargs):
+    def __init__(
+        self, amount_instances: int, **kwargs: Unpack[BaseInstanceHandlerKwargs]
+    ):
         """
+        Handles a fixed amount of Plantsim instances.
+
         :param amount_instances: Number of PlantSim instances to create.
         :type amount_instances: int
+        :param version: PlantSim version to use.
+        :type version: Union[PlantsimVersion, str]
+        :param visible: Whether the PlantSim UI should be visible.
+        :type visible: bool
+        :param trusted: Whether the PlantSim instance should run in trusted mode.
+        :type trusted: bool
+        :param license: PlantSim license type.
+        :type license: Union[PlantsimLicense, str]
+        :param suppress_3d: Suppress 3D window.
+        :type suppress_3d: bool
+        :param show_msg_box: Show message box on errors.
+        :type show_msg_box: bool
+        :param event_polling_interval: Interval for event polling.
+        :type event_polling_interval: float
+        :param disable_log_message: Disable log messages.
+        :type disable_log_message: bool
+        :param simulation_finished_callback: Callback for finished simulation.
+        :type simulation_finished_callback: Optional[Callable[[], None]]
+        :param simtalk_msg_callback: Callback for SimTalk messages.
+        :type simtalk_msg_callback: Optional[Callable[[str], None]]
+        :param fire_simtalk_msg_callback: Callback for fired SimTalk messages.
+        :type fire_simtalk_msg_callback: Optional[Callable[[str], None]]
+        :param simulation_error_callback: Callback for simulation errors.
+        :type simulation_error_callback: Optional[Callable[[SimulationException], None]]
         """
         super().__init__(**kwargs)
         self._amount_instances = amount_instances
