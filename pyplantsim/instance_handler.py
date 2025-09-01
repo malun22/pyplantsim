@@ -5,7 +5,7 @@ import time
 import gc
 import pythoncom
 
-from typing import Callable, Optional, Union, Dict, Unpack, TypedDict
+from typing import Callable, Optional, Union, Dict, Unpack, TypedDict, List
 from abc import ABC
 from dataclasses import dataclass, field
 
@@ -30,6 +30,9 @@ class SimulationJob(Job):
     on_endsim: Optional[Callable] = None
     on_simulation_error: Optional[Callable] = None
     on_progress: Optional[Callable] = None
+
+
+class ShutdownWorkerJob(Job): ...
 
 
 class BaseInstanceHandlerKwargs(TypedDict, total=False):
@@ -175,11 +178,20 @@ class BaseInstanceHandler(ABC):
         self._shutdown_event.set()
         self._job_queue.join()
 
+        jobs: List[ShutdownWorkerJob] = []
         for _ in range(len(self._workers)):
-            self._job_queue.put(None)
+            jobs.append(self._shotdown_next_worker())
+
+        for job in jobs:
+            self.wait_for(job)
 
         for t in self._workers:
             t.join()
+
+    def _shotdown_next_worker(self) -> ShutdownWorkerJob:
+        job = ShutdownWorkerJob()
+        self._job_queue.put(job)
+        return job
 
     def _worker(self, plantsim_args) -> None:
         """
@@ -194,7 +206,7 @@ class BaseInstanceHandler(ABC):
                 while True:
                     job = self._job_queue.get()
 
-                    if job is None:
+                    if isinstance(job, ShutdownWorkerJob):
                         self._job_queue.task_done()
                         break
                     elif not isinstance(job, SimulationJob):
@@ -399,3 +411,32 @@ class FixedInstanceHandler(BaseInstanceHandler):
         """
         for _ in range(amount_workers):
             self._create_worker(**self._plantsim_kwargs)
+
+
+class DynamicInstanceHandler(BaseInstanceHandler):
+    def __init__(
+        self,
+        max_cpu: float = 0.8,
+        max_memory: float = 0.8,
+        min_instances: int = 1,
+        max_instances: int = 8,
+        scale_interval: float = 15.0,
+        **kwargs: Unpack[BaseInstanceHandlerKwargs],
+    ):
+        super().__init__(**kwargs)
+        self.max_cpu = max_cpu
+        self.max_memory = max_memory
+        self.min_instances = min_instances
+        self.max_instances = max_instances
+        self.scale_interval = scale_interval
+
+        self._worker_states = {}  # thread -> busy state
+        self._workers_lock = threading.Lock()
+        self._scaler_thread = threading.Thread(target=self._scaler, daemon=True)
+        self._active = True
+
+        # Start with min_instances
+        for _ in range(self.min_instances):
+            self._create_dynamic_worker()
+
+        self._scaler_thread.start()
