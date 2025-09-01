@@ -190,7 +190,7 @@ class BaseInstanceHandler(ABC):
 
     def _shotdown_next_worker(self) -> ShutdownWorkerJob:
         job = ShutdownWorkerJob()
-        self._job_queue.put(job)
+        self.queue_job(job)
         return job
 
     def _worker(self, plantsim_args) -> None:
@@ -207,10 +207,10 @@ class BaseInstanceHandler(ABC):
                     job = self._job_queue.get()
 
                     if isinstance(job, ShutdownWorkerJob):
-                        self._job_queue.task_done()
+                        self._finish_job(job)
                         break
                     elif not isinstance(job, SimulationJob):
-                        self._job_queue.task_done()
+                        self._finish_job(job)
                         raise TypeError(f"Unexpected job type: {type(job)}")
 
                     cancel_event = self._cancel_flags.get(job.job_id)
@@ -225,14 +225,17 @@ class BaseInstanceHandler(ABC):
                             cancel_event=cancel_event,
                         )
                     finally:
-                        finished_event = self._results.get(job.job_id)
-                        if finished_event:
-                            finished_event.set()
-                        self._job_queue.task_done()
+                        self._finish_job(job)
         finally:
             time.sleep(0.1)
             pythoncom.CoUninitialize()
             gc.collect()
+
+    def _finish_job(self, job: Job) -> None:
+        finished_event = self._results.get(job.job_id)
+        if finished_event:
+            finished_event.set()
+        self._job_queue.task_done()
 
     def run_simulation(
         self,
@@ -267,12 +270,15 @@ class BaseInstanceHandler(ABC):
             on_progress=on_progress,
         )
 
-        finished_event = threading.Event()
-        self._results[job.job_id] = finished_event
-
         cancel_event = threading.Event()
         self._cancel_flags[job.job_id] = cancel_event
 
+        self.queue_job(job)
+        return job
+
+    def queue_job(self, job: Job) -> Job:
+        finished_event = threading.Event()
+        self._results[job.job_id] = finished_event
         self._job_queue.put(job)
         return job
 
