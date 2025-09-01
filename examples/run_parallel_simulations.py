@@ -5,6 +5,7 @@ from pyplantsim import (
     PlantsimLicense,
     PlantsimVersion,
     SimulationException,
+    SimulationJob,
 )
 from functools import partial
 
@@ -42,18 +43,21 @@ def main():
         suppress_3d=False,
         show_msg_box=False,
     ) as handler:
-        ids = []
+        jobs = []
         for _ in range(10):
-            job_id = handler.run_simulation(
-                without_animation=True,
-                on_init=partial(on_init, additional_parameter="Plantsim Rocks!"),
-                on_endsim=on_endsim,
-                on_simulation_error=on_error,
+            job = handler.queue_job(
+                SimulationJob(
+                    without_animation=True,
+                    on_init=partial(on_init, additional_parameter="Plantsim Rocks!"),
+                    on_endsim=on_endsim,
+                    on_simulation_error=on_error,
+                )
             )
-            ids.append(job_id)
 
-        for job_id in ids:
-            handler.wait_for(job_id)
+            jobs.append(job)
+
+        for job in jobs:
+            handler.wait_for(job)
         # Alternative: handler.wait_all()
 
 
