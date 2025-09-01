@@ -6,12 +6,30 @@ import gc
 import pythoncom
 
 from typing import Callable, Optional, Union, Dict, Unpack, TypedDict
-from abc import ABC, abstractmethod
+from abc import ABC
+from dataclasses import dataclass, field
 
 from .plantsim import Plantsim
 from .exception import SimulationException
 from .licenses import PlantsimLicense
 from .versions import PlantsimVersion
+
+
+@dataclass
+class Job(ABC):
+    job_id: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.job_id = str(uuid.uuid4())
+
+
+@dataclass
+class SimulationJob(Job):
+    without_animation: bool = True
+    on_init: Optional[Callable] = None
+    on_endsim: Optional[Callable] = None
+    on_simulation_error: Optional[Callable] = None
+    on_progress: Optional[Callable] = None
 
 
 class BaseInstanceHandlerKwargs(TypedDict, total=False):
@@ -79,7 +97,7 @@ class BaseInstanceHandler(ABC):
         """
         Initialize the InstanceHandler with the given parameters.
         """
-        self._job_queue = queue.Queue()
+        self._job_queue: queue.Queue[Job] = queue.Queue()
         self._shutdown_event = threading.Event()
         self._workers = []
         self._results: Dict[str, threading.Event] = {}
@@ -157,14 +175,11 @@ class BaseInstanceHandler(ABC):
         self._shutdown_event.set()
         self._job_queue.join()
 
-        for _ in range(len(self.workers)):
+        for _ in range(len(self._workers)):
             self._job_queue.put(None)
 
         for t in self._workers:
             t.join()
-
-        time.sleep(0.1)
-        gc.collect()
 
     def _worker(self, plantsim_args) -> None:
         """
@@ -178,37 +193,34 @@ class BaseInstanceHandler(ABC):
             with Plantsim(**plantsim_args) as instance:
                 while True:
                     job = self._job_queue.get()
+
                     if job is None:
-                        # Stop-Signal
                         self._job_queue.task_done()
                         break
-                    (
-                        job_id,
-                        without_animation,
-                        on_init,
-                        on_endsim,
-                        on_simulation_error,
-                        on_progress,
-                    ) = job
+                    elif not isinstance(job, SimulationJob):
+                        self._job_queue.task_done()
+                        raise TypeError(f"Unexpected job type: {type(job)}")
 
-                    cancel_event = self._cancel_flags.get(job_id)
+                    cancel_event = self._cancel_flags.get(job.job_id)
 
                     try:
                         instance.run_simulation(
-                            without_animation=without_animation,
-                            on_progress=on_progress,
-                            on_endsim=on_endsim,
-                            on_init=on_init,
-                            on_simulation_error=on_simulation_error,
+                            without_animation=job.without_animation,
+                            on_progress=job.on_progress,
+                            on_endsim=job.on_endsim,
+                            on_init=job.on_init,
+                            on_simulation_error=job.on_simulation_error,
                             cancel_event=cancel_event,
                         )
                     finally:
-                        finished_event = self._results.get(job_id)
+                        finished_event = self._results.get(job.job_id)
                         if finished_event:
                             finished_event.set()
                         self._job_queue.task_done()
         finally:
+            time.sleep(0.1)
             pythoncom.CoUninitialize()
+            gc.collect()
 
     def run_simulation(
         self,
@@ -217,7 +229,7 @@ class BaseInstanceHandler(ABC):
         on_endsim: Optional[Callable] = None,
         on_simulation_error: Optional[Callable] = None,
         on_progress: Optional[Callable] = None,
-    ) -> str:
+    ) -> SimulationJob:
         """
         Queue a simulation to be run by an available worker.
 
@@ -234,38 +246,36 @@ class BaseInstanceHandler(ABC):
         :return: Unique job id for this simulation.
         :rtype: str
         """
-        job_id = str(uuid.uuid4())
+
+        job = SimulationJob(
+            without_animation=without_animation,
+            on_init=on_init,
+            on_endsim=on_endsim,
+            on_simulation_error=on_simulation_error,
+            on_progress=on_progress,
+        )
 
         finished_event = threading.Event()
-        self._results[job_id] = finished_event
+        self._results[job.job_id] = finished_event
 
         cancel_event = threading.Event()
-        self._cancel_flags[job_id] = cancel_event
+        self._cancel_flags[job.job_id] = cancel_event
 
-        self._job_queue.put(
-            (
-                job_id,
-                without_animation,
-                on_init,
-                on_endsim,
-                on_simulation_error,
-                on_progress,
-            )
-        )
-        return job_id
+        self._job_queue.put(job)
+        return job
 
-    def wait_for(self, job_id: str):
+    def wait_for(self, job: Job):
         """
         Block until the simulation with the given job id is finished.
 
         :param job_id: The job id returned by run_simulation.
         :type job_id: str
         """
-        event = self._results.get(job_id)
+        event = self._results.get(job.job_id)
         if event is not None:
             event.wait()
         else:
-            raise ValueError(f"No such job id: {job_id}")
+            raise ValueError(f"No such job id: {job.job_id}")
 
     def wait_all(self) -> None:
         """
@@ -280,7 +290,7 @@ class BaseInstanceHandler(ABC):
         with self._job_queue.mutex:
             self._job_queue.queue.clear()
 
-    def remove_queued_job(self, job_id: str) -> bool:
+    def remove_queued_job(self, job: Job) -> bool:
         """
         Remove a specific job from the queue by its job_id.
 
@@ -291,23 +301,23 @@ class BaseInstanceHandler(ABC):
         with self._job_queue.mutex:
             new_queue = queue.deque()
             while self._job_queue.queue:
-                job = self._job_queue.queue.popleft()
-                if job is not None and job[0] == job_id:
+                queued_job = self._job_queue.queue.popleft()
+                if queued_job is not None and queued_job.job_id == job.job_id:
                     removed = True
-                    self._results.pop(job_id, None)
+                    self._results.pop(job.job_id, None)
                 else:
-                    new_queue.append(job)
+                    new_queue.append(queued_job)
             self._job_queue.queue = new_queue
         return removed
 
-    def cancel_running_job(self, job_id: str) -> bool:
+    def cancel_running_job(self, job: Job) -> bool:
         """
         Signal a running job to cancel, if possible.
 
         :param job_id: The job ID to cancel.
         :return: True if the cancel signal was sent, False otherwise.
         """
-        cancel_event = self._cancel_flags.get(job_id)
+        cancel_event = self._cancel_flags.get(job.job_id)
         if cancel_event:
             cancel_event.set()
             return True
