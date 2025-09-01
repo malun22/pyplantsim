@@ -3,4 +3,4 @@ from .exception import PlantsimException, SimulationException
 from .licenses import PlantsimLicense
 from .path import PlantsimPath
 from .versions import PlantsimVersion
-from .instance_handler import InstanceHandler
+from .instance_handler import FixedInstanceHandler

@@ -6,6 +6,7 @@ import gc
 import pythoncom
 
 from typing import Callable, Optional, Union, Dict
+from abc import ABC, abstractmethod
 
 from .plantsim import Plantsim
 from .exception import SimulationException
@@ -13,12 +14,10 @@ from .licenses import PlantsimLicense
 from .versions import PlantsimVersion
 
 
-class InstanceHandler:
+class BaseInstanceHandler(ABC):
     """
     Handles multiple pyplantsim workers, each with its own Plantsim instance.
 
-    :param amount_instances: Number of PlantSim instances to create.
-    :type amount_instances: int
     :param version: PlantSim version to use.
     :type version: Union[PlantsimVersion, str]
     :param visible: Whether the PlantSim UI should be visible.
@@ -47,7 +46,6 @@ class InstanceHandler:
 
     def __init__(
         self,
-        amount_instances: int,
         version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1,
         visible: bool = False,
         trusted: bool = False,
@@ -69,11 +67,10 @@ class InstanceHandler:
         self._job_queue = queue.Queue()
         self._shutdown_event = threading.Event()
         self._workers = []
-        self._num_workers = 0
         self._results: Dict[str, threading.Event] = {}
         self._cancel_flags: Dict[str, threading.Event] = {}
 
-        plantsim_kwargs = dict(
+        self._plantsim_kwargs = dict(
             version=version,
             visible=visible,
             trusted=trusted,
@@ -87,8 +84,6 @@ class InstanceHandler:
             fire_simtalk_msg_callback=fire_simtalk_msg_callback,
             simulation_error_callback=simulation_error_callback,
         )
-
-        self._create_workers(amount_instances, **plantsim_kwargs)
 
     def __enter__(self):
         """
@@ -105,21 +100,11 @@ class InstanceHandler:
         """
         self.shutdown()
 
-    def _create_workers(self, amount_workers: int, **plantsim_kwargs) -> None:
-        """
-        Create worker threads for simulation.
-
-        :param amount_workers: Number of workers to create.
-        :type amount_workers: int
-        :param plantsim_kwargs: Keyword arguments for Plantsim instances.
-        """
-        self._num_workers = amount_workers
-        for _ in range(amount_workers):
-            t = threading.Thread(
-                target=self._worker, args=(plantsim_kwargs,), daemon=True
-            )
-            t.start()
-            self._workers.append(t)
+    def _create_worker(self, **plantsim_kwargs) -> None:
+        """"""
+        t = threading.Thread(target=self._worker, args=(plantsim_kwargs,), daemon=True)
+        t.start()
+        self._workers.append(t)
 
     def shutdown(self) -> None:
         """
@@ -128,7 +113,7 @@ class InstanceHandler:
         self._shutdown_event.set()
         self._job_queue.join()
 
-        for _ in range(self._num_workers):
+        for _ in range(len(self.workers)):
             self._job_queue.put(None)
 
         for t in self._workers:
@@ -305,4 +290,30 @@ class InstanceHandler:
         :return: Number of instances.
         :rtype: int
         """
-        return self._num_workers
+        return len(self._workers)
+
+
+class FixedInstanceHandler(BaseInstanceHandler):
+    """ """
+
+    _amount_instances: int
+
+    def __init__(self, amount_instances: int, **kwargs):
+        """
+        :param amount_instances: Number of PlantSim instances to create.
+        :type amount_instances: int
+        """
+        super().__init__(**kwargs)
+        self._amount_instances = amount_instances
+        self._create_workers(amount_instances)
+
+    def _create_workers(self, amount_workers: int) -> None:
+        """
+        Create worker threads for simulation.
+
+        :param amount_workers: Number of workers to create.
+        :type amount_workers: int
+        :param plantsim_kwargs: Keyword arguments for Plantsim instances.
+        """
+        for _ in range(amount_workers):
+            self._create_worker(**self._plantsim_kwargs)

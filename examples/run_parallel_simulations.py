@@ -1,6 +1,6 @@
 import os
 from pyplantsim import (
-    InstanceHandler,
+    FixedInstanceHandler,
     Plantsim,
     PlantsimLicense,
     PlantsimVersion,
@@ -33,7 +33,7 @@ def on_error(instance: Plantsim, error: SimulationException):
 
 
 def main():
-    with InstanceHandler(
+    with FixedInstanceHandler(
         amount_instances=2,
         license=PlantsimLicense.RESEARCH,
         version=PlantsimVersion.V_MJ_25_MI_4,
@@ -45,7 +45,7 @@ def main():
         ids = []
         for _ in range(10):
             job_id = handler.run_simulation(
-                without_animation=False,
+                without_animation=True,
                 on_init=partial(on_init, additional_parameter="Plantsim Rocks!"),
                 on_endsim=on_endsim,
                 on_simulation_error=on_error,
