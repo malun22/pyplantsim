@@ -1,12 +1,11 @@
 import os
 from pyplantsim import (
-    DynamicInstanceHandler,
-    SimulationJob,
     Plantsim,
     PlantsimLicense,
     PlantsimVersion,
     SimulationException,
 )
+from pyplantsim.instance_handler import SimulationJob, DynamicInstanceHandler
 from functools import partial
 
 
