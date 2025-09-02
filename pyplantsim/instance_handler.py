@@ -4,6 +4,7 @@ import uuid
 import time
 import gc
 import pythoncom
+import psutil
 
 from typing import Callable, Optional, Union, Dict, Unpack, TypedDict, List
 from abc import ABC
@@ -103,6 +104,7 @@ class BaseInstanceHandler(ABC):
         self._job_queue: queue.Queue[Job] = queue.Queue()
         self._shutdown_event = threading.Event()
         self._workers = []
+        self._workers_lock = threading.Lock()
         self._results: Dict[str, threading.Event] = {}
         self._cancel_flags: Dict[str, threading.Event] = {}
 
@@ -167,9 +169,12 @@ class BaseInstanceHandler(ABC):
         :param simulation_error_callback: Callback for simulation errors.
         :type simulation_error_callback: Optional[Callable[[SimulationException], None]]
         """
-        t = threading.Thread(target=self._worker, args=(plantsim_kwargs,), daemon=True)
-        t.start()
-        self._workers.append(t)
+        with self._workers_lock:
+            t = threading.Thread(
+                target=self._worker, args=(plantsim_kwargs,), daemon=True
+            )
+            t.start()
+            self._workers.append(t)
 
     def shutdown(self) -> None:
         """
@@ -178,17 +183,24 @@ class BaseInstanceHandler(ABC):
         self._shutdown_event.set()
         self._job_queue.join()
 
+        num_workers = self.number_instances
         jobs: List[ShutdownWorkerJob] = []
-        for _ in range(len(self._workers)):
+        for _ in range(num_workers):
             jobs.append(self._shotdown_next_worker())
 
         for job in jobs:
             self.wait_for(job)
 
-        for t in self._workers:
+        with self._workers_lock:
+            workers = list(self._workers)
+
+        for t in workers:
             t.join()
 
     def _shotdown_next_worker(self) -> ShutdownWorkerJob:
+        """
+        Shuts down the next available worker by queueing a ShutdownWorkerJob
+        """
         job = ShutdownWorkerJob()
         self.queue_job(job)
         return job
@@ -259,7 +271,7 @@ class BaseInstanceHandler(ABC):
         :param on_progress: Progress callback.
         :type on_progress: Optional[Callable]
         :return: Unique job id for this simulation.
-        :rtype: str
+        :rtype: SimulationJob
         """
 
         job = SimulationJob(
@@ -270,15 +282,16 @@ class BaseInstanceHandler(ABC):
             on_progress=on_progress,
         )
 
-        cancel_event = threading.Event()
-        self._cancel_flags[job.job_id] = cancel_event
-
         self.queue_job(job)
         return job
 
     def queue_job(self, job: Job) -> Job:
         finished_event = threading.Event()
         self._results[job.job_id] = finished_event
+
+        cancel_event = threading.Event()
+        self._cancel_flags[job.job_id] = cancel_event
+
         self._job_queue.put(job)
         return job
 
@@ -362,7 +375,8 @@ class BaseInstanceHandler(ABC):
         :return: Number of instances.
         :rtype: int
         """
-        return len(self._workers)
+        with self._workers_lock:
+            return len(self._workers)
 
 
 class FixedInstanceHandler(BaseInstanceHandler):
@@ -420,15 +434,46 @@ class FixedInstanceHandler(BaseInstanceHandler):
 
 
 class DynamicInstanceHandler(BaseInstanceHandler):
+    """
+    Dynamically manages the number of PlantSim worker instances based on system resource usage.
+
+    This handler automatically scales the amount of worker instances up or down depending
+    on CPU and memory usage. It ensures that at least ``min_instances`` and at most
+    ``max_instances`` workers are active. Resource checks and scaling occur at a fixed interval.
+
+    :param max_cpu: Maximum allowed CPU usage (fraction, e.g., 0.8 for 80%).
+    :type max_cpu: float
+    :param max_memory: Maximum allowed memory usage (fraction, e.g., 0.8 for 80%).
+    :type max_memory: float
+    :param min_instances: Minimum number of PlantSim worker instances.
+    :type min_instances: int
+    :param max_instances: Maximum number of PlantSim worker instances.
+    :type max_instances: Optional[int]
+    :param scale_interval: Seconds between resource checks and scaling decisions.
+    :type scale_interval: float
+    :param kwargs: Additional keyword arguments forwarded to the PlantSim instance.
+    :type kwargs: BaseInstanceHandlerKwargs
+    """
+
     def __init__(
         self,
         max_cpu: float = 0.8,
         max_memory: float = 0.8,
         min_instances: int = 1,
-        max_instances: int = 8,
+        max_instances: Optional[int] = None,
         scale_interval: float = 15.0,
         **kwargs: Unpack[BaseInstanceHandlerKwargs],
     ):
+        """
+        Initialize the dynamic handler and start the scaler thread.
+
+        :param max_cpu: Maximum allowed CPU usage (fraction, e.g., 0.8 for 80%).
+        :param max_memory: Maximum allowed memory usage (fraction, e.g., 0.8 for 80%).
+        :param min_instances: Minimum number of worker instances.
+        :param max_instances: Maximum number of worker instances.
+        :param scale_interval: Seconds between scale checks.
+        :param kwargs: Additional keyword arguments for PlantSim instances.
+        """
         super().__init__(**kwargs)
         self.max_cpu = max_cpu
         self.max_memory = max_memory
@@ -436,13 +481,63 @@ class DynamicInstanceHandler(BaseInstanceHandler):
         self.max_instances = max_instances
         self.scale_interval = scale_interval
 
-        self._worker_states = {}  # thread -> busy state
-        self._workers_lock = threading.Lock()
-        self._scaler_thread = threading.Thread(target=self._scaler, daemon=True)
         self._active = True
 
-        # Start with min_instances
         for _ in range(self.min_instances):
-            self._create_dynamic_worker()
+            self._create_worker(**self._plantsim_kwargs)
 
+        self._scaler_thread = threading.Thread(target=self._scaler, daemon=True)
         self._scaler_thread.start()
+
+    def _scaler(self):
+        """
+        Background thread that monitors system resources and dynamically scales
+        the number of PlantSim worker instances.
+
+        The scaler checks CPU and memory usage at regular intervals and
+        increases or decreases the number of workers accordingly.
+        """
+        psutil.cpu_percent()
+        time.sleep(self.scale_interval)
+        while self._active:
+            cpu = psutil.cpu_percent(interval=1) / 100.0
+            mem = psutil.virtual_memory().percent / 100.0
+            current_instances = self.number_instances
+
+            if not self._active:
+                break
+
+            if (
+                (cpu < self.max_cpu)
+                and (mem < self.max_memory)
+                and (
+                    self.max_instances is None
+                    or (current_instances < self.max_instances)
+                )
+                and not self._job_queue.empty()
+            ):
+                self._create_worker(**self._plantsim_kwargs)
+            elif (current_instances > self.min_instances) and (
+                cpu > self.max_cpu or mem > self.max_memory
+            ):
+                job = self._shotdown_next_worker()
+                self.wait_for(
+                    job
+                )  # Wait for the worker to shut down before continuing the scaling process
+
+            if not self._active:
+                break
+
+            time.sleep(self.scale_interval)
+
+    def shutdown(self):
+        """
+        Shut down the dynamic handler and all managed worker threads.
+
+        This method signals the scaler thread to stop, shuts down all workers,
+        and waits for the scaler thread to terminate.
+        """
+        self._active = False
+        super().shutdown()
+        if self._scaler_thread.is_alive():
+            self._scaler_thread.join()
