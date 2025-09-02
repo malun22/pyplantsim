@@ -47,6 +47,7 @@
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.close_console_log_file"><code class="docutils literal notranslate"><span class="pre">Plantsim.close_console_log_file()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.close_model"><code class="docutils literal notranslate"><span class="pre">Plantsim.close_model()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.execute_sim_talk"><code class="docutils literal notranslate"><span class="pre">Plantsim.execute_sim_talk()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.exists_path"><code class="docutils literal notranslate"><span class="pre">Plantsim.exists_path()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_abs_sim_time"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_abs_sim_time()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_current_process_id"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_current_process_id()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_end_time"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_end_time()</span></code></a></li>
@@ -80,6 +81,7 @@
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.release"><code class="docutils literal notranslate"><span class="pre">Plantsim.release()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.remove_error_handler"><code class="docutils literal notranslate"><span class="pre">Plantsim.remove_error_handler()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.reset_simulation"><code class="docutils literal notranslate"><span class="pre">Plantsim.reset_simulation()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.restart"><code class="docutils literal notranslate"><span class="pre">Plantsim.restart()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.run_simulation"><code class="docutils literal notranslate"><span class="pre">Plantsim.run_simulation()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.save_model"><code class="docutils literal notranslate"><span class="pre">Plantsim.save_model()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.set_crash_stack_file"><code class="docutils literal notranslate"><span class="pre">Plantsim.set_crash_stack_file()</span></code></a></li>
@@ -148,60 +150,39 @@ documentation for details.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyplantsim.plantsim.</span></span><span class="sig-name descname"><span class="pre">Plantsim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PlantsimVersion.V_MJ_22_MI_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trusted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">license</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PlantsimLicense.VIEWER</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_3d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_msg_box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_polling_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_log_message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_finished_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simtalk_msg_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fire_simtalk_msg_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_error_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Wrapper class for the Siemens Tecnomatix Plant Simulation COM interface.</p>
-<section id="attributes">
-<h2>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>_dispatch_id<span class="classifier">str</span></dt><dd><p>COM dispatch identifier for the RemoteControl interface.</p>
-</dd>
-<dt>_event_controller<span class="classifier">PlantsimPath</span></dt><dd><p>Path to the event controller.</p>
-</dd>
-<dt>_version<span class="classifier">PlantsimVersion or str</span></dt><dd><p>Plant Simulation version to be used.</p>
-</dd>
-<dt>_visible<span class="classifier">bool</span></dt><dd><p>Whether the instance window is visible.</p>
-</dd>
-<dt>_trusted<span class="classifier">bool</span></dt><dd><p>Whether the instance has access to the computer.</p>
-</dd>
-<dt>_license<span class="classifier">PlantsimLicense or str</span></dt><dd><p>License to be used.</p>
-</dd>
-<dt>_suppress_3d<span class="classifier">bool</span></dt><dd><p>Suppresses the start of the 3D view.</p>
-</dd>
-<dt>_show_msg_box<span class="classifier">bool</span></dt><dd><p>Whether to show a message box.</p>
-</dd>
-<dt>_network_path<span class="classifier">str</span></dt><dd><p>Network path.</p>
-</dd>
-<dt>_event_thread</dt><dd><p>Event thread object.</p>
-</dd>
-<dt>_event_handler<span class="classifier">PlantSimEvents</span></dt><dd><p>Handler for Plant Simulation events.</p>
-</dd>
-<dt>_event_polling_interval<span class="classifier">float</span></dt><dd><p>Interval for polling events.</p>
-</dd>
-<dt>_datetime_format<span class="classifier">str</span></dt><dd><p>Format for datetime strings</p>
-</dd>
-<dt>_model_loaded<span class="classifier">bool</span></dt><dd><p>Whether a model has been loaded.</p>
-</dd>
-<dt>_model_path<span class="classifier">str</span></dt><dd><p>Path to the loaded model.</p>
-</dd>
-<dt>_running<span class="classifier">str</span></dt><dd><p>Simulation status.</p>
-</dd>
-<dt>_simulation_error<span class="classifier">Optional[dict]</span></dt><dd><p>Simulation error details.</p>
-</dd>
-<dt>_simulation_finished_event<span class="classifier">threading.Event</span></dt><dd><p>Event triggered when the simulation finishes.</p>
-</dd>
-<dt>_error_handler<span class="classifier">Optional[str]</span></dt><dd><p>The path to the installed error handler</p>
-</dd>
-<dt>_user_simulation_finished_cb<span class="classifier">Optional[Callable[[], None]]</span></dt><dd><p>Callback for when the simulation finishes.</p>
-</dd>
-<dt>_user_simtalk_msg_cb<span class="classifier">Optional[Callable[[str], None]]</span></dt><dd><p>Callback for SimTalk messages.</p>
-</dd>
-<dt>_user_fire_simtalk_msg_cb<span class="classifier">Optional[Callable[[str], None]]</span></dt><dd><p>Callback to fire SimTalk messages.</p>
-</dd>
-<dt>_user_simulation_error_cb<span class="classifier">Optional[Callable[[SimulationException], None]]</span></dt><dd><p>Callback for simulation errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_dispatch_id</strong> (<em>str</em>) – COM dispatch identifier for the RemoteControl interface.</p></li>
+<li><p><strong>_event_controller</strong> (<em>PlantsimPath</em>) – Path to the event controller.</p></li>
+<li><p><strong>_version</strong> (<em>PlantsimVersion</em><em> or </em><em>str</em>) – Plant Simulation version to be used.</p></li>
+<li><p><strong>_visible</strong> (<em>bool</em>) – Whether the instance window is visible.</p></li>
+<li><p><strong>_trusted</strong> (<em>bool</em>) – Whether the instance has access to the computer.</p></li>
+<li><p><strong>_license</strong> (<em>PlantsimLicense</em><em> or </em><em>str</em>) – License to be used.</p></li>
+<li><p><strong>_suppress_3d</strong> (<em>bool</em>) – Suppresses the start of the 3D view.</p></li>
+<li><p><strong>_show_msg_box</strong> (<em>bool</em>) – Whether to show a message box.</p></li>
+<li><p><strong>_network_path</strong> (<em>str</em>) – Network path.</p></li>
+<li><p><strong>_event_thread</strong> – Event thread object.</p></li>
+<li><p><strong>_event_handler</strong> (<em>PlantSimEvents</em>) – Handler for Plant Simulation events.</p></li>
+<li><p><strong>_event_polling_interval</strong> (<em>float</em>) – Interval for polling events.</p></li>
+<li><p><strong>_datetime_format</strong> (<em>str</em>) – Format for datetime strings.</p></li>
+<li><p><strong>_model_loaded</strong> (<em>bool</em>) – Whether a model has been loaded.</p></li>
+<li><p><strong>_model_path</strong> (<em>str</em>) – Path to the loaded model.</p></li>
+<li><p><strong>_running</strong> (<em>str</em>) – Simulation status.</p></li>
+<li><p><strong>_simulation_error</strong> (<em>Optional</em><em>[</em><em>dict</em><em>]</em>) – Simulation error details.</p></li>
+<li><p><strong>_simulation_finished_event</strong> (<em>threading.Event</em>) – Event triggered when the simulation finishes.</p></li>
+<li><p><strong>_error_handler</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – The path to the installed error handler.</p></li>
+<li><p><strong>_user_simulation_finished_cb</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback for when the simulation finishes.</p></li>
+<li><p><strong>_user_simtalk_msg_cb</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>str</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback for SimTalk messages.</p></li>
+<li><p><strong>_user_fire_simtalk_msg_cb</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>str</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback to fire SimTalk messages.</p></li>
+<li><p><strong>_user_simulation_error_cb</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>SimulationException</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback for simulation errors.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.close_console_log_file">
 <span class="sig-name descname"><span class="pre">close_console_log_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.close_console_log_file" title="Link to this definition"></a></dt>
-<dd><p>Closes the routing to the output file</p>
+<dd><p>Close routing to the output file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
@@ -212,7 +193,7 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.close_model">
 <span class="sig-name descname"><span class="pre">close_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.close_model" title="Link to this definition"></a></dt>
-<dd><p>Closes the active model</p>
+<dd><p>Close the active model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
@@ -223,30 +204,56 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.execute_sim_talk">
 <span class="sig-name descname"><span class="pre">execute_sim_talk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.execute_sim_talk" title="Link to this definition"></a></dt>
-<dd><p>Executes Sim Talk in the current instance and optionally returns the value returned by Sim Talk</p>
+<dd><p>Execute SimTalk in the current instance and return the result.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_code</strong> (<em>str</em>) – The code to be executed.</p></li>
+<li><p><strong>parameters</strong> (<em>any</em>) – Parameters to pass to SimTalk.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result of SimTalk execution.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code></span></p>
+<dd class="field-odd"><p>any</p>
 </dd>
 </dl>
-<section id="id1">
-<h3>Attributes:<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>source_code<span class="classifier">str</span></dt><dd><p>The code to be executed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.exists_path">
+<span class="sig-name descname"><span class="pre">exists_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.exists_path" title="Link to this definition"></a></dt>
+<dd><p>Check if the given path exists in the loaded model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>Union</em><em>[</em><em>PlantsimPath</em><em>, </em><em>str</em><em>]</em>) – Path to check.</p>
 </dd>
-<dt><a href="#id2"><span class="problematic" id="id3">*</span></a>parameters<span class="classifier">any</span></dt><dd><p>Parameters to pass</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if path exists, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – If no model is loaded.</p>
 </dd>
 </dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_abs_sim_time">
 <span class="sig-name descname"><span class="pre">get_abs_sim_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_abs_sim_time" title="Link to this definition"></a></dt>
-<dd><p>Gets the current simulation time</p>
+<dd><p>Get the current simulation absolute time.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Current simulation time.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>datetime</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If EventController is not set.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -254,10 +261,13 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_current_process_id">
 <span class="sig-name descname"><span class="pre">get_current_process_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_current_process_id" title="Link to this definition"></a></dt>
-<dd><p>Returns the ID of the current instance. Not sure what the id is for yet.</p>
+<dd><p>Get the ID of the current instance process.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Process ID.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -265,10 +275,16 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_end_time">
 <span class="sig-name descname"><span class="pre">get_end_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_end_time" title="Link to this definition"></a></dt>
-<dd><p>Extracts the end time of the event controller.</p>
+<dd><p>Extract the end time of the event controller.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Simulation end time as timedelta.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>timedelta</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If EventController is not set.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -276,22 +292,36 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_ids_of_names">
 <span class="sig-name descname"><span class="pre">get_ids_of_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_ids_of_names" title="Link to this definition"></a></dt>
-<dd><p>Further documentation: <a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/api/oaidl/nf-oaidl-idispatch-getidsofnames">https://docs.microsoft.com/en-us/windows/win32/api/oaidl/nf-oaidl-idispatch-getidsofnames</a></p>
+<dd><p>Get IDs of names for dispatch interface.
+Further documentation: <a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/api/oaidl/nf-oaidl-idispatch-getidsofnames">https://docs.microsoft.com/en-us/windows/win32/api/oaidl/nf-oaidl-idispatch-getidsofnames</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IDs of names.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_jte_export">
 <span class="sig-name descname"><span class="pre">get_jte_export</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_jte_export" title="Link to this definition"></a></dt>
-<dd><p>Takes one argument. An object in the simulation. Gives the 3D JTE Export. Not sure how it works yet.</p>
+<dd><p>Get the 3D JTE export for a simulation object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>3D JTE export.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_model_language">
 <span class="sig-name descname"><span class="pre">get_model_language</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_model_language" title="Link to this definition"></a></dt>
-<dd><p>Returns the model language.</p>
+<dd><p>Get the model language.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Language code (0=German, 1=English, 3=Chinese).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -299,10 +329,16 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_start_date">
 <span class="sig-name descname"><span class="pre">get_start_date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_start_date" title="Link to this definition"></a></dt>
-<dd><p>Extracts the start date from the event controller.</p>
+<dd><p>Extract the start date from the event controller.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></span></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Start datetime.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>datetime</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If EventController is not set.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -310,27 +346,36 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_table">
 <span class="sig-name descname"><span class="pre">get_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_table" title="Link to this definition"></a></dt>
-<dd><p>returns a dataframe based on a Plant Simulation table object</p>
+<dd><p>Get a DataFrame based on a Plant Simulation table object.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to the table.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame representing the table.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></span></p>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
-<section id="id4">
-<h3>Attributes:<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>path<span class="classifier">str</span></dt><dd><p>path to the table</p>
-</dd>
-</dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_table_column_data_type">
 <span class="sig-name descname"><span class="pre">get_table_column_data_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_table_column_data_type" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Get the data type of a table column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>table</strong> (<em>PlantsimPath</em>) – Table path.</p></li>
+<li><p><strong>column</strong> (<em>int</em>) – Column index.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data type as string.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -338,104 +383,163 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_type_info">
 <span class="sig-name descname"><span class="pre">get_type_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_type_info" title="Link to this definition"></a></dt>
-<dd><p>Takes one argument</p>
+<dd><p>Get type information for the instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Type info.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_type_info_count">
 <span class="sig-name descname"><span class="pre">get_type_info_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_type_info_count" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Get the type information count.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Type info count.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_value">
 <span class="sig-name descname"><span class="pre">get_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_value" title="Link to this definition"></a></dt>
-<dd><p>returns the value of an attribute of a Plant Simulation object</p>
+<dd><p>Get the value of an attribute of a Plant Simulation object.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to the attribute.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Attribute value.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
+<dd class="field-odd"><p>Any</p>
 </dd>
 </dl>
-<section id="id5">
-<h3>Attributes:<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>path<span class="classifier">str</span></dt><dd><p>path to the attribute</p>
-</dd>
-</dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.has_simulation_error">
 <span class="sig-name descname"><span class="pre">has_simulation_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.has_simulation_error" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Check if a simulation error has occurred.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if there is an error, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.install_error_handler">
 <span class="sig-name descname"><span class="pre">install_error_handler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.install_error_handler" title="Link to this definition"></a></dt>
-<dd><p>Installs an error handler in the model file under basis.ErrorHandler. Searches for any method object and duplicates that.</p>
+<dd><p>Install an error handler in the model file under basis.ErrorHandler. Searches for any method object and duplicates that.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If error handler could not be created.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.invoke">
 <span class="sig-name descname"><span class="pre">invoke</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.invoke" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Invoke method on the COM instance.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.license">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">license</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PlantsimLicense</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.license" title="Link to this definition"></a></dt>
-<dd><p>Attribute holding the license of the current instance</p>
+<dd><p>License of the current instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>License type.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Union[PlantsimLicense, str]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.load_model">
 <span class="sig-name descname"><span class="pre">load_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">close_other</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.load_model" title="Link to this definition"></a></dt>
-<dd><p>Loading a model into the current instance</p>
+<dd><p>Load a model into the current instance.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>str</em>) – Full path to the model file (.spp).</p></li>
+<li><p><strong>password</strong> (<em>str</em><em>, </em><em>optional</em>) – Password for encrypted models.</p></li>
+<li><p><strong>close_other</strong> (<em>bool</em><em>, </em><em>optional</em>) – Close other models before loading.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – If file does not exist or another model is loaded.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id6">
-<h3>Attributes:<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>filepath<span class="classifier">str</span></dt><dd><p>The full path to the model file (.spp)</p>
-</dd>
-<dt>password<span class="classifier">str, optional</span></dt><dd><p>designates the password that is used for loading an encrypted model (default is None)</p>
-</dd>
-</dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.load_model_without_state">
 <span class="sig-name descname"><span class="pre">load_model_without_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.load_model_without_state" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Load a model without restoring state.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.model_loaded">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_loaded</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.model_loaded" title="Link to this definition"></a></dt>
-<dd><p>Attribute holding true, when the instance has a model loaded, false, when it not</p>
+<dd><p>Whether the instance has a model loaded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if model is loaded, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.model_path">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.model_path" title="Link to this definition"></a></dt>
-<dd><p>Attribute holding the path to current model file</p>
+<dd><p>Path to the current model file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Model path or None.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Union[str, None]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.network_path">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">network_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.network_path" title="Link to this definition"></a></dt>
-<dd><p>Attribute holding the current active network path</p>
+<dd><p>Current active network path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Network path or None.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Union[str, None]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.new_model">
 <span class="sig-name descname"><span class="pre">new_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">close_other</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.new_model" title="Link to this definition"></a></dt>
-<dd><p>Creates a new simulation model in the current instance</p>
+<dd><p>Create a new simulation model in the current instance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>close_other</strong> (<em>bool</em><em>, </em><em>optional</em>) – Close other models before creating new one.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -443,10 +547,13 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.open_console_log_file">
 <span class="sig-name descname"><span class="pre">open_console_log_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.open_console_log_file" title="Link to this definition"></a></dt>
-<dd><p>Routes the Console output to a file</p>
+<dd><p>Route the Console output to a file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<em>str</em>) – Path to the log file.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -454,15 +561,19 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.query_interface">
 <span class="sig-name descname"><span class="pre">query_interface</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.query_interface" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Query the COM interface.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.quit">
 <span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.quit" title="Link to this definition"></a></dt>
-<dd><p>Quits the current instance.</p>
+<dd><p>Quit the current Plant Simulation instance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If instance is already closed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -470,78 +581,124 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.quit_after_time">
 <span class="sig-name descname"><span class="pre">quit_after_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.quit_after_time" title="Link to this definition"></a></dt>
-<dd><p>Quits the current instance after a specified time</p>
+<dd><p>Quit the current instance after a specified time.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time</strong> (<em>int</em>) – Time in seconds after which instance quits.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id7">
-<h3>Attributes:<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>time<span class="classifier">int</span></dt><dd><p>time after the instrance quits in seconds</p>
-</dd>
-</dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.register_on_fire_simtalk_message">
 <span class="sig-name descname"><span class="pre">register_on_fire_simtalk_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.register_on_fire_simtalk_message" title="Link to this definition"></a></dt>
-<dd><p>Set Callback for FireSimTalkMessage Event.</p>
+<dd><p>Set callback for FireSimTalkMessage event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>callback</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>str</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback function.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.register_on_simtalk_message">
 <span class="sig-name descname"><span class="pre">register_on_simtalk_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.register_on_simtalk_message" title="Link to this definition"></a></dt>
-<dd><p>Set Callback for OnSimTalkMessage Event.</p>
+<dd><p>Set callback for OnSimTalkMessage event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>callback</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>str</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback function.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.register_on_simulation_error">
 <span class="sig-name descname"><span class="pre">register_on_simulation_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.register_on_simulation_error" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set callback for simulation errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>callback</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>SimulationException</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback function.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.register_on_simulation_finished">
 <span class="sig-name descname"><span class="pre">register_on_simulation_finished</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.register_on_simulation_finished" title="Link to this definition"></a></dt>
-<dd><p>Set Callback for OnSimulationFinished Event.</p>
+<dd><p>Set callback for OnSimulationFinished event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>callback</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback function.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.release">
 <span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.release" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Release the COM instance.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.remove_error_handler">
 <span class="sig-name descname"><span class="pre">remove_error_handler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.remove_error_handler" title="Link to this definition"></a></dt>
-<dd><p>Removes the installed error handler from basis.ErrorHandler.</p>
+<dd><p>Remove the installed error handler from basis.ErrorHandler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If no error handler is installed or removal fails.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.reset_simulation">
 <span class="sig-name descname"><span class="pre">reset_simulation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.reset_simulation" title="Link to this definition"></a></dt>
-<dd><p>Resets the simulation</p>
+<dd><p>Reset the simulation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If EventController is not set.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id8">
-<h3>Attributes:<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>eventcontroller_object<span class="classifier">str, optional</span></dt><dd><p>path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.restart">
+<span class="sig-name descname"><span class="pre">restart</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.restart" title="Link to this definition"></a></dt>
+<dd><p>Restart the Plant Simulation instance and restore previous state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>NotImplementedError</strong> – Restart is not implemented.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.run_simulation">
 <span class="sig-name descname"><span class="pre">run_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">without_animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_endsim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_simulation_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cancel_event</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.run_simulation" title="Link to this definition"></a></dt>
-<dd><p>Makes a full simulation run and returns after the run is over. Throws in case the simulation ends without finishing.</p>
+<dd><p>Run a full simulation and return after the run is over. This method suggests, that the EventController has a EndDate</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>without_animation</strong> (<em>bool</em><em>, </em><em>optional</em>) – Run without animation.</p></li>
+<li><p><strong>on_init</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#pyplantsim.plantsim.Plantsim" title="pyplantsim.plantsim.Plantsim"><em>Plantsim</em></a><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback before simulation starts.</p></li>
+<li><p><strong>on_endsim</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#pyplantsim.plantsim.Plantsim" title="pyplantsim.plantsim.Plantsim"><em>Plantsim</em></a><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback after simulation ends.</p></li>
+<li><p><strong>on_simulation_error</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#pyplantsim.plantsim.Plantsim" title="pyplantsim.plantsim.Plantsim"><em>Plantsim</em></a><em>, </em><em>SimulationException</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Callback on simulation error.</p></li>
+<li><p><strong>on_progress</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#pyplantsim.plantsim.Plantsim" title="pyplantsim.plantsim.Plantsim"><em>Plantsim</em></a><em>, </em><em>float</em><em>]</em><em>, </em><em>None</em><em>]</em><em>]</em>) – Progress callback (receives percent complete).</p></li>
+<li><p><strong>cancel_event</strong> (<em>Optional</em><em>[</em><em>threading.Event</em><em>]</em>) – Event to cancel the run.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>SimulationException</strong> – If a simulation error occurs.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
@@ -551,53 +708,53 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.save_model">
 <span class="sig-name descname"><span class="pre">save_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.save_model" title="Link to this definition"></a></dt>
-<dd><p>Saves the current model as the given name in the given folder</p>
+<dd><p>Save the current model under the given name in the given folder.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder_path</strong> (<em>str</em>) – Path to the folder.</p></li>
+<li><p><strong>file_name</strong> (<em>str</em>) – Name of the model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id9">
-<h3>Attributes:<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>folder_path<span class="classifier">str</span></dt><dd><p>path to the folder the model should be saved in</p>
-</dd>
-<dt>file_name<span class="classifier">str</span></dt><dd><p>Name of the Model</p>
-</dd>
-</dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_crash_stack_file">
 <span class="sig-name descname"><span class="pre">set_crash_stack_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_crash_stack_file" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set the crash stack file for error logging.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_event_controller">
 <span class="sig-name descname"><span class="pre">set_event_controller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_event_controller" title="Link to this definition"></a></dt>
-<dd><p>Sets the path of the Event Controller</p>
+<dd><p>Set the path of the Event Controller.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to the EventController object. If not given, uses default.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id10">
-<h3>Attributes:<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>path<span class="classifier">str, optional</span></dt><dd><p>Path to the EventController object. If not giveen, it defaults to the defaul relative paths EventController (default: None)</p>
-</dd>
-</dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_license">
 <span class="sig-name descname"><span class="pre">set_license</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">license</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_license" title="Link to this definition"></a></dt>
-<dd><p>Sets the license for the instance</p>
+<dd><p>Set the license for the instance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>license</strong> (<em>PlantsimLicense</em>) – License type.</p></li>
+<li><p><strong>force</strong> (<em>bool</em><em>, </em><em>optional</em>) – Force update even if value is already set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -607,8 +764,15 @@ documentation for details.</p>
 <span class="sig-name descname"><span class="pre">set_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_event_controller</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">install_error_handler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_network" title="Link to this definition"></a></dt>
 <dd><p>Set the active network.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>PlantsimPath</em>) – Network path.</p></li>
+<li><p><strong>set_event_controller</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to set the event controller.</p></li>
+<li><p><strong>install_error_handler</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to install the error handler.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -616,8 +780,14 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_seed">
 <span class="sig-name descname"><span class="pre">set_seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_seed" title="Link to this definition"></a></dt>
-<dd><p>Sets the Seed on the event controller.</p>
+<dd><p>Set the random seed on the event controller.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>seed</strong> (<em>int</em>) – Seed value (-2147483647 to 2147483647).</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – If EventController is not set or seed is out of range.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
@@ -627,10 +797,16 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_show_message_box">
 <span class="sig-name descname"><span class="pre">set_show_message_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">show</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_show_message_box" title="Link to this definition"></a></dt>
-<dd><p>Should the instance show a message box</p>
+<dd><p>Set whether the instance should show a message box.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>show</strong> (<em>bool</em>) – Show message box.</p></li>
+<li><p><strong>force</strong> (<em>bool</em><em>, </em><em>optional</em>) – Force update even if value is already set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -638,15 +814,22 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_stop_simulation_on_error">
 <span class="sig-name descname"><span class="pre">set_stop_simulation_on_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_stop_simulation_on_error" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set option to stop simulation on error.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_suppress_start_of_3d">
 <span class="sig-name descname"><span class="pre">set_suppress_start_of_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suppress</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_suppress_start_of_3d" title="Link to this definition"></a></dt>
-<dd><p>Should the instance suppress the start of 3D</p>
+<dd><p>Set whether to suppress the start of 3D.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>suppress</strong> (<em>bool</em>) – Suppress 3D view.</p></li>
+<li><p><strong>force</strong> (<em>bool</em><em>, </em><em>optional</em>) – Force update even if value is already set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -654,30 +837,33 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_table">
 <span class="sig-name descname"><span class="pre">set_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_table" title="Link to this definition"></a></dt>
-<dd><p>Set a Plant Simulation Tabelle based on a DataFrame</p>
+<dd><p>Set a Plant Simulation table based on a DataFrame.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path to the table.</p></li>
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame containing the values to write.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="attribute">
-<h3>Attribute:<a class="headerlink" href="#attribute" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>path<span class="classifier">str</span></dt><dd><p>path to the table</p>
-</dd>
-<dt>df<span class="classifier">pd.DataFrame</span></dt><dd><p>DataFrame, which values need to be written</p>
-</dd>
-</dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_trust_models">
 <span class="sig-name descname"><span class="pre">set_trust_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trusted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_trust_models" title="Link to this definition"></a></dt>
-<dd><p>Should the instance have access to the computer or not</p>
+<dd><p>Set whether the instance has access to the computer.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trusted</strong> (<em>bool</em>) – Trusted mode.</p></li>
+<li><p><strong>force</strong> (<em>bool</em><em>, </em><em>optional</em>) – Force update even if value is already set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -685,37 +871,44 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_value">
 <span class="sig-name descname"><span class="pre">set_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_value" title="Link to this definition"></a></dt>
-<dd><p>Sets a value to a given attribute</p>
+<dd><p>Set a value to a given attribute.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Path to the attribute.</p></li>
+<li><p><strong>value</strong> (<em>any</em>) – The new value to assign.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id11">
-<h3>Attributes:<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>object_name<span class="classifier">str</span></dt><dd><p>path to the attribute</p>
-</dd>
-<dt>value<span class="classifier">any</span></dt><dd><p>the new value the attribute should be assigned to</p>
-</dd>
-<dt>is_absolute<span class="classifier">bool</span></dt><dd><p>Whether the path to the object is absolute already. If not, the relative path context is going to be used before the oject name</p>
-</dd>
-</dl>
-</section>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_version">
 <span class="sig-name descname"><span class="pre">set_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_version" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Set the Plant Simulation version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>version</strong> (<em>Union</em><em>[</em><em>PlantsimVersion</em><em>, </em><em>str</em><em>]</em>) – Plant Simulation version or string.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.set_visible">
 <span class="sig-name descname"><span class="pre">set_visible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">visible</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.set_visible" title="Link to this definition"></a></dt>
-<dd><p>Should the instance window be visible on screen</p>
+<dd><p>Set whether the instance window is visible.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>visible</strong> (<em>bool</em>) – Window visibility.</p></li>
+<li><p><strong>force</strong> (<em>bool</em><em>, </em><em>optional</em>) – Force update even if value is already set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -723,21 +916,44 @@ documentation for details.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.show_msg_box">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">show_msg_box</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.show_msg_box" title="Link to this definition"></a></dt>
-<dd><p>Attribute holding true, when the instance is showing a message box, false, when it’s not</p>
+<dd><p>Whether the instance is showing a message box.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if message box is shown, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.simulation_running">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">simulation_running</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.simulation_running" title="Link to this definition"></a></dt>
-<dd><p>Returns if the simulation is currently running.</p>
+<dd><p>Whether the simulation is currently running.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if running, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.start">
 <span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.start" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Start the Plant Simulation instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If Plant Simulation is already running.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The PlantSim instance.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pyplantsim.plantsim.Plantsim" title="pyplantsim.plantsim.Plantsim"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plantsim</span></code></a></span></p>
+<dd class="field-odd"><p><a class="reference internal" href="#pyplantsim.plantsim.Plantsim" title="pyplantsim.plantsim.Plantsim">Plantsim</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -745,8 +961,14 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.start_simulation">
 <span class="sig-name descname"><span class="pre">start_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">without_animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.start_simulation" title="Link to this definition"></a></dt>
-<dd><p>Starts the simulation</p>
+<dd><p>Start the simulation.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>without_animation</strong> (<em>bool</em><em>, </em><em>optional</em>) – Run without animation.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – If EventController is not set.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
@@ -756,7 +978,8 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.stop">
 <span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.stop" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Stop the Plant Simulation instance and clean up resources.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
@@ -766,51 +989,79 @@ documentation for details.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.stop_simulation">
 <span class="sig-name descname"><span class="pre">stop_simulation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.stop_simulation" title="Link to this definition"></a></dt>
-<dd><p>Stops the simulation</p>
+<dd><p>Stop the simulation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If EventController is not set.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<section id="id12">
-<h3>Attributes:<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
-<dl class="simple">
-<dt>eventcontroller_object<span class="classifier">str, optional</span></dt><dd><p>path to the Event Controller object to be reset. If not given, it defaults to the default event controller path (default: None)</p>
-</dd>
-</dl>
-</section>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.suppress_3d">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">suppress_3d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.suppress_3d" title="Link to this definition"></a></dt>
-<dd><p>Attribute holding true, when the instance is suppressed, false, when it’s not</p>
+<dd><p>Whether suppression of 3D is enabled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if suppressed, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.tranfer_model">
 <span class="sig-name descname"><span class="pre">tranfer_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.tranfer_model" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Transfer the model to another instance.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.trusted">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trusted</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.trusted" title="Link to this definition"></a></dt>
-<dd><p>Attribute holding true, when the instance is trusted, false, when it’s not</p>
+<dd><p>Whether the instance is trusted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if trusted, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.version">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PlantsimVersion</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.version" title="Link to this definition"></a></dt>
-<dd><p>Attribute holding the version of the current instance</p>
+<dd><p>Version of the current instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Plant Simulation version.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Union[PlantsimVersion, str]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.visible">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">visible</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.visible" title="Link to this definition"></a></dt>
-<dd><p>Attribute holding true, when the instance is visible, false, when it’s not</p>
+<dd><p>Whether the instance is visible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if visible, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
 </dd></dl>
 
-</section>
 </dd></dl>
 
 </section>
