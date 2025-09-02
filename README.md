@@ -12,11 +12,6 @@ pyplantsim
   <a href="#license">License</a>
 </p>
 
-<!-- - [Setup](#setup)
-- [Examples](#examples)
-- [Further documentation](#further-documentation)
-- [Notice](#notice) -->
-
 ## Setup
 
 Install via pip:

@@ -5,7 +5,7 @@ from pyplantsim import (
     PlantsimVersion,
     SimulationException,
 )
-from pyplantsim.instance_handler import FixedInstanceHandler, SimulationJob
+from pyplantsim.instance_handler import SimulationJob, DynamicInstanceHandler
 from functools import partial
 
 
@@ -33,8 +33,11 @@ def on_error(instance: Plantsim, error: SimulationException):
 
 
 def main():
-    with FixedInstanceHandler(
-        amount_instances=2,
+    with DynamicInstanceHandler(
+        max_cpu=0.7,
+        max_memory=0.7,
+        max_instances=12,
+        min_instances=1,
         license=PlantsimLicense.RESEARCH,
         version=PlantsimVersion.V_MJ_25_MI_4,
         visible=True,
@@ -43,7 +46,7 @@ def main():
         show_msg_box=False,
     ) as handler:
         jobs = []
-        for _ in range(10):
+        for _ in range(1000):
             job = handler.queue_job(
                 SimulationJob(
                     without_animation=True,
