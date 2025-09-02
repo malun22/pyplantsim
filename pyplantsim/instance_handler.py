@@ -249,42 +249,6 @@ class BaseInstanceHandler(ABC):
             finished_event.set()
         self._job_queue.task_done()
 
-    def run_simulation(
-        self,
-        without_animation: bool = True,
-        on_init: Optional[Callable] = None,
-        on_endsim: Optional[Callable] = None,
-        on_simulation_error: Optional[Callable] = None,
-        on_progress: Optional[Callable] = None,
-    ) -> SimulationJob:
-        """
-        Queue a simulation to be run by an available worker.
-
-        :param without_animation: Whether the simulation should be run without animation.
-        :type without_animation: bool
-        :param on_init: Initialization callback.
-        :type on_init: Optional[Callable]
-        :param on_endsim: Simulation end callback.
-        :type on_endsim: Optional[Callable]
-        :param on_simulation_error: Simulation error callback.
-        :type on_simulation_error: Optional[Callable]
-        :param on_progress: Progress callback.
-        :type on_progress: Optional[Callable]
-        :return: Unique job id for this simulation.
-        :rtype: SimulationJob
-        """
-
-        job = SimulationJob(
-            without_animation=without_animation,
-            on_init=on_init,
-            on_endsim=on_endsim,
-            on_simulation_error=on_simulation_error,
-            on_progress=on_progress,
-        )
-
-        self.queue_job(job)
-        return job
-
     def queue_job(self, job: Job) -> Job:
         finished_event = threading.Event()
         self._results[job.job_id] = finished_event
