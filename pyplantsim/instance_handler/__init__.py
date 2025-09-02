@@ -5,3 +5,4 @@ from .instance_handler import (
     DynamicInstanceHandler,
 )
 from .job import Job, SimulationJob
+from .exception import InstanceHandlerNotInitializedException

@@ -15,6 +15,7 @@ from ..exception import SimulationException
 from ..licenses import PlantsimLicense
 from ..versions import PlantsimVersion
 from .job import Job, SimulationJob, ShutdownWorkerJob
+from .exception import InstanceHandlerNotInitializedException
 
 
 class BaseInstanceHandlerKwargs(TypedDict, total=False):
@@ -158,14 +159,16 @@ class BaseInstanceHandler(ABC):
             simulation_error_callback=simulation_error_callback,
         )
 
-    def __enter__(self):
+        self._initialized = False
+
+    def __enter__(self) -> "BaseInstanceHandler":
         """
         Enter the runtime context related to this object.
 
         :returns: InstanceHandler object
         :rtype: InstanceHandler
         """
-        return self
+        return self.initialize()
 
     def __exit__(self, _, __, ___):
         """
@@ -173,6 +176,18 @@ class BaseInstanceHandler(ABC):
         """
         self.shutdown()
 
+    def initialize(self) -> "BaseInstanceHandler":
+        self._initialized = True
+
+    def requires_initialized(method):
+        def wrapper(self, *args, **kwargs):
+            if not self._initialized:
+                raise InstanceHandlerNotInitializedException("initialize() not called")
+            return method(self, *args, **kwargs)
+
+        return wrapper
+
+    @requires_initialized
     def _create_worker(
         self, **plantsim_kwargs: Unpack[BaseInstanceHandlerKwargs]
     ) -> None:
@@ -189,6 +204,7 @@ class BaseInstanceHandler(ABC):
             t.start()
             self._workers.append(t)
 
+    @requires_initialized
     def shutdown(self) -> None:
         """
         Shut down all workers and wait until all jobs are finished.
@@ -210,6 +226,9 @@ class BaseInstanceHandler(ABC):
         for t in workers:
             t.join()
 
+        self._initialized = False
+
+    @requires_initialized
     def _shotdown_next_worker(self) -> ShutdownWorkerJob:
         """
         Shuts down the next available worker by queueing a ShutdownWorkerJob
@@ -218,6 +237,7 @@ class BaseInstanceHandler(ABC):
         self.queue_job(job)
         return job
 
+    @requires_initialized
     def _worker(self, plantsim_args) -> None:
         """
         Worker thread that processes simulation jobs.
@@ -256,6 +276,7 @@ class BaseInstanceHandler(ABC):
             pythoncom.CoUninitialize()
             gc.collect()
 
+    @requires_initialized
     def _finish_job(self, job: Job) -> None:
         """
         Mark a job as finished and signal waiting events.
@@ -268,6 +289,7 @@ class BaseInstanceHandler(ABC):
             finished_event.set()
         self._job_queue.task_done()
 
+    @requires_initialized
     def queue_job(self, job: Job) -> Job:
         """
         Add a job to the queue for processing.
@@ -286,6 +308,7 @@ class BaseInstanceHandler(ABC):
         self._job_queue.put(job)
         return job
 
+    @requires_initialized
     def wait_for(self, job: Job):
         """
         Block until the the given job is finished.
@@ -300,12 +323,14 @@ class BaseInstanceHandler(ABC):
         else:
             raise ValueError(f"No such job id: {job.job_id}")
 
+    @requires_initialized
     def wait_all(self) -> None:
         """
         Block until all queued jobs are finished.
         """
         self._job_queue.join()
 
+    @requires_initialized
     def empty_queue(self) -> None:
         """
         Remove all not-yet-started jobs from the queue.
@@ -313,6 +338,7 @@ class BaseInstanceHandler(ABC):
         with self._job_queue.mutex:
             self._job_queue.queue.clear()
 
+    @requires_initialized
     def remove_queued_job(self, job: Job) -> bool:
         """
         Remove a specific job from the queue by its job_id.
@@ -335,6 +361,7 @@ class BaseInstanceHandler(ABC):
             self._job_queue.queue = new_queue
         return removed
 
+    @requires_initialized
     def cancel_running_job(self, job: Job) -> bool:
         """
         Signal all running jobs to cancel.
@@ -348,6 +375,7 @@ class BaseInstanceHandler(ABC):
             return True
         return False
 
+    @requires_initialized
     def cancel_running_jobs(self) -> int:
         """
         Signal all running jobs to cancel.
@@ -398,7 +426,11 @@ class FixedInstanceHandler(BaseInstanceHandler):
         """
         super().__init__(**kwargs)
         self._amount_instances = amount_instances
-        self._create_workers(amount_instances)
+
+    def initialize(self) -> "FixedInstanceHandler":
+        super().initialize()
+        self._create_workers(self._amount_instances)
+        return self
 
     def _create_workers(self, amount_workers: int) -> None:
         """
@@ -460,6 +492,9 @@ class DynamicInstanceHandler(BaseInstanceHandler):
         self.max_instances = max_instances
         self.scale_interval = scale_interval
 
+    def initialize(self) -> "DynamicInstanceHandler":
+        super().initialize()
+
         self._active = True
 
         for _ in range(self.min_instances):
@@ -467,6 +502,8 @@ class DynamicInstanceHandler(BaseInstanceHandler):
 
         self._scaler_thread = threading.Thread(target=self._scaler, daemon=True)
         self._scaler_thread.start()
+
+        return self
 
     def _scaler(self):
         """
