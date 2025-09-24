@@ -16,7 +16,7 @@ numpy==2.3.2
 packaging==25.0
 pandas==2.3.2
 pathspec==0.12.1
-plantsimpath==0.0.2
+plantsimpath==0.0.3
 platformdirs==4.3.8
 psutil==7.0.0
 Pygments==2.19.2
