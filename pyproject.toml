@@ -30,7 +30,6 @@ dev = [
     "pandas-stubs",
     "types-psutil",
     "loguru",
-    "loguru-mypy",
     "plantsimpath",
     "packaging",
 ]
