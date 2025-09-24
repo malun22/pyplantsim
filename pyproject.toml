@@ -29,7 +29,7 @@ dev = [
     "types-pywin32",
     "pandas-stubs",
     "types-psutil",
-    "loguru-mypy",
+    "loguru",
     "plantsimpath",
     "packaging",
 ]
