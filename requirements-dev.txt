@@ -1,0 +1,4 @@
+mypy
+types-pywin32
+pandas-stubs
+types-psutil

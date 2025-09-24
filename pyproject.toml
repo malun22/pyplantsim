@@ -23,6 +23,14 @@ dependencies = [
     "plantsimpath>=0.0.3",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "mypy",
+    "types-pywin32",
+    "pandas-stubs",
+    "types-psutil",
+]
+
 [project.urls]
 Homepage = "https://github.com/malun22/pyplantsim"
 Documentation = "https://malun22.github.io/pyplantsim/"
