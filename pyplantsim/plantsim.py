@@ -12,11 +12,11 @@ from pathlib import Path
 from typing import Union, Any, Optional, List, Callable
 from loguru import logger
 from datetime import datetime, timedelta
+from plantsimpath import PlantsimPath
 
 from .versions import PlantsimVersion
 from .licenses import PlantsimLicense
 from .exception import PlantsimException, SimulationException
-from .path import PlantsimPath
 from .events import PlantSimEvents
 
 
