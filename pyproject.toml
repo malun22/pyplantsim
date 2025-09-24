@@ -30,12 +30,14 @@ dev = [
     "pandas-stubs",
     "types-psutil",
     "loguru",
+    "loguru-mypy",
     "plantsimpath",
     "packaging",
 ]
 docs = [
     "sphinx",
     "sphinx-autodoc-typehints",
+    "sphinx-rtd-theme"
 ]
 
 [project.urls]
