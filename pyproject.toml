@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyplantsim"
-version = "0.4.2"
+version = "0.4.3"
 description = "A Python wrapper for Siemens Tecnomatix Plant Simulation COM Interface"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -13,20 +13,40 @@ authors = [
     {name = "Luca Bernstiel", email = "bernstiel@gmx.de"},
 ]
 keywords = ["plant", "siemens", "simulation", "COM"]
-urls = { "Homepage" = "https://github.com/malun22/pyplantsim" }
 dependencies = [
-    "colorama>=0.4.6",
     "loguru>=0.7.3",
     "pywin32>=311; platform_system=='Windows'",
     "win32_setctime>=1.2.0; platform_system=='Windows'",
     "pandas>=2.3.2",
     "psutil>=7.0.0",
-    "plantsimpath>=0.0.2",
+    "plantsimpath>=0.0.3",
+    "packaging>=25.0"
 ]
+
+[project.optional-dependencies]
+dev = [
+    "mypy",
+    "types-pywin32",
+    "pandas-stubs",
+    "types-psutil",
+    "loguru",
+    "plantsimpath",
+    "packaging",
+]
+docs = [
+    "sphinx",
+    "sphinx-autodoc-typehints",
+    "sphinx-rtd-theme"
+]
+
+[project.urls]
+Homepage = "https://github.com/malun22/pyplantsim"
+Documentation = "https://malun22.github.io/pyplantsim/"
+Repository = "https://github.com/malun22/pyplantsim"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pyplantsim*"]
 
 [tool.setuptools.package-data]
-pyplantsim = ["sim_talk_scripts/*.st"]
+pyplantsim = ["py.typed", "sim_talk_scripts/*.st"]

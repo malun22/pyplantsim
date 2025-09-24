@@ -1,4 +1,7 @@
+import threading
 from typing import Callable, Optional
+
+from .exception import SimulationException
 
 
 class PlantSimEvents:
@@ -70,3 +73,9 @@ class PlantSimEvents:
         """
         if self.on_fire_simtalk_message:
             self.on_fire_simtalk_message(msg)
+
+
+class ErrorEvent(threading.Event):
+    def __init__(self) -> None:
+        super().__init__()
+        self.error: Optional[SimulationException] = None

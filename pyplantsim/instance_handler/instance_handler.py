@@ -6,8 +6,9 @@ import gc
 import pythoncom
 import psutil
 
-from typing import Callable, Optional, Union, Dict, Unpack, TypedDict, List
+from typing import Callable, Optional, Union, Dict, Unpack, TypedDict, List, Deque, Any
 from abc import ABC
+from collections import deque
 
 
 from ..plantsim import Plantsim
@@ -16,6 +17,15 @@ from ..licenses import PlantsimLicense
 from ..versions import PlantsimVersion
 from .job import Job, SimulationJob, ShutdownWorkerJob
 from .exception import InstanceHandlerNotInitializedException
+
+
+def requires_initialized(method: Callable[..., Any]) -> Callable[..., Any]:
+    def wrapper(self, *args: Any, **kwargs: Any) -> Any:
+        if not self._initialized:
+            raise InstanceHandlerNotInitializedException("initialize() not called")
+        return method(self, *args, **kwargs)
+
+    return wrapper
 
 
 class BaseInstanceHandlerKwargs(TypedDict, total=False):
@@ -139,7 +149,7 @@ class BaseInstanceHandler(ABC):
         """
         self._job_queue: queue.Queue[Job] = queue.Queue()
         self._shutdown_event = threading.Event()
-        self._workers = []
+        self._workers: List[threading.Thread] = []
         self._workers_lock = threading.Lock()
         self._results: Dict[str, threading.Event] = {}
         self._cancel_flags: Dict[str, threading.Event] = {}
@@ -178,14 +188,7 @@ class BaseInstanceHandler(ABC):
 
     def initialize(self) -> "BaseInstanceHandler":
         self._initialized = True
-
-    def requires_initialized(method):
-        def wrapper(self, *args, **kwargs):
-            if not self._initialized:
-                raise InstanceHandlerNotInitializedException("initialize() not called")
-            return method(self, *args, **kwargs)
-
-        return wrapper
+        return self
 
     @requires_initialized
     def _create_worker(
@@ -350,7 +353,7 @@ class BaseInstanceHandler(ABC):
         """
         removed = False
         with self._job_queue.mutex:
-            new_queue = queue.deque()
+            new_queue: Deque[Job] = deque()
             while self._job_queue.queue:
                 queued_job = self._job_queue.queue.popleft()
                 if queued_job is not None and queued_job.job_id == job.job_id:

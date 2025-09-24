@@ -1,0 +1,10 @@
+mypy
+types-pywin32
+pandas-stubs
+types-psutil
+loguru
+sphinx
+sphinx-autodoc-typehints
+sphinx-rtd-theme
+plantsimpath
+packaging

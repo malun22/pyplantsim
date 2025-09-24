@@ -17,7 +17,7 @@ from plantsimpath import PlantsimPath
 from .versions import PlantsimVersion
 from .licenses import PlantsimLicense
 from .exception import PlantsimException, SimulationException
-from .events import PlantSimEvents
+from .events import PlantSimEvents, ErrorEvent
 
 
 class Plantsim:
@@ -54,7 +54,7 @@ class Plantsim:
     :ivar _model_path: Path to the loaded model.
     :vartype _model_path: str
     :ivar _running: Simulation status.
-    :vartype _running: str
+    :vartype _running: bool
     :ivar _simulation_error: Simulation error details.
     :vartype _simulation_error: Optional[dict]
     :ivar _simulation_finished_event: Event triggered when the simulation finishes.
@@ -74,25 +74,25 @@ class Plantsim:
     # Defaults
     _DISPATCH_ID: str = "Tecnomatix.PlantSimulation.RemoteControl"
     _dispatch_id: str = "Tecnomatix.PlantSimulation.RemoteControl"
-    _event_controller: PlantsimPath = None
-    _version: Version = None
-    _visible: bool = None
-    _trusted: bool = None
-    _license: Union[PlantsimLicense, str] = None
-    _suppress_3d: bool = None
-    _show_msg_box: bool = None
-    _network_path: str = None
-    _event_thread = None
-    _event_handler: PlantSimEvents = None
+    _event_controller: Optional[PlantsimPath] = None
+    _version: Version = Version(PlantsimVersion.V_MJ_22_MI_1.value)
+    _visible: bool = True
+    _trusted: bool = False
+    _license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER
+    _suppress_3d: bool = False
+    _show_msg_box: bool = False
+    _network_path: Optional[PlantsimPath] = None
+    _event_thread: Optional[threading.Thread] = None
+    _event_handler: Optional[PlantSimEvents] = None
     _event_polling_interval: float = 0.05
-    _datetime_format: str
+    _datetime_format: Optional[str] = None
 
     # State management
     _model_loaded: bool = False
-    _model_path: str = None
-    _running: str = False
+    _model_path: Optional[str] = None
+    _running: bool = False
     _simulation_error: Optional[dict] = None
-    _simulation_finished_event: threading.Event = None
+    _simulation_finished_event: threading.Event
     _error_handler: Optional[str] = None
 
     # Callbacks
@@ -158,8 +158,8 @@ class Plantsim:
         self._suppress_3d = suppress_3d
         self._show_msg_box = show_msg_box
         self._event_polling_interval = event_polling_interval
-        self._simulation_finished_event = threading.Event()
-        self._simulation_error_event = threading.Event()
+        self._simulation_finished_event: threading.Event = threading.Event()
+        self._simulation_error_event: ErrorEvent = ErrorEvent()
 
         self.register_on_simulation_finished(simulation_finished_callback)
         self.register_on_simtalk_message(simtalk_msg_callback)
@@ -339,7 +339,7 @@ class Plantsim:
             self._suppress_3d = suppress
             self._instance.SetSuppressStartOf3D(self._suppress_3d)
 
-    def set_license(self, license: PlantsimLicense, force=False) -> None:
+    def set_license(self, license: Union[PlantsimLicense, str], force=False) -> None:
         """
         Set the license for the instance.
 
@@ -537,7 +537,7 @@ class Plantsim:
         self._model_path = None
         self._simulation_error = None
 
-    def set_event_controller(self, path: PlantsimPath = None) -> None:
+    def set_event_controller(self, path: Optional[PlantsimPath] = None) -> None:
         """
         Set the path of the Event Controller.
 
@@ -549,7 +549,7 @@ class Plantsim:
         elif self._network_path:
             self._event_controller = PlantsimPath(self._network_path, "EventController")
 
-    def execute_sim_talk(self, source_code: str, *parameters: any) -> any:
+    def execute_sim_talk(self, source_code: str, *parameters: Any) -> Any:
         """
         Execute SimTalk in the current instance and return the result.
 
@@ -664,19 +664,19 @@ class Plantsim:
         col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
         if col_index_active and df.columns is not None:
             for col, name in enumerate(df.columns, 1):
-                self.set_value(f"{path}[{col},0]", name)
+                self.set_value(PlantsimPath(f"{path}[{col},0]"), name)
 
         row_index_active = self.get_value(PlantsimPath(path, "rowIndex"))
         if row_index_active and df.index is not None:
             if df.index.name is not None and col_index_active:
-                self.set_value(f"{path}[0,0]", df.index.name)
+                self.set_value(PlantsimPath(f"{path}[0,0]"), df.index.name)
             for row, idx in enumerate(df.index, 1):
-                self.set_value(f"{path}[0,{row}]", idx)
+                self.set_value(PlantsimPath(f"{path}[0,{row}]"), idx)
 
         for row in range(1, y_dim + 1):
             for col in range(1, x_dim + 1):
                 value = df.iat[row - 1, col - 1]
-                self.set_value(f"{path}[{col},{row}]", value)
+                self.set_value(PlantsimPath(f"{path}[{col},{row}]"), value)
 
     def _is_simulation_running(self) -> bool:
         """
@@ -688,7 +688,7 @@ class Plantsim:
         return self._instance.IsSimulationRunning()
 
     def load_model(
-        self, filepath: str, password: str = None, close_other: bool = False
+        self, filepath: str, password: Optional[str] = None, close_other: bool = False
     ) -> None:
         """
         Load a model into the current instance.
@@ -903,10 +903,13 @@ class Plantsim:
             time.sleep(self._event_polling_interval)
 
         if self._simulation_error_event.is_set():
-            if on_simulation_error:
+            if on_simulation_error and self._simulation_error_event.error is not None:
                 on_simulation_error(self, self._simulation_error_event.error)
                 return
-            raise self._simulation_error_event.error
+            if self._simulation_error_event.error is not None:
+                raise self._simulation_error_event.error
+            else:
+                raise Exception("Unknown simulation error")
 
         if cancel_event is not None and cancel_event.is_set():
             self.stop_simulation()
@@ -972,6 +975,8 @@ class Plantsim:
         :return: Parsed datetime object.
         :rtype: datetime
         """
+        if not self._datetime_format:
+            raise Exception("Datetime format needs to be set.")
         return datetime.strptime(date_str, self._datetime_format)
 
     def get_start_date(self) -> datetime:
@@ -1145,7 +1150,7 @@ class Plantsim:
         return self._model_path
 
     @property
-    def network_path(self) -> Union[str, None]:
+    def network_path(self) -> Union[PlantsimPath, None]:
         """
         Current active network path.
 
@@ -1195,12 +1200,12 @@ class Plantsim:
         return self._license
 
     @property
-    def version(self) -> Union[PlantsimVersion, str]:
+    def version(self) -> Union[Version]:
         """
         Version of the current instance.
 
         :return: Plant Simulation version.
-        :rtype: Union[PlantsimVersion, str]
+        :rtype: Union[Version, str]
         """
         return self._version
 
