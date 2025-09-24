@@ -5,3 +5,5 @@ types-psutil
 loguru-mypy
 sphinx
 sphinx-autodoc-typehints
+plantsimpath
+packaging
