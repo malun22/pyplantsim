@@ -43,9 +43,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: pip install -r requirements-dev.txt
-      - name: Install mypy
-        run: pip install mypy
+        run: pip install -r requirements-dev.txt -r requirements.txt
       - name: mypy typecheck
         run: mypy $PACKAGE_PATH
 
