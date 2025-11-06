@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pyplantsim documentation &mdash; pyplantsim 0.4.4 documentation</title>
+  <title>pyplantsim documentation &mdash; pyplantsim 0.4.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=90733dfc"></script>
+      <script src="_static/documentation_options.js?v=340bb9e5"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -49,6 +49,7 @@
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.execute_sim_talk"><code class="docutils literal notranslate"><span class="pre">Plantsim.execute_sim_talk()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.exists_path"><code class="docutils literal notranslate"><span class="pre">Plantsim.exists_path()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_abs_sim_time"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_abs_sim_time()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_call_cycles"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_call_cycles()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_current_process_id"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_current_process_id()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_end_time"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_end_time()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.get_ids_of_names"><code class="docutils literal notranslate"><span class="pre">Plantsim.get_ids_of_names()</span></code></a></li>
@@ -74,6 +75,7 @@
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.query_interface"><code class="docutils literal notranslate"><span class="pre">Plantsim.query_interface()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.quit"><code class="docutils literal notranslate"><span class="pre">Plantsim.quit()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.quit_after_time"><code class="docutils literal notranslate"><span class="pre">Plantsim.quit_after_time()</span></code></a></li>
+<li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.read_call_cycles"><code class="docutils literal notranslate"><span class="pre">Plantsim.read_call_cycles()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.register_on_fire_simtalk_message"><code class="docutils literal notranslate"><span class="pre">Plantsim.register_on_fire_simtalk_message()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.register_on_simtalk_message"><code class="docutils literal notranslate"><span class="pre">Plantsim.register_on_simtalk_message()</span></code></a></li>
 <li><a class="reference internal" href="#pyplantsim.plantsim.Plantsim.register_on_simulation_error"><code class="docutils literal notranslate"><span class="pre">Plantsim.register_on_simulation_error()</span></code></a></li>
@@ -254,6 +256,16 @@ documentation for details.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>Exception</strong> – If EventController is not set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.get_call_cycles">
+<span class="sig-name descname"><span class="pre">get_call_cycles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.get_call_cycles" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CallCycle</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -588,6 +600,16 @@ Further documentation: <a class="reference external" href="https://docs.microsof
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyplantsim.plantsim.Plantsim.read_call_cycles">
+<span class="sig-name descname"><span class="pre">read_call_cycles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_num_cycles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyplantsim.plantsim.Plantsim.read_call_cycles" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CallCycle</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
