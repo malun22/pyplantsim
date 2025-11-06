@@ -14,6 +14,7 @@ from loguru import logger
 from datetime import datetime, timedelta
 from plantsimpath import PlantsimPath
 
+from .call_cycle import CallCycle
 from .versions import PlantsimVersion
 from .licenses import PlantsimLicense
 from .exception import PlantsimException, SimulationException
@@ -1118,6 +1119,33 @@ class Plantsim:
 
         if old_error_handler:
             self.install_error_handler()
+
+    def get_call_cycles(self) -> List[CallCycle]:
+        result: List[CallCycle] = []
+
+        def on_init(instance: Plantsim):
+            simtalk = self._load_simtalk_script("activate_profiler")
+            instance.execute_sim_talk(simtalk)
+
+        def on_endsim(_: Plantsim):
+            nonlocal result
+            result = self.read_call_cycles()
+
+        self.run_simulation(on_init=on_init, on_endsim=on_endsim)
+        return result
+
+    def read_call_cycles(self, max_num_cycles: Optional[int] = None) -> List[CallCycle]:
+        simtalk = self._load_simtalk_script("get_call_cycles")
+        if max_num_cycles:
+            raw = self.execute_sim_talk(simtalk, max_num_cycles)
+        else:
+            raw = self.execute_sim_talk(simtalk)
+
+        if raw is None:
+            return []
+
+        data = json.loads(raw)
+        return [CallCycle.from_dict(cc) for cc in data.get("CallCycles", [])]
 
     @property
     def simulation_running(self) -> bool:
