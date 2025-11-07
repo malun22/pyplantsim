@@ -7,20 +7,20 @@ name = "pyplantsim"
 version = "0.4.5"
 description = "A Python wrapper for Siemens Tecnomatix Plant Simulation COM Interface"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 license = "MIT"
 authors = [
     {name = "Luca Bernstiel", email = "bernstiel@gmx.de"},
 ]
 keywords = ["plant", "siemens", "simulation", "COM"]
 dependencies = [
-    "loguru>=0.7.3",
-    "pywin32>=311; platform_system=='Windows'",
-    "win32_setctime>=1.2.0; platform_system=='Windows'",
-    "pandas>=2.3.2",
-    "psutil>=7.0.0",
-    "plantsimpath>=0.0.3",
-    "packaging>=25.0"
+    "loguru",
+    "pywin32; platform_system=='Windows'",
+    "win32_setctime; platform_system=='Windows'",
+    "pandas",
+    "psutil",
+    "plantsimpath @ git+https://github.com/malun22/plantsimpath@python-to-311",
+    "packaging"
 ]
 
 [project.optional-dependencies]
