@@ -1,7 +1,0 @@
-loguru>=0.7.3
-pywin32>=311; platform_system=='Windows'
-win32_setctime>=1.2.0; platform_system=='Windows'
-pandas>=2.3.2
-psutil>=7.0.0
-plantsimpath>=0.0.3
-packaging>=25.0
