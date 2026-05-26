@@ -11,6 +11,7 @@ import time
 from types import TracebackType
 from typing import Any
 from typing import Callable
+from typing import cast
 from typing import List
 from typing import Optional
 from typing import Union
@@ -240,8 +241,9 @@ class Plantsim:
 
         # Dispatch the Instance
         try:
-            self._instance = win32com.client.DispatchWithEvents(
-                self._dispatch_id, type(self._event_handler)
+            self._instance = cast(
+                Any,
+                win32com.client.DispatchWithEvents(self._dispatch_id, type(self._event_handler)),  # type: ignore[no-untyped-call]
             )
             self._running = True
         except Exception as e:
