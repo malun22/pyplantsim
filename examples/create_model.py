@@ -1,7 +1,7 @@
 import pyplantsim
 
 
-def create_model():
+def create_model() -> None:
     with pyplantsim.Plantsim(
         license=pyplantsim.PlantsimLicense.STUDENT,
         version=pyplantsim.PlantsimVersion.V_MJ_22_MI_1,
@@ -12,9 +12,7 @@ def create_model():
     ) as plantsim:
         plantsim.new_model()
 
-        plantsim.save_model(
-            folder_path=r"S:\Coding\Projects\pyplantsim", file_name="MyNewModel"
-        )
+        plantsim.save_model(folder_path=r"S:\Coding\Projects\pyplantsim", file_name="MyNewModel")
 
 
 if __name__ == "__main__":

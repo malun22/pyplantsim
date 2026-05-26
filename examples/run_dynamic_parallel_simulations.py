@@ -1,17 +1,19 @@
-import os
-from pyplantsim import (
-    Plantsim,
-    PlantsimLicense,
-    PlantsimVersion,
-    SimulationException,
-)
-from pyplantsim.instance_handler import SimulationJob, DynamicInstanceHandler
 from functools import partial
+import os
+
+from plantsimpath import PlantsimPath
+
+from pyplantsim import Plantsim
+from pyplantsim import PlantsimLicense
+from pyplantsim import PlantsimVersion
+from pyplantsim import SimulationException
+from pyplantsim.instance_handler import DynamicInstanceHandler
+from pyplantsim.instance_handler import SimulationJob
 
 
-def on_init(instance: Plantsim, additional_parameter: str):
+def on_init(instance: Plantsim, additional_parameter: str) -> None:
     print(additional_parameter)
-    network_path = ".Models.Model"
+    network_path = PlantsimPath(".Models.Model")
     if instance.network_path != network_path:
         model_path = os.path.join(os.path.dirname(__file__), "testModel.spp")
         instance.load_model(model_path)
@@ -22,17 +24,17 @@ def on_init(instance: Plantsim, additional_parameter: str):
     instance.reset_simulation()
 
 
-def on_endsim(instance: Plantsim):
-    value = instance.get_value('.Models.Model.DataTable["Amount",1]')
+def on_endsim(instance: Plantsim) -> None:
+    value = instance.get_value(PlantsimPath('.Models.Model.DataTable["Amount",1]'))
 
     print("The result is: ", value)
 
 
-def on_error(instance: Plantsim, error: SimulationException):
+def on_error(instance: Plantsim, error: SimulationException) -> None:
     print(error)
 
 
-def main():
+def main() -> None:
     with DynamicInstanceHandler(
         max_cpu=0.7,
         max_memory=0.7,

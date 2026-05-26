@@ -1,10 +1,12 @@
+from abc import ABC
+from dataclasses import dataclass
+from dataclasses import field
+from typing import Callable
+from typing import Optional
 import uuid
 
-from abc import ABC
-from dataclasses import dataclass, field
-from typing import Callable, Optional
-from ..plantsim import Plantsim
 from ..exception import SimulationException
+from ..plantsim import Plantsim
 
 
 @dataclass
@@ -45,9 +47,7 @@ class SimulationJob(Job):
     without_animation: bool = True
     on_init: Optional[Callable[[Plantsim], None]] = None
     on_endsim: Optional[Callable[[Plantsim], None]] = None
-    on_simulation_error: Optional[Callable[[Plantsim, SimulationException], None]] = (
-        None
-    )
+    on_simulation_error: Optional[Callable[[Plantsim, SimulationException], None]] = None
     on_progress: Optional[Callable[[Plantsim, float], None]] = None
 
 

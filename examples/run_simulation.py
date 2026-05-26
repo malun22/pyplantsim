@@ -1,13 +1,19 @@
 import os
-from pyplantsim import SimulationException, Plantsim, PlantsimLicense, PlantsimVersion
+
+from plantsimpath import PlantsimPath
+
+from pyplantsim import Plantsim
+from pyplantsim import PlantsimLicense
+from pyplantsim import PlantsimVersion
+from pyplantsim import SimulationException
 
 
 def on_progress(
     instance: Plantsim, progress: float
-): ...  # Here a progressbar could be created
+) -> None: ...  # Here a progressbar could be created
 
 
-def run_model():
+def run_model() -> None:
     with Plantsim(
         license=PlantsimLicense.RESEARCH,
         version=PlantsimVersion.V_MJ_25_MI_4,
@@ -24,7 +30,9 @@ def run_model():
             return
 
         plantsim.set_network(
-            path=".Models.Model", set_event_controller=True, install_error_handler=True
+            path=PlantsimPath(".Models.Model"),
+            set_event_controller=True,
+            install_error_handler=True,
         )
 
         start_date = plantsim.get_start_date()
@@ -38,7 +46,7 @@ def run_model():
 
         plantsim.remove_error_handler()
 
-        value = plantsim.get_value('.Models.Model.DataTable["Amount",1]')
+        value = plantsim.get_value(PlantsimPath('.Models.Model.DataTable["Amount",1]'))
 
         print("The result is: ", value)
 

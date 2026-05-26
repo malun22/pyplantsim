@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyplantsim"
-version = "0.4.7"
+version = "0.4.8"
 description = "A Python wrapper for Siemens Tecnomatix Plant Simulation COM Interface"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -19,13 +19,17 @@ dependencies = [
     "win32_setctime; platform_system=='Windows'",
     "pandas",
     "psutil",
-    "plantsimpath @ git+https://github.com/malun22/plantsimpath@python-to-311",
+    "plantsimpath",
     "packaging"
 ]
 
 [project.optional-dependencies]
 dev = [
+    "bump-my-version",
+    "build",
+    "pre-commit",
     "mypy",
+    "ruff",
     "types-pywin32",
     "pandas-stubs",
     "types-psutil",
@@ -50,3 +54,33 @@ include = ["pyplantsim*"]
 
 [tool.setuptools.package-data]
 pyplantsim = ["py.typed", "sim_talk_scripts/*.st"]
+
+[tool.ruff]
+line-length = 99
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["optuna", "tests", "docs"]
+lines-after-imports = 2
+force-single-line = true
+force-sort-within-sections = true
+order-by-type = false
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+warn_unused_ignores = false
