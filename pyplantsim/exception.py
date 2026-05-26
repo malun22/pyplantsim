@@ -16,7 +16,7 @@ class PlantsimException(Exception):
     _message: str
     _id: int
 
-    def __init__(self, e: Exception, *args):
+    def __init__(self, e: Exception, *args: object):
         """
         Initialize the PlantsimException instance.
 
@@ -29,7 +29,7 @@ class PlantsimException(Exception):
         self._message = e.args[1]
         self._id = e.args[0]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Return the string representation of the exception.
 
@@ -57,7 +57,7 @@ class SimulationException(Exception):
     _method_path: str
     _line_number: int
 
-    def __init__(self, method_path: str, line_number: int):
+    def __init__(self, method_path: str, line_number: int) -> None:
         """
         Initialize the SimulationException instance.
 
@@ -70,7 +70,7 @@ class SimulationException(Exception):
         self._method_path = method_path
         self._line_number = line_number
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Return the string representation of the exception.
 

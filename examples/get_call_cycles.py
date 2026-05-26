@@ -1,8 +1,13 @@
 import os
-from pyplantsim import Plantsim, PlantsimLicense, PlantsimVersion
+
+from plantsimpath import PlantsimPath
+
+from pyplantsim import Plantsim
+from pyplantsim import PlantsimLicense
+from pyplantsim import PlantsimVersion
 
 
-def run_model():
+def run_model() -> None:
     with Plantsim(
         license=PlantsimLicense.RESEARCH,
         version=PlantsimVersion.V_MJ_25_MI_4,
@@ -15,7 +20,9 @@ def run_model():
         plantsim.load_model(model_path)
 
         plantsim.set_network(
-            path=".Models.Model", set_event_controller=True, install_error_handler=True
+            path=PlantsimPath(".Models.Model"),
+            set_event_controller=True,
+            install_error_handler=True,
         )
 
         call_cycles = plantsim.get_call_cycles()

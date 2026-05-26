@@ -1,11 +1,11 @@
-from .instance_handler import (
-    BaseInstanceHandler,
-    BaseInstanceHandlerKwargs,
-    FixedInstanceHandler,
-    DynamicInstanceHandler,
-)
-from .job import Job, SimulationJob
 from .exception import InstanceHandlerNotInitializedException
+from .instance_handler import BaseInstanceHandler
+from .instance_handler import BaseInstanceHandlerKwargs
+from .instance_handler import DynamicInstanceHandler
+from .instance_handler import FixedInstanceHandler
+from .job import Job
+from .job import SimulationJob
+
 
 __all__ = [
     "BaseInstanceHandler",

@@ -1,26 +1,35 @@
-import queue
-import threading
-
-import time
-import gc
-import pythoncom
-import psutil
-
-from typing import Callable, Optional, Union, Dict, Unpack, TypedDict, List, Deque, Any
 from abc import ABC
 from collections import deque
+import gc
+import queue
+import threading
+import time
+from types import TracebackType
+from typing import Any
+from typing import Callable
+from typing import Deque
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import TypedDict
+from typing import Union
+from typing import Unpack
 
+import psutil
+import pythoncom
 
-from ..plantsim import Plantsim
 from ..exception import SimulationException
 from ..licenses import PlantsimLicense
+from ..plantsim import Plantsim
 from ..versions import PlantsimVersion
-from .job import Job, SimulationJob, ShutdownWorkerJob
 from .exception import InstanceHandlerNotInitializedException
+from .job import Job
+from .job import ShutdownWorkerJob
+from .job import SimulationJob
 
 
 def requires_initialized(method: Callable[..., Any]) -> Callable[..., Any]:
-    def wrapper(self, *args: Any, **kwargs: Any) -> Any:
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         if not self._initialized:
             raise InstanceHandlerNotInitializedException("initialize() not called")
         return method(self, *args, **kwargs)
@@ -115,9 +124,7 @@ class BaseInstanceHandler(ABC):
         simulation_finished_callback: Optional[Callable[[], None]] = None,
         simtalk_msg_callback: Optional[Callable[[str], None]] = None,
         fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-        simulation_error_callback: Optional[
-            Callable[[SimulationException], None]
-        ] = None,
+        simulation_error_callback: Optional[Callable[[SimulationException], None]] = None,
     ):
         """
         Initialize the InstanceHandler with the given parameters.
@@ -180,7 +187,12 @@ class BaseInstanceHandler(ABC):
         """
         return self.initialize()
 
-    def __exit__(self, _, __, ___):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """
         Exit the runtime context and shut down all workers.
         """
@@ -191,9 +203,7 @@ class BaseInstanceHandler(ABC):
         return self
 
     @requires_initialized
-    def _create_worker(
-        self, **plantsim_kwargs: Unpack[BaseInstanceHandlerKwargs]
-    ) -> None:
+    def _create_worker(self, **plantsim_kwargs: Unpack[BaseInstanceHandlerKwargs]) -> None:
         """
         Create a new worker and add it to the worker list.
 
@@ -201,9 +211,7 @@ class BaseInstanceHandler(ABC):
         :type plantsim_kwargs: BaseInstanceHandlerKwargs
         """
         with self._workers_lock:
-            t = threading.Thread(
-                target=self._worker, args=(plantsim_kwargs,), daemon=True
-            )
+            t = threading.Thread(target=self._worker, args=(plantsim_kwargs,), daemon=True)
             t.start()
             self._workers.append(t)
 
@@ -241,7 +249,7 @@ class BaseInstanceHandler(ABC):
         return job
 
     @requires_initialized
-    def _worker(self, plantsim_args) -> None:
+    def _worker(self, plantsim_args: Any) -> None:
         """
         Worker thread that processes simulation jobs.
 
@@ -312,7 +320,7 @@ class BaseInstanceHandler(ABC):
         return job
 
     @requires_initialized
-    def wait_for(self, job: Job):
+    def wait_for(self, job: Job) -> None:
         """
         Block until the the given job is finished.
 
@@ -416,9 +424,7 @@ class FixedInstanceHandler(BaseInstanceHandler):
 
     _amount_instances: int
 
-    def __init__(
-        self, amount_instances: int, **kwargs: Unpack[BaseInstanceHandlerKwargs]
-    ):
+    def __init__(self, amount_instances: int, **kwargs: Unpack[BaseInstanceHandlerKwargs]):
         """
         Initialize the FixedInstanceHandler.
 
@@ -508,7 +514,7 @@ class DynamicInstanceHandler(BaseInstanceHandler):
 
         return self
 
-    def _scaler(self):
+    def _scaler(self) -> None:
         """
         Background thread that monitors system resources and dynamically scales
         the number of PlantSim worker instances.
@@ -529,10 +535,7 @@ class DynamicInstanceHandler(BaseInstanceHandler):
             if (
                 (cpu < self.max_cpu)
                 and (mem < self.max_memory)
-                and (
-                    self.max_instances is None
-                    or (current_instances < self.max_instances)
-                )
+                and (self.max_instances is None or (current_instances < self.max_instances))
                 and not self._job_queue.empty()
             ):
                 self._create_worker(**self._plantsim_kwargs)
@@ -549,7 +552,7 @@ class DynamicInstanceHandler(BaseInstanceHandler):
 
             time.sleep(self.scale_interval)
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """
         Shut down the dynamic handler and all managed worker threads.
 

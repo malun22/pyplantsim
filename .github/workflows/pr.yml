@@ -1,0 +1,35 @@
+name: Build Python Package (Pull Request)
+
+on:
+  pull_request:
+
+jobs:
+  lint:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_lint.yml
+    with:
+      package-path: pyplantsim/
+
+  format:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_format.yml
+    with:
+      package-path: pyplantsim/
+
+  typecheck:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_typecheck.yml
+    with:
+      package-path: pyplantsim/
+
+  build:
+    needs: [lint, format, typecheck]
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/_build.yml
+    with:
+      package-path: pyplantsim/

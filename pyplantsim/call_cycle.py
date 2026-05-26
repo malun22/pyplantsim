@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 from typing import List
 
 
@@ -14,7 +15,7 @@ class CallerEntry:
     callees_time: float
 
     @staticmethod
-    def from_dict(d: dict) -> "CallerEntry":
+    def from_dict(d: dict[str, Any]) -> "CallerEntry":
         return CallerEntry(
             caller=d["Caller"],
             called=d["Called"],
@@ -32,7 +33,7 @@ class CallCycleMethod:
     callees_time: float
 
     @staticmethod
-    def from_dict(d: dict) -> "CallCycleMethod":
+    def from_dict(d: dict[str, Any]) -> "CallCycleMethod":
         return CallCycleMethod(
             method=d["Method"],
             called=d["Called"],
@@ -48,7 +49,7 @@ class CallCycle:
     callers: List[CallerEntry]
 
     @staticmethod
-    def from_dict(d: dict) -> "CallCycle":
+    def from_dict(d: dict[str, Any]) -> "CallCycle":
         if "Method" not in d:
             raise MissingMethodError("Key 'Method' is required in CallCycle dict")
 

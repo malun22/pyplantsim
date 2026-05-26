@@ -1,24 +1,34 @@
-import os
-import threading
-import win32com.client
-import pythoncom
-import time
-import json
-import pandas as pd
-import importlib.resources
-from packaging.version import Version
+from __future__ import annotations
 
+from datetime import datetime
+from datetime import timedelta
+import importlib.resources
+import json
+import os
 from pathlib import Path
-from typing import Union, Any, Optional, List, Callable
+import threading
+import time
+from types import TracebackType
+from typing import Any
+from typing import Callable
+from typing import List
+from typing import Optional
+from typing import Union
+
 from loguru import logger
-from datetime import datetime, timedelta
+from packaging.version import Version
+import pandas as pd
 from plantsimpath import PlantsimPath
+import pythoncom
+import win32com.client
 
 from .call_cycle import CallCycle
-from .versions import PlantsimVersion
+from .events import ErrorEvent
+from .events import PlantSimEvents
+from .exception import PlantsimException
+from .exception import SimulationException
 from .licenses import PlantsimLicense
-from .exception import PlantsimException, SimulationException
-from .events import PlantSimEvents, ErrorEvent
+from .versions import PlantsimVersion
 
 
 class Plantsim:
@@ -92,7 +102,7 @@ class Plantsim:
     _model_loaded: bool = False
     _model_path: Optional[str] = None
     _running: bool = False
-    _simulation_error: Optional[dict] = None
+    _simulation_error: Optional[dict[str, Any]] = None
     _simulation_finished_event: threading.Event
     _error_handler: Optional[str] = None
 
@@ -115,9 +125,7 @@ class Plantsim:
         simulation_finished_callback: Optional[Callable[[], None]] = None,
         simtalk_msg_callback: Optional[Callable[[str], None]] = None,
         fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-        simulation_error_callback: Optional[
-            Callable[[SimulationException], None]
-        ] = None,
+        simulation_error_callback: Optional[Callable[[SimulationException], None]] = None,
     ) -> None:
         """
         Initialize the Siemens Tecnomatix Plant Simulation instance.
@@ -169,16 +177,14 @@ class Plantsim:
 
         self.start()
 
-    def set_version(self, version: Union[PlantsimVersion, str]):
+    def set_version(self, version: Union[PlantsimVersion, str]) -> None:
         """
         Set the Plant Simulation version.
 
         :param version: Plant Simulation version or string.
         :type version: Union[PlantsimVersion, str]
         """
-        self._version = Version(
-            version.value if isinstance(version, PlantsimVersion) else version
-        )
+        self._version = Version(version.value if isinstance(version, PlantsimVersion) else version)
 
     def __enter__(self) -> "Plantsim":
         """
@@ -217,9 +223,7 @@ class Plantsim:
         if self._running:
             raise Exception("Plant Simulation already running.")
 
-        logger.info(
-            f"Starting Siemens Tecnomatix Plant Simulation {str(self._version)} instance."
-        )
+        logger.info(f"Starting Siemens Tecnomatix Plant Simulation {str(self._version)} instance.")
 
         # Changing dispatch_id regarding requested version
         self._dispatch_id = self._DISPATCH_ID
@@ -271,7 +275,12 @@ class Plantsim:
 
         return self
 
-    def __exit__(self, _, __, ___) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """
         Exit the runtime context and stop the Plant Simulation instance.
         """
@@ -314,7 +323,7 @@ class Plantsim:
         if set_event_controller:
             self.set_event_controller()
 
-    def set_show_message_box(self, show: bool, force=False) -> None:
+    def set_show_message_box(self, show: bool, force: bool = False) -> None:
         """
         Set whether the instance should show a message box.
 
@@ -327,7 +336,7 @@ class Plantsim:
             self._show_msg_box = show
             self._instance.SetNoMessageBox(self._show_msg_box)
 
-    def set_suppress_start_of_3d(self, suppress: bool, force=False) -> None:
+    def set_suppress_start_of_3d(self, suppress: bool, force: bool = False) -> None:
         """
         Set whether to suppress the start of 3D.
 
@@ -340,7 +349,7 @@ class Plantsim:
             self._suppress_3d = suppress
             self._instance.SetSuppressStartOf3D(self._suppress_3d)
 
-    def set_license(self, license: Union[PlantsimLicense, str], force=False) -> None:
+    def set_license(self, license: Union[PlantsimLicense, str], force: bool = False) -> None:
         """
         Set the license for the instance.
 
@@ -358,7 +367,7 @@ class Plantsim:
                 else self._license
             )
 
-    def set_visible(self, visible: bool, force=False) -> None:
+    def set_visible(self, visible: bool, force: bool = False) -> None:
         """
         Set whether the instance window is visible.
 
@@ -371,7 +380,7 @@ class Plantsim:
             self._visible = visible
             self._instance.SetVisible(self._visible)
 
-    def set_trust_models(self, trusted: bool, force=False) -> None:
+    def set_trust_models(self, trusted: bool, force: bool = False) -> None:
         """
         Set whether the instance has access to the computer.
 
@@ -384,14 +393,14 @@ class Plantsim:
             self._trusted = trusted
             self._instance.SetTrustModels(self._trusted)
 
-    def _start_event_thread(self):
+    def _start_event_thread(self) -> None:
         """
         Start the event thread to listen to COM Events.
         """
         self._event_thread = threading.Thread(target=self._event_loop, daemon=True)
         self._event_thread.start()
 
-    def _internal_simulation_finished(self):
+    def _internal_simulation_finished(self) -> None:
         """
         Gets called when the simulation finishes.
         """
@@ -399,7 +408,7 @@ class Plantsim:
         if self._user_simulation_finished_cb:
             self._user_simulation_finished_cb()
 
-    def register_on_simulation_finished(self, callback: Optional[Callable[[], None]]):
+    def register_on_simulation_finished(self, callback: Optional[Callable[[], None]]) -> None:
         """
         Set callback for OnSimulationFinished event.
 
@@ -408,7 +417,7 @@ class Plantsim:
         """
         self._user_simulation_finished_cb = callback
 
-    def _internal_on_simtalk_message(self, msg: str):
+    def _internal_on_simtalk_message(self, msg: str) -> None:
         """
         Gets called when the model sends a SimTalk message.
 
@@ -421,7 +430,7 @@ class Plantsim:
         if self._user_simtalk_msg_cb:
             self._user_simtalk_msg_cb(msg)
 
-    def _handle_simtalk_message(self, msg: str):
+    def _handle_simtalk_message(self, msg: str) -> None:
         """
         Handle a SimTalk message.
 
@@ -443,7 +452,7 @@ class Plantsim:
             if self._user_simtalk_msg_cb:
                 self._user_simtalk_msg_cb(msg)
 
-    def _is_json(self, msg: str):
+    def _is_json(self, msg: str) -> bool:
         """
         Check if message is valid JSON.
 
@@ -458,7 +467,7 @@ class Plantsim:
             return False
         return True
 
-    def register_on_simtalk_message(self, callback: Optional[Callable[[str], None]]):
+    def register_on_simtalk_message(self, callback: Optional[Callable[[str], None]]) -> None:
         """
         Set callback for OnSimTalkMessage event.
 
@@ -467,9 +476,7 @@ class Plantsim:
         """
         self._user_simtalk_msg_cb = callback
 
-    def register_on_fire_simtalk_message(
-        self, callback: Optional[Callable[[str], None]]
-    ):
+    def register_on_fire_simtalk_message(self, callback: Optional[Callable[[str], None]]) -> None:
         """
         Set callback for FireSimTalkMessage event.
 
@@ -482,7 +489,7 @@ class Plantsim:
 
     def register_on_simulation_error(
         self, callback: Optional[Callable[[SimulationException], None]]
-    ):
+    ) -> None:
         """
         Set callback for simulation errors.
 
@@ -491,14 +498,14 @@ class Plantsim:
         """
         self._user_simulation_error_cb = callback
 
-    def _close_event_thread(self):
+    def _close_event_thread(self) -> None:
         """
         Close the event thread when the instance is terminated.
         """
         if self._event_thread:
             self._event_thread.join(timeout=1)
 
-    def _event_loop(self):
+    def _event_loop(self) -> None:
         """
         Listen to events and handle COM messages.
         """
@@ -517,7 +524,11 @@ class Plantsim:
             raise Exception("Instance has been closed before already.")
 
         logger.info(
-            f"Closing Siemens Tecnomatix Plant Simulation {self._version.value if isinstance(self._version, PlantsimVersion) else self._version} instance."
+            f"""Closing Siemens Tecnomatix Plant Simulation {
+                self._version.value
+                if isinstance(self._version, PlantsimVersion)
+                else self._version
+            } instance."""
         )
 
         try:
@@ -536,7 +547,6 @@ class Plantsim:
 
         self._model_loaded = False
         self._model_path = None
-        self._simulation_error = None
 
     def set_event_controller(self, path: Optional[PlantsimPath] = None) -> None:
         """
@@ -597,8 +607,7 @@ class Plantsim:
         index: Optional[List[Any]] = None
         if row_index_active:
             index = [
-                self.get_value(PlantsimPath(path, f"[0,{row}]"))
-                for row in range(1, y_dim + 1)
+                self.get_value(PlantsimPath(path, f"[0,{row}]")) for row in range(1, y_dim + 1)
             ]
 
         col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
@@ -609,8 +618,7 @@ class Plantsim:
                 index_name = self.get_value(PlantsimPath(path, "[0,0]"))
 
             columns = [
-                self.get_value(PlantsimPath(path, f"[{col},0]"))
-                for col in range(1, x_dim + 1)
+                self.get_value(PlantsimPath(path, f"[{col},0]")) for col in range(1, x_dim + 1)
             ]
 
         data = []
@@ -638,7 +646,7 @@ class Plantsim:
         :rtype: str
         """
         simtalk = self._load_simtalk_script("get_table_column_data_type")
-        return self.execute_sim_talk(simtalk, table, column)
+        return str(self.execute_sim_talk(simtalk, table, column))
 
     def set_value(self, path: PlantsimPath, value: Any) -> None:
         """
@@ -686,7 +694,7 @@ class Plantsim:
         :return: True if running, False otherwise.
         :rtype: bool
         """
-        return self._instance.IsSimulationRunning()
+        return bool(self._instance.IsSimulationRunning())
 
     def load_model(
         self, filepath: str, password: Optional[str] = None, close_other: bool = False
@@ -722,7 +730,6 @@ class Plantsim:
 
         self._model_loaded = True
         self._model_path = filepath
-        self._simulation_error = None
 
     def _load_simtalk_script(self, script_name: str) -> str:
         """
@@ -737,9 +744,10 @@ class Plantsim:
         resource = f"sim_talk_scripts/{script_name}.st"
         return importlib.resources.files(package).joinpath(resource).read_text()
 
-    def install_error_handler(self):
+    def install_error_handler(self) -> None:
         """
-        Install an error handler in the model file under basis.ErrorHandler. Searches for any method object and duplicates that.
+        Install an error handler in the model file under basis.ErrorHandler. Searches for any
+        method object and duplicates that.
 
         :raises Exception: If error handler could not be created.
         """
@@ -752,7 +760,7 @@ class Plantsim:
 
         self._error_handler = "basis.ErrorHandler"
 
-    def remove_error_handler(self):
+    def remove_error_handler(self) -> None:
         """
         Remove the installed error handler from basis.ErrorHandler.
 
@@ -786,7 +794,6 @@ class Plantsim:
         except Exception as e:
             raise PlantsimException(e)
 
-        self._simulation_error = None
         self._model_loaded = False
 
     def open_console_log_file(self, filepath: str) -> None:
@@ -822,7 +829,6 @@ class Plantsim:
         if not self._event_controller:
             raise Exception("EventController needs to be set.")
 
-        self._simulation_error = None
         self._instance.ResetSimulation(self._event_controller)
 
     def save_model(self, folder_path: str, file_name: str) -> None:
@@ -854,7 +860,6 @@ class Plantsim:
         if not self._event_controller:
             raise Exception("EventController needs to be set.")
 
-        self._simulation_error = None
         self._simulation_finished_event.clear()
         self._simulation_error_event.clear()
         self._instance.StartSimulation(self._event_controller, without_animation)
@@ -864,14 +869,13 @@ class Plantsim:
         without_animation: bool = True,
         on_init: Optional[Callable[["Plantsim"], None]] = None,
         on_endsim: Optional[Callable[["Plantsim"], None]] = None,
-        on_simulation_error: Optional[
-            Callable[["Plantsim", SimulationException], None]
-        ] = None,
+        on_simulation_error: Optional[Callable[["Plantsim", SimulationException], None]] = None,
         on_progress: Optional[Callable[["Plantsim", float], None]] = None,
         cancel_event: Optional[threading.Event] = None,
     ) -> None:
         """
-        Run a full simulation and return after the run is over. This method suggests, that the EventController has a EndDate
+        Run a full simulation and return after the run is over. This method suggests, that the
+        EventController has a EndDate
 
         :param without_animation: Run without animation.
         :type without_animation: bool, optional
@@ -892,9 +896,7 @@ class Plantsim:
 
         self.start_simulation(without_animation)
 
-        self._run_simulation_event_loop(
-            on_progress=on_progress, cancel_event=cancel_event
-        )
+        self._run_simulation_event_loop(on_progress=on_progress, cancel_event=cancel_event)
 
         while (
             not self._simulation_finished_event.is_set()
@@ -923,7 +925,7 @@ class Plantsim:
         self,
         on_progress: Optional[Callable[["Plantsim", float], None]] = None,
         cancel_event: Optional[threading.Event] = None,
-    ):
+    ) -> None:
         """
         Internal loop to handle simulation events and progress callbacks.
 
@@ -1007,7 +1009,7 @@ class Plantsim:
         :rtype: int
         """
         simtalk = self._load_simtalk_script("get_model_language")
-        return self.execute_sim_talk(simtalk)
+        return int(self.execute_sim_talk(simtalk))
 
     def _set_datetime_format(self) -> None:
         """
@@ -1071,9 +1073,7 @@ class Plantsim:
         if seed > 2147483647 or seed < -2147483647:
             raise Exception("Seed must be between -2147483647 and 2147483647")
 
-        self.set_value(
-            PlantsimPath(self._event_controller, "RandomNumbersVariant"), seed
-        )
+        self.set_value(PlantsimPath(self._event_controller, "RandomNumbersVariant"), seed)
 
     def exists_path(self, path: Union[PlantsimPath, str]) -> bool:
         """
@@ -1089,7 +1089,7 @@ class Plantsim:
             raise Exception("No model is loaded.")
 
         simtalk = self._load_simtalk_script("exists_path")
-        return self.execute_sim_talk(simtalk, path)
+        return bool(self.execute_sim_talk(simtalk, path))
 
     def restart(self) -> None:
         """
@@ -1123,11 +1123,11 @@ class Plantsim:
     def get_call_cycles(self) -> List[CallCycle]:
         result: List[CallCycle] = []
 
-        def on_init(instance: Plantsim):
+        def on_init(instance: Plantsim) -> None:
             simtalk = self._load_simtalk_script("activate_profiler")
             instance.execute_sim_talk(simtalk)
 
-        def on_endsim(_: Plantsim):
+        def on_endsim(_: Plantsim) -> None:
             nonlocal result
             result = self.read_call_cycles()
 
@@ -1255,87 +1255,4 @@ class Plantsim:
         :return: Process ID.
         :rtype: int
         """
-        return self._instance.GetCurrentProcessId()
-
-    def get_ids_of_names(self):
-        """
-        Get IDs of names for dispatch interface.
-        Further documentation: https://docs.microsoft.com/en-us/windows/win32/api/oaidl/nf-oaidl-idispatch-getidsofnames
-
-        :return: IDs of names.
-        """
-        return self._instance.GetIDsOfNames(".Models.Model.Eventcontroller")
-
-    def get_jte_export(self):
-        """
-        Get the 3D JTE export for a simulation object.
-
-        :return: 3D JTE export.
-        """
-        return self._instance.GetJTExport()
-
-    def get_type_info(self):
-        """
-        Get type information for the instance.
-
-        :return: Type info.
-        """
-        return self._instance.GetTypeInfo()
-
-    def get_type_info_count(self):
-        """
-        Get the type information count.
-
-        :return: Type info count.
-        """
-        return self._instance.GetTypeInfoCount()
-
-    def has_simulation_error(self):
-        """
-        Check if a simulation error has occurred.
-
-        :return: True if there is an error, False otherwise.
-        """
-        return self._instance.HasSimulationError()
-
-    def invoke(self):
-        """
-        Invoke method on the COM instance.
-        """
-        return self._instance.Invoke()
-
-    def load_model_without_state(self):
-        """
-        Load a model without restoring state.
-        """
-        return self._instance.LoadModelWithoutState()
-
-    def query_interface(self):
-        """
-        Query the COM interface.
-        """
-        return self._instance.QueryInterface()
-
-    def release(self):
-        """
-        Release the COM instance.
-        """
-        return self._instance.Release()
-
-    def set_crash_stack_file(self):
-        """
-        Set the crash stack file for error logging.
-        """
-        return self._instance.SetCrashStackFile()
-
-    def set_stop_simulation_on_error(self):
-        """
-        Set option to stop simulation on error.
-        """
-        return self._instance.SetStopSimulationOnError()
-
-    def tranfer_model(self):
-        """
-        Transfer the model to another instance.
-        """
-        return self._instance.TransferModel()
+        return int(self._instance.GetCurrentProcessId())

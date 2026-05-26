@@ -14,7 +14,7 @@ class InstanceHandlerNotInitializedException(Exception):
 
     _message: str
 
-    def __init__(self, message: str = "Instance has not been initialized.", *args):
+    def __init__(self, message: str = "Instance has not been initialized.", *args: object) -> None:
         """
         Initialize the InstanceNotInitializedException instance.
 
@@ -26,7 +26,7 @@ class InstanceHandlerNotInitializedException(Exception):
         super().__init__(message, *args)
         self._message = message
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Return the string representation of the exception.
 

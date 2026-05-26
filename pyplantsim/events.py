@@ -1,5 +1,6 @@
 import threading
-from typing import Callable, Optional
+from typing import Callable
+from typing import Optional
 
 from .exception import SimulationException
 
@@ -47,14 +48,14 @@ class PlantSimEvents:
         self.on_simtalk_message = on_simtalk_message
         self.on_fire_simtalk_message = on_fire_simtalk_message
 
-    def OnSimulationFinished(self):
+    def OnSimulationFinished(self) -> None:
         """
         Triggered when the simulation is finished. Calls the registered callback if available.
         """
         if self.on_simulation_finished:
             self.on_simulation_finished()
 
-    def OnSimTalkMessage(self, msg: str):
+    def OnSimTalkMessage(self, msg: str) -> None:
         """
         Triggered when a SimTalk message is received. Calls the registered callback if available.
 
@@ -64,7 +65,7 @@ class PlantSimEvents:
         if self.on_simtalk_message:
             self.on_simtalk_message(msg)
 
-    def FireSimTalkMessage(self, msg: str):
+    def FireSimTalkMessage(self, msg: str) -> None:
         """
         Triggered when a SimTalk message is fired. Calls the registered callback if available.
 
