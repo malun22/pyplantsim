@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class InstanceHandlerNotInitializedException(Exception):
     """
     Exception raised when an operation is attempted on an instance

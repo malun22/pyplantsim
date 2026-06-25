@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyplantsim"
-version = "0.4.8"
+version = "1.0.0"
 description = "A Python wrapper for Siemens Tecnomatix Plant Simulation COM Interface"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -14,7 +14,6 @@ authors = [
 ]
 keywords = ["plant", "siemens", "simulation", "COM"]
 dependencies = [
-    "loguru",
     "pywin32; platform_system=='Windows'",
     "win32_setctime; platform_system=='Windows'",
     "pandas",
@@ -33,9 +32,6 @@ dev = [
     "types-pywin32",
     "pandas-stubs",
     "types-psutil",
-    "loguru",
-    "plantsimpath",
-    "packaging",
 ]
 docs = [
     "sphinx",

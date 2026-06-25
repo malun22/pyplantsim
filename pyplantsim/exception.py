@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class PlantsimException(Exception):
     """
     Exception raised when dispatching the Plant Simulation instance fails.
@@ -26,8 +29,8 @@ class PlantsimException(Exception):
         :type args: Any
         """
         super().__init__(args)
-        self._message = e.args[1]
-        self._id = e.args[0]
+        self._id: int = e.args[0] if len(e.args) > 0 else -1
+        self._message: str = e.args[1] if len(e.args) > 1 else str(e)
 
     def __str__(self) -> str:
         """
@@ -78,3 +81,54 @@ class SimulationException(Exception):
         :rtype: str
         """
         return f"Method {self._method_path} crashed on line {self._line_number}."
+
+
+class PlantsimStateException(Exception):
+    """Base for state-related errors that don't wrap a COM exception."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self._message = message
+
+    def __str__(self) -> str:
+        return self._message
+
+
+class PlantsimAlreadyRunningException(PlantsimStateException):
+    """Raised when start() is called on an already-running instance."""
+
+
+class PlantsimNotRunningException(PlantsimStateException):
+    """Raised when an operation is attempted on a closed instance."""
+
+
+class ModelAlreadyLoadedException(PlantsimStateException):
+    """Raised when load_model() is called while another model is open."""
+
+
+class ModelNotFoundException(PlantsimStateException):
+    """Raised when the model file does not exist."""
+
+
+class ModelNotLoadedException(PlantsimStateException):
+    """Raised when an operation requires a loaded model but none is present."""
+
+
+class EventControllerNotSetException(PlantsimStateException):
+    """Raised when an operation requires the EventController to be set."""
+
+
+class ErrorHandlerException(PlantsimStateException):
+    """Raised when installing or removing the error handler fails."""
+
+
+class DatetimeFormatNotSetException(PlantsimStateException):
+    """Raised when a datetime conversion is attempted before the format has been set."""
+
+
+class SeedOutOfRangeException(PlantsimStateException):
+    """Raised when the provided random seed is outside the allowed range."""
+
+
+class UnknownSimulationErrorException(PlantsimStateException):
+    """Raised when a simulation error event is set but carries no error detail."""

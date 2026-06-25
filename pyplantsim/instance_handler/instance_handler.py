@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from abc import ABC
 from collections import deque
+import functools
 import gc
 import queue
 import threading
@@ -7,12 +10,7 @@ import time
 from types import TracebackType
 from typing import Any
 from typing import Callable
-from typing import Deque
-from typing import Dict
-from typing import List
-from typing import Optional
 from typing import TypedDict
-from typing import Union
 from typing import Unpack
 
 import psutil
@@ -29,9 +27,12 @@ from .job import SimulationJob
 
 
 def requires_initialized(method: Callable[..., Any]) -> Callable[..., Any]:
+    @functools.wraps(method)
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         if not self._initialized:
-            raise InstanceHandlerNotInitializedException("initialize() not called")
+            raise InstanceHandlerNotInitializedException(
+                f"{method.__qualname__} called before initialize()"
+            )
         return method(self, *args, **kwargs)
 
     return wrapper
@@ -42,43 +43,40 @@ class BaseInstanceHandlerKwargs(TypedDict, total=False):
     Typed dictionary for keyword arguments passed to PlantSim instance handlers.
 
     :key version: PlantSim version to use.
-    :type version: Union[PlantsimVersion, str]
+    :type version: PlantsimVersion | str
     :key visible: Whether the PlantSim UI should be visible.
     :type visible: bool
     :key trusted: Whether the PlantSim instance should run in trusted mode.
     :type trusted: bool
     :key license: PlantSim license type.
-    :type license: Union[PlantsimLicense, str]
+    :type license: PlantsimLicense | str
     :key suppress_3d: Suppress 3D window.
     :type suppress_3d: bool
     :key show_msg_box: Show message box on errors.
     :type show_msg_box: bool
     :key event_polling_interval: Interval for event polling (seconds).
     :type event_polling_interval: float
-    :key disable_log_message: Disable log messages.
-    :type disable_log_message: bool
     :key simulation_finished_callback: Callback for finished simulation.
-    :type simulation_finished_callback: Optional[Callable[[], None]]
+    :type simulation_finished_callback: Callable[[], None] | None
     :key simtalk_msg_callback: Callback for SimTalk messages.
-    :type simtalk_msg_callback: Optional[Callable[[str], None]]
+    :type simtalk_msg_callback: Callable[[str], None] | None
     :key fire_simtalk_msg_callback: Callback for fired SimTalk messages.
-    :type fire_simtalk_msg_callback: Optional[Callable[[str], None]]
+    :type fire_simtalk_msg_callback: Callable[[str], None] | None
     :key simulation_error_callback: Callback for simulation errors.
-    :type simulation_error_callback: Optional[Callable[[SimulationException], None]]
+    :type simulation_error_callback: Callable[[SimulationException], None] | None
     """
 
-    version: Union[PlantsimVersion, str]
+    version: PlantsimVersion | str
     visible: bool
     trusted: bool
-    license: Union[PlantsimLicense, str]
+    license: PlantsimLicense | str
     suppress_3d: bool
     show_msg_box: bool
     event_polling_interval: float
-    disable_log_message: bool
-    simulation_finished_callback: Optional[Callable[[], None]]
-    simtalk_msg_callback: Optional[Callable[[str], None]]
-    fire_simtalk_msg_callback: Optional[Callable[[str], None]]
-    simulation_error_callback: Optional[Callable[[SimulationException], None]]
+    simulation_finished_callback: Callable[[], None] | None
+    simtalk_msg_callback: Callable[[str], None] | None
+    fire_simtalk_msg_callback: Callable[[str], None] | None
+    simulation_error_callback: Callable[[SimulationException], None] | None
 
 
 class BaseInstanceHandler(ABC):
@@ -86,80 +84,75 @@ class BaseInstanceHandler(ABC):
     Handles multiple pyplantsim workers, each with its own Plantsim instance.
 
     :param version: PlantSim version to use.
-    :type version: Union[PlantsimVersion, str]
+    :type version: PlantsimVersion | str
     :param visible: Whether the PlantSim UI should be visible.
     :type visible: bool
     :param trusted: Whether the PlantSim instance should run in trusted mode.
     :type trusted: bool
     :param license: PlantSim license type.
-    :type license: Union[PlantsimLicense, str]
+    :type license: PlantsimLicense | str
     :param suppress_3d: Suppress 3D window.
     :type suppress_3d: bool
     :param show_msg_box: Show message box on errors.
     :type show_msg_box: bool
     :param event_polling_interval: Interval for event polling.
     :type event_polling_interval: float
-    :param disable_log_message: Disable log messages.
-    :type disable_log_message: bool
     :param simulation_finished_callback: Callback for finished simulation.
-    :type simulation_finished_callback: Optional[Callable[[], None]]
+    :type simulation_finished_callback: Callable[[], None] | None
     :param simtalk_msg_callback: Callback for SimTalk messages.
-    :type simtalk_msg_callback: Optional[Callable[[str], None]]
+    :type simtalk_msg_callback: Callable[[str], None] | None
     :param fire_simtalk_msg_callback: Callback for fired SimTalk messages.
-    :type fire_simtalk_msg_callback: Optional[Callable[[str], None]]
+    :type fire_simtalk_msg_callback: Callable[[str], None] | None
     :param simulation_error_callback: Callback for simulation errors.
-    :type simulation_error_callback: Optional[Callable[[SimulationException], None]]
+    :type simulation_error_callback: Callable[[SimulationException], None] | None
     """
 
     def __init__(
         self,
-        version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1,
+        version: PlantsimVersion | str = PlantsimVersion.V_MJ_22_MI_1,
         visible: bool = False,
         trusted: bool = False,
-        license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER,
+        license: PlantsimLicense | str = PlantsimLicense.VIEWER,
         suppress_3d: bool = False,
         show_msg_box: bool = False,
         event_polling_interval: float = 0.05,
-        disable_log_message: bool = False,
-        simulation_finished_callback: Optional[Callable[[], None]] = None,
-        simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-        fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-        simulation_error_callback: Optional[Callable[[SimulationException], None]] = None,
+        simulation_finished_callback: Callable[[], None] | None = None,
+        simtalk_msg_callback: Callable[[str], None] | None = None,
+        fire_simtalk_msg_callback: Callable[[str], None] | None = None,
+        simulation_error_callback: Callable[[SimulationException], None] | None = None,
     ):
         """
         Initialize the InstanceHandler with the given parameters.
 
         :param version: PlantSim version to use.
-        :type version: Union[PlantsimVersion, str]
+        :type version: PlantsimVersion | str
         :param visible: Whether the PlantSim UI should be visible.
         :type visible: bool
         :param trusted: Whether the PlantSim instance should run in trusted mode.
         :type trusted: bool
         :param license: PlantSim license type.
-        :type license: Union[PlantsimLicense, str]
+        :type license: PlantsimLicense | str
         :param suppress_3d: Suppress 3D window.
         :type suppress_3d: bool
         :param show_msg_box: Show message box on errors.
         :type show_msg_box: bool
         :param event_polling_interval: Interval for event polling.
         :type event_polling_interval: float
-        :param disable_log_message: Disable log messages.
-        :type disable_log_message: bool
         :param simulation_finished_callback: Callback for finished simulation.
-        :type simulation_finished_callback: Optional[Callable[[], None]]
+        :type simulation_finished_callback: Callable[[], None] | None
         :param simtalk_msg_callback: Callback for SimTalk messages.
-        :type simtalk_msg_callback: Optional[Callable[[str], None]]
+        :type simtalk_msg_callback: Callable[[str], None] | None
         :param fire_simtalk_msg_callback: Callback for fired SimTalk messages.
-        :type fire_simtalk_msg_callback: Optional[Callable[[str], None]]
+        :type fire_simtalk_msg_callback: Callable[[str], None] | None
         :param simulation_error_callback: Callback for simulation errors.
-        :type simulation_error_callback: Optional[Callable[[SimulationException], None]]
+        :type simulation_error_callback: Callable[[SimulationException], None] | None
         """
         self._job_queue: queue.Queue[Job] = queue.Queue()
         self._shutdown_event = threading.Event()
-        self._workers: List[threading.Thread] = []
+        self._workers: list[threading.Thread] = []
         self._workers_lock = threading.Lock()
-        self._results: Dict[str, threading.Event] = {}
-        self._cancel_flags: Dict[str, threading.Event] = {}
+        self._results: dict[str, threading.Event] = {}
+        self._cancel_flags: dict[str, threading.Event] = {}
 
         self._plantsim_kwargs = dict(
             version=version,
@@ -169,7 +162,6 @@ class BaseInstanceHandler(ABC):
             suppress_3d=suppress_3d,
             show_msg_box=show_msg_box,
             event_polling_interval=event_polling_interval,
-            disable_log_message=disable_log_message,
             simulation_finished_callback=simulation_finished_callback,
             simtalk_msg_callback=simtalk_msg_callback,
             fire_simtalk_msg_callback=fire_simtalk_msg_callback,
@@ -224,9 +216,9 @@ class BaseInstanceHandler(ABC):
         self._job_queue.join()
 
         num_workers = self.number_instances
-        jobs: List[ShutdownWorkerJob] = []
+        jobs: list[ShutdownWorkerJob] = []
         for _ in range(num_workers):
-            jobs.append(self._shotdown_next_worker())
+            jobs.append(self._shutdown_next_worker())
 
         for job in jobs:
             self.wait_for(job)
@@ -240,7 +232,7 @@ class BaseInstanceHandler(ABC):
         self._initialized = False
 
     @requires_initialized
-    def _shotdown_next_worker(self) -> ShutdownWorkerJob:
+    def _shutdown_next_worker(self) -> ShutdownWorkerJob:
         """
         Shuts down the next available worker by queueing a ShutdownWorkerJob
         """
@@ -300,6 +292,10 @@ class BaseInstanceHandler(ABC):
             finished_event.set()
         self._job_queue.task_done()
 
+        # Clean up to prevent unbounded memory growth over many jobs
+        self._results.pop(job.job_id, None)
+        self._cancel_flags.pop(job.job_id, None)
+
     @requires_initialized
     def queue_job(self, job: Job) -> Job:
         """
@@ -331,8 +327,7 @@ class BaseInstanceHandler(ABC):
         event = self._results.get(job.job_id)
         if event is not None:
             event.wait()
-        else:
-            raise ValueError(f"No such job id: {job.job_id}")
+        # If event is None the job already finished and was cleaned up. nothing to wait for
 
     @requires_initialized
     def wait_all(self) -> None:
@@ -361,7 +356,7 @@ class BaseInstanceHandler(ABC):
         """
         removed = False
         with self._job_queue.mutex:
-            new_queue: Deque[Job] = deque()
+            new_queue: deque[Job] = deque()
             while self._job_queue.queue:
                 queued_job = self._job_queue.queue.popleft()
                 if queued_job is not None and queued_job.job_id == job.job_id:
@@ -468,7 +463,7 @@ class DynamicInstanceHandler(BaseInstanceHandler):
     :param min_instances: Minimum number of PlantSim worker instances.
     :type min_instances: int
     :param max_instances: Maximum number of PlantSim worker instances.
-    :type max_instances: Optional[int]
+    :type max_instances: int | None
     :param scale_interval: Seconds between resource checks and scaling decisions.
     :type scale_interval: float
     :param kwargs: Additional keyword arguments forwarded to the PlantSim instance.
@@ -480,7 +475,7 @@ class DynamicInstanceHandler(BaseInstanceHandler):
         max_cpu: float = 0.8,
         max_memory: float = 0.8,
         min_instances: int = 1,
-        max_instances: Optional[int] = None,
+        max_instances: int | None = None,
         scale_interval: float = 15.0,
         **kwargs: Unpack[BaseInstanceHandlerKwargs],
     ):
@@ -542,7 +537,7 @@ class DynamicInstanceHandler(BaseInstanceHandler):
             elif (current_instances > self.min_instances) and (
                 cpu > self.max_cpu or mem > self.max_memory
             ):
-                job = self._shotdown_next_worker()
+                job = self._shutdown_next_worker()
                 self.wait_for(
                     job
                 )  # Wait for the worker to shut down before continuing the scaling process

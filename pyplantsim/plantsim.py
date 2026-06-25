@@ -4,6 +4,7 @@ from datetime import datetime
 from datetime import timedelta
 import importlib.resources
 import json
+import logging
 import os
 from pathlib import Path
 import threading
@@ -12,11 +13,7 @@ from types import TracebackType
 from typing import Any
 from typing import Callable
 from typing import cast
-from typing import List
-from typing import Optional
-from typing import Union
 
-from loguru import logger
 from packaging.version import Version
 import pandas as pd
 from plantsimpath import PlantsimPath
@@ -26,10 +23,23 @@ import win32com.client
 from .call_cycle import CallCycle
 from .events import ErrorEvent
 from .events import PlantSimEvents
+from .exception import DatetimeFormatNotSetException
+from .exception import ErrorHandlerException
+from .exception import EventControllerNotSetException
+from .exception import ModelAlreadyLoadedException
+from .exception import ModelNotFoundException
+from .exception import ModelNotLoadedException
+from .exception import PlantsimAlreadyRunningException
 from .exception import PlantsimException
+from .exception import PlantsimNotRunningException
+from .exception import SeedOutOfRangeException
 from .exception import SimulationException
+from .exception import UnknownSimulationErrorException
 from .licenses import PlantsimLicense
 from .versions import PlantsimVersion
+
+
+logger = logging.getLogger(__name__)
 
 
 class Plantsim:
@@ -68,68 +78,44 @@ class Plantsim:
     :ivar _running: Simulation status.
     :vartype _running: bool
     :ivar _simulation_error: Simulation error details.
-    :vartype _simulation_error: Optional[dict]
+    :vartype _simulation_error: dict[str, Any] | None
     :ivar _simulation_finished_event: Event triggered when the simulation finishes.
     :vartype _simulation_finished_event: threading.Event
     :ivar _error_handler: The path to the installed error handler.
-    :vartype _error_handler: Optional[str]
+    :vartype _error_handler: str | None
     :ivar _user_simulation_finished_cb: Callback for when the simulation finishes.
-    :vartype _user_simulation_finished_cb: Optional[Callable[[], None]]
+    :vartype _user_simulation_finished_cb: Callable[[], None] | None
     :ivar _user_simtalk_msg_cb: Callback for SimTalk messages.
-    :vartype _user_simtalk_msg_cb: Optional[Callable[[str], None]]
+    :vartype _user_simtalk_msg_cb: Callable[[str], None] | None
     :ivar _user_fire_simtalk_msg_cb: Callback to fire SimTalk messages.
-    :vartype _user_fire_simtalk_msg_cb: Optional[Callable[[str], None]]
+    :vartype _user_fire_simtalk_msg_cb: Callable[[str], None] | None
     :ivar _user_simulation_error_cb: Callback for simulation errors.
-    :vartype _user_simulation_error_cb: Optional[Callable[[SimulationException], None]]
+    :vartype _user_simulation_error_cb: Callable[[SimulationException], None] | None
     """
 
     # Defaults
     _DISPATCH_ID: str = "Tecnomatix.PlantSimulation.RemoteControl"
-    _dispatch_id: str = "Tecnomatix.PlantSimulation.RemoteControl"
-    _event_controller: Optional[PlantsimPath] = None
-    _version: Version = Version(PlantsimVersion.V_MJ_22_MI_1.value)
-    _visible: bool = True
-    _trusted: bool = False
-    _license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER
-    _suppress_3d: bool = False
-    _show_msg_box: bool = False
-    _network_path: Optional[PlantsimPath] = None
-    _event_thread: Optional[threading.Thread] = None
-    _event_handler: Optional[PlantSimEvents] = None
-    _event_polling_interval: float = 0.05
-    _datetime_format: Optional[str] = None
-
-    # State management
-    _model_loaded: bool = False
-    _model_path: Optional[str] = None
-    _running: bool = False
-    _simulation_error: Optional[dict[str, Any]] = None
-    _simulation_finished_event: threading.Event
-    _error_handler: Optional[str] = None
-
-    # Callbacks
-    _user_simulation_finished_cb: Optional[Callable[[], None]] = None
-    _user_simtalk_msg_cb: Optional[Callable[[str], None]] = None
-    _user_fire_simtalk_msg_cb: Optional[Callable[[str], None]] = None
-    _user_simulation_error_cb: Optional[Callable[[SimulationException], None]] = None
 
     def __init__(
         self,
-        version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1,
+        version: PlantsimVersion | str = PlantsimVersion.V_MJ_22_MI_1,
         visible: bool = True,
         trusted: bool = False,
-        license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER,
+        license: PlantsimLicense | str = PlantsimLicense.VIEWER,
         suppress_3d: bool = False,
         show_msg_box: bool = False,
         event_polling_interval: float = 0.05,
-        disable_log_message: bool = False,
-        simulation_finished_callback: Optional[Callable[[], None]] = None,
-        simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-        fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-        simulation_error_callback: Optional[Callable[[SimulationException], None]] = None,
+        simulation_finished_callback: Callable[[], None] | None = None,
+        simtalk_msg_callback: Callable[[str], None] | None = None,
+        fire_simtalk_msg_callback: Callable[[str], None] | None = None,
+        simulation_error_callback: Callable[[SimulationException], None] | None = None,
     ) -> None:
         """
         Initialize the Siemens Tecnomatix Plant Simulation instance.
+        pyplantsim uses the standard logging module under the logger name 'pyplantsim.plantsim'.
+        To see log output, configure a handler in your application:
+            import logging
+            logging.basicConfig(level=logging.INFO)
 
         :param version: Plant Simulation version to use.
         :type version: PlantsimVersion or str, optional
@@ -153,14 +139,24 @@ class Plantsim:
         :type simulation_error_callback: Callable[[SimulationException], None], optional
         :param event_polling_interval: Interval (in seconds) for polling events.
         :type event_polling_interval: float, optional
-        :param disable_log_message: Disable log messages.
-        :type disable_log_message: bool, optional
         """
+        self._dispatch_id: str = self._DISPATCH_ID
+        self._event_controller: PlantsimPath | None = None
+        self._network_path: PlantsimPath | None = None
+        self._event_thread: threading.Thread | None = None
+        self._event_handler: PlantSimEvents | None = None
+        self._datetime_format: str | None = None
+        self._model_loaded: bool = False
+        self._model_path: str | None = None
+        self._running: bool = False
+        self._simulation_error: dict[str, Any] | None = None
+        self._error_handler: str | None = None
+        self._user_simulation_finished_cb: Callable[[], None] | None = None
+        self._user_simtalk_msg_cb: Callable[[str], None] | None = None
+        self._user_fire_simtalk_msg_cb: Callable[[str], None] | None = None
+        self._user_simulation_error_cb: Callable[[SimulationException], None] | None = None
 
         # Inits
-        if disable_log_message:
-            logger.disable(__name__)
-
         self.set_version(version)
         self._visible = visible
         self._trusted = trusted
@@ -178,12 +174,12 @@ class Plantsim:
 
         self.start()
 
-    def set_version(self, version: Union[PlantsimVersion, str]) -> None:
+    def set_version(self, version: PlantsimVersion | str) -> None:
         """
         Set the Plant Simulation version.
 
         :param version: Plant Simulation version or string.
-        :type version: Union[PlantsimVersion, str]
+        :type version: PlantsimVersion | str
         """
         self._version = Version(version.value if isinstance(version, PlantsimVersion) else version)
 
@@ -210,7 +206,7 @@ class Plantsim:
             f"trusted={self._trusted!r}, "
             f"license={self._license!r}, "
             f"suppress_3d={self._suppress_3d!r}, "
-            f"show_msg_box={self._show_msg_box!r}, "
+            f"show_msg_box={self._show_msg_box!r})"
         )
 
     def start(self) -> "Plantsim":
@@ -222,7 +218,7 @@ class Plantsim:
         :rtype: Plantsim
         """
         if self._running:
-            raise Exception("Plant Simulation already running.")
+            raise PlantsimAlreadyRunningException("Plant Simulation already running.")
 
         logger.info(f"Starting Siemens Tecnomatix Plant Simulation {str(self._version)} instance.")
 
@@ -232,7 +228,6 @@ class Plantsim:
             self._dispatch_id += f".{str(self._version)}"
 
         # Initialize the Event Handler
-        pythoncom.CoInitialize()
         self._event_handler = PlantSimEvents(
             on_simulation_finished=self._internal_simulation_finished,
             on_simtalk_message=self._user_simtalk_msg_cb,
@@ -298,8 +293,6 @@ class Plantsim:
         if self._instance:
             self.quit()
 
-        pythoncom.CoUninitialize()
-
     def set_network(
         self,
         path: PlantsimPath,
@@ -351,7 +344,7 @@ class Plantsim:
             self._suppress_3d = suppress
             self._instance.SetSuppressStartOf3D(self._suppress_3d)
 
-    def set_license(self, license: Union[PlantsimLicense, str], force: bool = False) -> None:
+    def set_license(self, license: PlantsimLicense | str, force: bool = False) -> None:
         """
         Set the license for the instance.
 
@@ -410,12 +403,12 @@ class Plantsim:
         if self._user_simulation_finished_cb:
             self._user_simulation_finished_cb()
 
-    def register_on_simulation_finished(self, callback: Optional[Callable[[], None]]) -> None:
+    def register_on_simulation_finished(self, callback: Callable[[], None] | None) -> None:
         """
         Set callback for OnSimulationFinished event.
 
         :param callback: Callback function.
-        :type callback: Optional[Callable[[], None]]
+        :type callback: Callable[[], None] | None
         """
         self._user_simulation_finished_cb = callback
 
@@ -469,34 +462,34 @@ class Plantsim:
             return False
         return True
 
-    def register_on_simtalk_message(self, callback: Optional[Callable[[str], None]]) -> None:
+    def register_on_simtalk_message(self, callback: Callable[[str], None] | None) -> None:
         """
         Set callback for OnSimTalkMessage event.
 
         :param callback: Callback function.
-        :type callback: Optional[Callable[[str], None]]
+        :type callback: Callable[[str], None] | None
         """
         self._user_simtalk_msg_cb = callback
 
-    def register_on_fire_simtalk_message(self, callback: Optional[Callable[[str], None]]) -> None:
+    def register_on_fire_simtalk_message(self, callback: Callable[[str], None] | None) -> None:
         """
         Set callback for FireSimTalkMessage event.
 
         :param callback: Callback function.
-        :type callback: Optional[Callable[[str], None]]
+        :type callback: Callable[[str], None] | None
         """
         self._user_fire_simtalk_msg_cb = callback
         if self._event_handler:
             self._event_handler.on_fire_simtalk_message = callback
 
     def register_on_simulation_error(
-        self, callback: Optional[Callable[[SimulationException], None]]
+        self, callback: Callable[[SimulationException], None] | None
     ) -> None:
         """
         Set callback for simulation errors.
 
         :param callback: Callback function.
-        :type callback: Optional[Callable[[SimulationException], None]]
+        :type callback: Callable[[SimulationException], None] | None
         """
         self._user_simulation_error_cb = callback
 
@@ -512,9 +505,12 @@ class Plantsim:
         Listen to events and handle COM messages.
         """
         pythoncom.CoInitialize()
-        while self._running:
-            pythoncom.PumpWaitingMessages()
-            time.sleep(self._event_polling_interval)
+        try:
+            while self._running:
+                pythoncom.PumpWaitingMessages()
+                time.sleep(self._event_polling_interval)
+        finally:
+            pythoncom.CoUninitialize()
 
     def quit(self) -> None:
         """
@@ -523,20 +519,14 @@ class Plantsim:
         :raises Exception: If instance is already closed.
         """
         if not self._instance:
-            raise Exception("Instance has been closed before already.")
+            raise PlantsimNotRunningException("Instance has been closed already.")
 
-        logger.info(
-            f"""Closing Siemens Tecnomatix Plant Simulation {
-                self._version.value
-                if isinstance(self._version, PlantsimVersion)
-                else self._version
-            } instance."""
-        )
+        logger.info(f"""Closing Siemens Tecnomatix Plant Simulation {self._version} instance.""")
 
         try:
             self._instance.Quit()
         except Exception:
-            raise Exception("Instance has been closed before already.")
+            raise PlantsimNotRunningException("Instance has been closed already.")
 
         self._instance = None
 
@@ -550,7 +540,7 @@ class Plantsim:
         self._model_loaded = False
         self._model_path = None
 
-    def set_event_controller(self, path: Optional[PlantsimPath] = None) -> None:
+    def set_event_controller(self, path: PlantsimPath | None = None) -> None:
         """
         Set the path of the Event Controller.
 
@@ -606,15 +596,15 @@ class Plantsim:
 
         # Check if indexes are active
         row_index_active = self.get_value(PlantsimPath(path, "rowIndex"))
-        index: Optional[List[Any]] = None
+        index: list[Any] | None = None
         if row_index_active:
             index = [
                 self.get_value(PlantsimPath(path, f"[0,{row}]")) for row in range(1, y_dim + 1)
             ]
 
         col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
-        columns: Optional[List[str]] = None
-        index_name: Optional[str] = None
+        columns: list[str] | None = None
+        index_name: str | None = None
         if col_index_active:
             if row_index_active:
                 index_name = self.get_value(PlantsimPath(path, "[0,0]"))
@@ -675,19 +665,19 @@ class Plantsim:
         col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
         if col_index_active and df.columns is not None:
             for col, name in enumerate(df.columns, 1):
-                self.set_value(PlantsimPath(f"{path}[{col},0]"), name)
+                self.set_value(PlantsimPath(path, f"[{col},0]"), name)
 
         row_index_active = self.get_value(PlantsimPath(path, "rowIndex"))
         if row_index_active and df.index is not None:
             if df.index.name is not None and col_index_active:
-                self.set_value(PlantsimPath(f"{path}[0,0]"), df.index.name)
+                self.set_value(PlantsimPath(path, "[0,0]"), df.index.name)
             for row, idx in enumerate(df.index, 1):
-                self.set_value(PlantsimPath(f"{path}[0,{row}]"), idx)
+                self.set_value(PlantsimPath(path, f"[0,{row}]"), idx)
 
         for row in range(1, y_dim + 1):
             for col in range(1, x_dim + 1):
                 value = df.iat[row - 1, col - 1]
-                self.set_value(PlantsimPath(f"{path}[{col},{row}]"), value)
+                self.set_value(PlantsimPath(path, f"[{col},{row}]"), value)
 
     def _is_simulation_running(self) -> bool:
         """
@@ -699,7 +689,7 @@ class Plantsim:
         return bool(self._instance.IsSimulationRunning())
 
     def load_model(
-        self, filepath: str, password: Optional[str] = None, close_other: bool = False
+        self, filepath: str, password: str | None = None, close_other: bool = False
     ) -> None:
         """
         Load a model into the current instance.
@@ -716,10 +706,10 @@ class Plantsim:
             self.close_model()
 
         if self._model_loaded:
-            raise Exception("Another model is opened already.")
+            raise ModelAlreadyLoadedException("Another model is already open.")
 
         if not os.path.exists(filepath):
-            raise Exception("File does not exists.")
+            raise ModelNotFoundException(f"File does not exist: {filepath}")
 
         logger.info(f"Loading {filepath}.")
 
@@ -758,7 +748,7 @@ class Plantsim:
         response = self.execute_sim_talk(simtalk)
 
         if not response:
-            raise Exception("Could not create Error Handler")
+            raise ErrorHandlerException("Could not create error handler.")
 
         self._error_handler = "basis.ErrorHandler"
 
@@ -769,14 +759,14 @@ class Plantsim:
         :raises Exception: If no error handler is installed or removal fails.
         """
         if not self._error_handler:
-            raise Exception("Not error handler has been installed")
+            raise ErrorHandlerException("No error handler has been installed.")
 
         simtalk = self._load_simtalk_script("remove_error_handler")
 
         response = self.execute_sim_talk(simtalk)
 
         if not response:
-            raise Exception("Could not remove the error handler")
+            raise ErrorHandlerException("Could not create error handler.")
 
         self._error_handler = None
 
@@ -796,7 +786,7 @@ class Plantsim:
         except Exception as e:
             raise PlantsimException(e)
 
-        self._model_loaded = False
+        self._model_loaded = True
 
     def open_console_log_file(self, filepath: str) -> None:
         """
@@ -829,7 +819,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         self._instance.ResetSimulation(self._event_controller)
 
@@ -860,7 +850,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         self._simulation_finished_event.clear()
         self._simulation_error_event.clear()
@@ -869,11 +859,11 @@ class Plantsim:
     def run_simulation(
         self,
         without_animation: bool = True,
-        on_init: Optional[Callable[["Plantsim"], None]] = None,
-        on_endsim: Optional[Callable[["Plantsim"], None]] = None,
-        on_simulation_error: Optional[Callable[["Plantsim", SimulationException], None]] = None,
-        on_progress: Optional[Callable[["Plantsim", float], None]] = None,
-        cancel_event: Optional[threading.Event] = None,
+        on_init: Callable[["Plantsim"], None] | None = None,
+        on_endsim: Callable[["Plantsim"], None] | None = None,
+        on_simulation_error: Callable[["Plantsim", SimulationException], None] | None = None,
+        on_progress: Callable[["Plantsim", float], None] | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> None:
         """
         Run a full simulation and return after the run is over. This method suggests, that the
@@ -882,15 +872,15 @@ class Plantsim:
         :param without_animation: Run without animation.
         :type without_animation: bool, optional
         :param on_init: Callback before simulation starts.
-        :type on_init: Optional[Callable[[Plantsim], None]]
+        :type on_init: Callable[[Plantsim], None] | None
         :param on_endsim: Callback after simulation ends.
-        :type on_endsim: Optional[Callable[[Plantsim], None]]
+        :type on_endsim: Callable[[Plantsim], None] | None
         :param on_simulation_error: Callback on simulation error.
-        :type on_simulation_error: Optional[Callable[[Plantsim, SimulationException], None]]
+        :type on_simulation_error: Callable[[Plantsim, SimulationException], None] | None
         :param on_progress: Progress callback (receives percent complete).
-        :type on_progress: Optional[Callable[[Plantsim, float], None]]
+        :type on_progress: Callable[[Plantsim, float], None] | None
         :param cancel_event: Event to cancel the run.
-        :type cancel_event: Optional[threading.Event]
+        :type cancel_event: threading.Event | None
         :raises SimulationException: If a simulation error occurs.
         """
         if on_init:
@@ -900,13 +890,6 @@ class Plantsim:
 
         self._run_simulation_event_loop(on_progress=on_progress, cancel_event=cancel_event)
 
-        while (
-            not self._simulation_finished_event.is_set()
-            and not self._simulation_error_event.is_set()
-        ):
-            pythoncom.PumpWaitingMessages()
-            time.sleep(self._event_polling_interval)
-
         if self._simulation_error_event.is_set():
             if on_simulation_error and self._simulation_error_event.error is not None:
                 on_simulation_error(self, self._simulation_error_event.error)
@@ -914,7 +897,7 @@ class Plantsim:
             if self._simulation_error_event.error is not None:
                 raise self._simulation_error_event.error
             else:
-                raise Exception("Unknown simulation error")
+                raise UnknownSimulationErrorException("Unknown simulation error.")
 
         if cancel_event is not None and cancel_event.is_set():
             self.stop_simulation()
@@ -925,16 +908,16 @@ class Plantsim:
 
     def _run_simulation_event_loop(
         self,
-        on_progress: Optional[Callable[["Plantsim", float], None]] = None,
-        cancel_event: Optional[threading.Event] = None,
+        on_progress: Callable[["Plantsim", float], None] | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> None:
         """
         Internal loop to handle simulation events and progress callbacks.
 
         :param on_progress: Progress callback.
-        :type on_progress: Optional[Callable[[Plantsim, float], None]]
+        :type on_progress: Callable[[Plantsim, float], None] | None
         :param cancel_event: Event to cancel the simulation.
-        :type cancel_event: Optional[threading.Event]
+        :type cancel_event: threading.Event | None
         """
         start_date = self.get_start_date()
         end_time = self.get_end_time()
@@ -965,7 +948,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         return self._str_to_datetime(
             self.get_value(PlantsimPath(self._event_controller, "AbsSimTime"))
@@ -981,7 +964,7 @@ class Plantsim:
         :rtype: datetime
         """
         if not self._datetime_format:
-            raise Exception("Datetime format needs to be set.")
+            raise DatetimeFormatNotSetException("Datetime format needs to be set.")
         return datetime.strptime(date_str, self._datetime_format)
 
     def get_start_date(self) -> datetime:
@@ -993,7 +976,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         attribute_name = "StartDate"
         if self._version < Version(PlantsimVersion.V_MJ_25_MI_4.value):
@@ -1029,7 +1012,11 @@ class Plantsim:
             case 3:  # Chinese
                 self._datetime_format = "%Y/%m/%d %H:%M:%S.%f"
             case _:
-                raise NotImplementedError()
+                raise NotImplementedError(
+                    f"Datetime format not implemented for language code {language!r}. "
+                    "Please open an issue at https://github.com/malun22/pyplantsim/issues "
+                    "and include your Plant Simulation model language setting."
+                )
 
     def get_end_time(self) -> timedelta:
         """
@@ -1040,7 +1027,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         attribute_name = "EndTime"
         if self._version < Version(PlantsimVersion.V_MJ_25_MI_4.value):
@@ -1057,7 +1044,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         self._instance.StopSimulation(self._event_controller)
 
@@ -1070,25 +1057,25 @@ class Plantsim:
         :raises Exception: If EventController is not set or seed is out of range.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         if seed > 2147483647 or seed < -2147483647:
-            raise Exception("Seed must be between -2147483647 and 2147483647")
+            raise SeedOutOfRangeException("Seed must be between -2147483647 and 2147483647.")
 
         self.set_value(PlantsimPath(self._event_controller, "RandomNumbersVariant"), seed)
 
-    def exists_path(self, path: Union[PlantsimPath, str]) -> bool:
+    def exists_path(self, path: PlantsimPath | str) -> bool:
         """
         Check if the given path exists in the loaded model.
 
         :param path: Path to check.
-        :type path: Union[PlantsimPath, str]
+        :type path: PlantsimPath | str
         :return: True if path exists, False otherwise.
         :rtype: bool
         :raises Exception: If no model is loaded.
         """
         if not self.model_loaded:
-            raise Exception("No model is loaded.")
+            raise ModelNotLoadedException("No model is loaded.")
 
         simtalk = self._load_simtalk_script("exists_path")
         return bool(self.execute_sim_talk(simtalk, path))
@@ -1122,8 +1109,21 @@ class Plantsim:
         if old_error_handler:
             self.install_error_handler()
 
-    def get_call_cycles(self) -> List[CallCycle]:
-        result: List[CallCycle] = []
+    def get_call_cycles(self) -> list[CallCycle]:
+        """
+        Run a full simulation with the SimTalk profiler enabled and return
+        the resulting call cycles.
+
+        The profiler is activated before the simulation starts and the results
+        are collected once the simulation ends. The model must have an
+        EventController with an end date set.
+
+        :return: List of call cycles recorded during the simulation run.
+        :rtype: List[CallCycle]
+        :raises SimulationException: If the simulation encounters an error.
+        :raises Exception: If the EventController is not set.
+        """
+        result: list[CallCycle] = []
 
         def on_init(instance: Plantsim) -> None:
             simtalk = self._load_simtalk_script("activate_profiler")
@@ -1136,7 +1136,22 @@ class Plantsim:
         self.run_simulation(on_init=on_init, on_endsim=on_endsim)
         return result
 
-    def read_call_cycles(self, max_num_cycles: Optional[int] = None) -> List[CallCycle]:
+    def read_call_cycles(self, max_num_cycles: int | None = None) -> list[CallCycle]:
+        """
+        Read the call cycles currently stored in the model's profiler without
+        running a new simulation.
+
+        This is useful when the profiler has already been activated externally,
+        or when calling from within an ``on_endsim`` callback. For a
+        self-contained profiling run use :meth:`get_call_cycles` instead.
+
+        :param max_num_cycles: Maximum number of call cycles to retrieve.
+            If ``None``, all available cycles are returned.
+        :type max_num_cycles: int, optional
+        :return: List of call cycles from the profiler output.
+        :rtype: List[CallCycle]
+        :raises SimulationException: If the SimTalk script execution fails.
+        """
         simtalk = self._load_simtalk_script("get_call_cycles")
         if max_num_cycles:
             raw = self.execute_sim_talk(simtalk, max_num_cycles)
@@ -1170,22 +1185,22 @@ class Plantsim:
         return self._model_loaded
 
     @property
-    def model_path(self) -> Union[str, None]:
+    def model_path(self) -> str | None:
         """
         Path to the current model file.
 
         :return: Model path or None.
-        :rtype: Union[str, None]
+        :rtype: str | None
         """
         return self._model_path
 
     @property
-    def network_path(self) -> Union[PlantsimPath, None]:
+    def network_path(self) -> PlantsimPath | None:
         """
         Current active network path.
 
         :return: Network path or None.
-        :rtype: Union[str, None]
+        :rtype: str | None
         """
         return self._network_path
 
@@ -1220,22 +1235,22 @@ class Plantsim:
         return self._suppress_3d
 
     @property
-    def license(self) -> Union[PlantsimLicense, str]:
+    def license(self) -> PlantsimLicense | str:
         """
         License of the current instance.
 
         :return: License type.
-        :rtype: Union[PlantsimLicense, str]
+        :rtype: PlantsimLicense | str
         """
         return self._license
 
     @property
-    def version(self) -> Union[Version]:
+    def version(self) -> Version:
         """
         Version of the current instance.
 
         :return: Plant Simulation version.
-        :rtype: Union[Version, str]
+        :rtype: Version
         """
         return self._version
 
