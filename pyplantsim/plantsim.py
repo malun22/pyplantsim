@@ -669,19 +669,19 @@ class Plantsim:
         col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
         if col_index_active and df.columns is not None:
             for col, name in enumerate(df.columns, 1):
-                self.set_value(PlantsimPath(f"{path}[{col},0]"), name)
+                self.set_value(PlantsimPath(path, f"[{col},0]"), name)
 
         row_index_active = self.get_value(PlantsimPath(path, "rowIndex"))
         if row_index_active and df.index is not None:
             if df.index.name is not None and col_index_active:
-                self.set_value(PlantsimPath(f"{path}[0,0]"), df.index.name)
+                self.set_value(PlantsimPath(path, "[0,0]"), df.index.name)
             for row, idx in enumerate(df.index, 1):
-                self.set_value(PlantsimPath(f"{path}[0,{row}]"), idx)
+                self.set_value(PlantsimPath(path, f"[0,{row}]"), idx)
 
         for row in range(1, y_dim + 1):
             for col in range(1, x_dim + 1):
                 value = df.iat[row - 1, col - 1]
-                self.set_value(PlantsimPath(f"{path}[{col},{row}]"), value)
+                self.set_value(PlantsimPath(path, f"[{col},{row}]"), value)
 
     def _is_simulation_running(self) -> bool:
         """
