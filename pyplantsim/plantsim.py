@@ -894,13 +894,6 @@ class Plantsim:
 
         self._run_simulation_event_loop(on_progress=on_progress, cancel_event=cancel_event)
 
-        while (
-            not self._simulation_finished_event.is_set()
-            and not self._simulation_error_event.is_set()
-        ):
-            pythoncom.PumpWaitingMessages()
-            time.sleep(self._event_polling_interval)
-
         if self._simulation_error_event.is_set():
             if on_simulation_error and self._simulation_error_event.error is not None:
                 on_simulation_error(self, self._simulation_error_event.error)
