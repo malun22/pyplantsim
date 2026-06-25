@@ -92,33 +92,6 @@ class Plantsim:
 
     # Defaults
     _DISPATCH_ID: str = "Tecnomatix.PlantSimulation.RemoteControl"
-    _dispatch_id: str = "Tecnomatix.PlantSimulation.RemoteControl"
-    _event_controller: Optional[PlantsimPath] = None
-    _version: Version = Version(PlantsimVersion.V_MJ_22_MI_1.value)
-    _visible: bool = True
-    _trusted: bool = False
-    _license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER
-    _suppress_3d: bool = False
-    _show_msg_box: bool = False
-    _network_path: Optional[PlantsimPath] = None
-    _event_thread: Optional[threading.Thread] = None
-    _event_handler: Optional[PlantSimEvents] = None
-    _event_polling_interval: float = 0.05
-    _datetime_format: Optional[str] = None
-
-    # State management
-    _model_loaded: bool = False
-    _model_path: Optional[str] = None
-    _running: bool = False
-    _simulation_error: Optional[dict[str, Any]] = None
-    _simulation_finished_event: threading.Event
-    _error_handler: Optional[str] = None
-
-    # Callbacks
-    _user_simulation_finished_cb: Optional[Callable[[], None]] = None
-    _user_simtalk_msg_cb: Optional[Callable[[str], None]] = None
-    _user_fire_simtalk_msg_cb: Optional[Callable[[str], None]] = None
-    _user_simulation_error_cb: Optional[Callable[[SimulationException], None]] = None
 
     def __init__(
         self,
@@ -163,6 +136,21 @@ class Plantsim:
         :param disable_log_message: Disable log messages.
         :type disable_log_message: bool, optional
         """
+        self._dispatch_id: str = self._DISPATCH_ID
+        self._event_controller: Optional[PlantsimPath] = None
+        self._network_path: Optional[PlantsimPath] = None
+        self._event_thread: Optional[threading.Thread] = None
+        self._event_handler: Optional[PlantSimEvents] = None
+        self._datetime_format: Optional[str] = None
+        self._model_loaded: bool = False
+        self._model_path: Optional[str] = None
+        self._running: bool = False
+        self._simulation_error: Optional[dict[str, Any]] = None
+        self._error_handler: Optional[str] = None
+        self._user_simulation_finished_cb: Optional[Callable[[], None]] = None
+        self._user_simtalk_msg_cb: Optional[Callable[[str], None]] = None
+        self._user_fire_simtalk_msg_cb: Optional[Callable[[str], None]] = None
+        self._user_simulation_error_cb: Optional[Callable[[SimulationException], None]] = None
 
         # Inits
         if disable_log_message:
