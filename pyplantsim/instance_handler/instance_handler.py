@@ -10,7 +10,6 @@ from types import TracebackType
 from typing import Any
 from typing import Callable
 from typing import TypedDict
-from typing import Union
 from typing import Unpack
 
 import psutil
@@ -40,13 +39,13 @@ class BaseInstanceHandlerKwargs(TypedDict, total=False):
     Typed dictionary for keyword arguments passed to PlantSim instance handlers.
 
     :key version: PlantSim version to use.
-    :type version: Union[PlantsimVersion, str]
+    :type version: PlantsimVersion | str
     :key visible: Whether the PlantSim UI should be visible.
     :type visible: bool
     :key trusted: Whether the PlantSim instance should run in trusted mode.
     :type trusted: bool
     :key license: PlantSim license type.
-    :type license: Union[PlantsimLicense, str]
+    :type license: PlantsimLicense | str
     :key suppress_3d: Suppress 3D window.
     :type suppress_3d: bool
     :key show_msg_box: Show message box on errors.
@@ -65,10 +64,10 @@ class BaseInstanceHandlerKwargs(TypedDict, total=False):
     :type simulation_error_callback: Callable[[SimulationException], None] | None
     """
 
-    version: Union[PlantsimVersion, str]
+    version: PlantsimVersion | str
     visible: bool
     trusted: bool
-    license: Union[PlantsimLicense, str]
+    license: PlantsimLicense | str
     suppress_3d: bool
     show_msg_box: bool
     event_polling_interval: float
@@ -84,13 +83,13 @@ class BaseInstanceHandler(ABC):
     Handles multiple pyplantsim workers, each with its own Plantsim instance.
 
     :param version: PlantSim version to use.
-    :type version: Union[PlantsimVersion, str]
+    :type version: PlantsimVersion | str
     :param visible: Whether the PlantSim UI should be visible.
     :type visible: bool
     :param trusted: Whether the PlantSim instance should run in trusted mode.
     :type trusted: bool
     :param license: PlantSim license type.
-    :type license: Union[PlantsimLicense, str]
+    :type license: PlantsimLicense | str
     :param suppress_3d: Suppress 3D window.
     :type suppress_3d: bool
     :param show_msg_box: Show message box on errors.
@@ -111,10 +110,10 @@ class BaseInstanceHandler(ABC):
 
     def __init__(
         self,
-        version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1,
+        version: PlantsimVersion | str = PlantsimVersion.V_MJ_22_MI_1,
         visible: bool = False,
         trusted: bool = False,
-        license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER,
+        license: PlantsimLicense | str = PlantsimLicense.VIEWER,
         suppress_3d: bool = False,
         show_msg_box: bool = False,
         event_polling_interval: float = 0.05,
@@ -128,13 +127,13 @@ class BaseInstanceHandler(ABC):
         Initialize the InstanceHandler with the given parameters.
 
         :param version: PlantSim version to use.
-        :type version: Union[PlantsimVersion, str]
+        :type version: PlantsimVersion | str
         :param visible: Whether the PlantSim UI should be visible.
         :type visible: bool
         :param trusted: Whether the PlantSim instance should run in trusted mode.
         :type trusted: bool
         :param license: PlantSim license type.
-        :type license: Union[PlantsimLicense, str]
+        :type license: PlantsimLicense | str
         :param suppress_3d: Suppress 3D window.
         :type suppress_3d: bool
         :param show_msg_box: Show message box on errors.

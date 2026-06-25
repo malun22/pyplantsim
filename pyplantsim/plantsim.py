@@ -12,7 +12,6 @@ from types import TracebackType
 from typing import Any
 from typing import Callable
 from typing import cast
-from typing import Union
 
 from loguru import logger
 from packaging.version import Version
@@ -93,10 +92,10 @@ class Plantsim:
 
     def __init__(
         self,
-        version: Union[PlantsimVersion, str] = PlantsimVersion.V_MJ_22_MI_1,
+        version: PlantsimVersion | str = PlantsimVersion.V_MJ_22_MI_1,
         visible: bool = True,
         trusted: bool = False,
-        license: Union[PlantsimLicense, str] = PlantsimLicense.VIEWER,
+        license: PlantsimLicense | str = PlantsimLicense.VIEWER,
         suppress_3d: bool = False,
         show_msg_box: bool = False,
         event_polling_interval: float = 0.05,
@@ -171,12 +170,12 @@ class Plantsim:
 
         self.start()
 
-    def set_version(self, version: Union[PlantsimVersion, str]) -> None:
+    def set_version(self, version: PlantsimVersion | str) -> None:
         """
         Set the Plant Simulation version.
 
         :param version: Plant Simulation version or string.
-        :type version: Union[PlantsimVersion, str]
+        :type version: PlantsimVersion | str
         """
         self._version = Version(version.value if isinstance(version, PlantsimVersion) else version)
 
@@ -344,7 +343,7 @@ class Plantsim:
             self._suppress_3d = suppress
             self._instance.SetSuppressStartOf3D(self._suppress_3d)
 
-    def set_license(self, license: Union[PlantsimLicense, str], force: bool = False) -> None:
+    def set_license(self, license: PlantsimLicense | str, force: bool = False) -> None:
         """
         Set the license for the instance.
 
@@ -1057,12 +1056,12 @@ class Plantsim:
 
         self.set_value(PlantsimPath(self._event_controller, "RandomNumbersVariant"), seed)
 
-    def exists_path(self, path: Union[PlantsimPath, str]) -> bool:
+    def exists_path(self, path: PlantsimPath | str) -> bool:
         """
         Check if the given path exists in the loaded model.
 
         :param path: Path to check.
-        :type path: Union[PlantsimPath, str]
+        :type path: PlantsimPath | str
         :return: True if path exists, False otherwise.
         :rtype: bool
         :raises Exception: If no model is loaded.
@@ -1150,22 +1149,22 @@ class Plantsim:
         return self._model_loaded
 
     @property
-    def model_path(self) -> Union[str, None]:
+    def model_path(self) -> str | None:
         """
         Path to the current model file.
 
         :return: Model path or None.
-        :rtype: Union[str, None]
+        :rtype: str | None
         """
         return self._model_path
 
     @property
-    def network_path(self) -> Union[PlantsimPath, None]:
+    def network_path(self) -> PlantsimPath | None:
         """
         Current active network path.
 
         :return: Network path or None.
-        :rtype: Union[str, None]
+        :rtype: str | None
         """
         return self._network_path
 
@@ -1200,22 +1199,22 @@ class Plantsim:
         return self._suppress_3d
 
     @property
-    def license(self) -> Union[PlantsimLicense, str]:
+    def license(self) -> PlantsimLicense | str:
         """
         License of the current instance.
 
         :return: License type.
-        :rtype: Union[PlantsimLicense, str]
+        :rtype: PlantsimLicense | str
         """
         return self._license
 
     @property
-    def version(self) -> Union[Version]:
+    def version(self) -> Version:
         """
         Version of the current instance.
 
         :return: Plant Simulation version.
-        :rtype: Union[Version, str]
+        :rtype: Version
         """
         return self._version
 
