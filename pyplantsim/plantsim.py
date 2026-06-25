@@ -26,7 +26,14 @@ import win32com.client
 from .call_cycle import CallCycle
 from .events import ErrorEvent
 from .events import PlantSimEvents
+from .exception import ErrorHandlerException
+from .exception import EventControllerNotSetException
+from .exception import ModelAlreadyLoadedException
+from .exception import ModelNotFoundException
+from .exception import ModelNotLoadedException
+from .exception import PlantsimAlreadyRunningException
 from .exception import PlantsimException
+from .exception import PlantsimNotRunningException
 from .exception import SimulationException
 from .licenses import PlantsimLicense
 from .versions import PlantsimVersion
@@ -222,7 +229,7 @@ class Plantsim:
         :rtype: Plantsim
         """
         if self._running:
-            raise Exception("Plant Simulation already running.")
+            raise PlantsimAlreadyRunningException("Plant Simulation already running.")
 
         logger.info(f"Starting Siemens Tecnomatix Plant Simulation {str(self._version)} instance.")
 
@@ -523,14 +530,14 @@ class Plantsim:
         :raises Exception: If instance is already closed.
         """
         if not self._instance:
-            raise Exception("Instance has been closed before already.")
+            raise PlantsimNotRunningException("Instance has been closed already.")
 
         logger.info(f"""Closing Siemens Tecnomatix Plant Simulation {self._version} instance.""")
 
         try:
             self._instance.Quit()
         except Exception:
-            raise Exception("Instance has been closed before already.")
+            raise PlantsimNotRunningException("Instance has been closed already.")
 
         self._instance = None
 
@@ -710,10 +717,10 @@ class Plantsim:
             self.close_model()
 
         if self._model_loaded:
-            raise Exception("Another model is opened already.")
+            raise ModelAlreadyLoadedException("Another model is already open.")
 
         if not os.path.exists(filepath):
-            raise Exception("File does not exists.")
+            raise ModelNotFoundException(f"File does not exist: {filepath}")
 
         logger.info(f"Loading {filepath}.")
 
@@ -752,7 +759,7 @@ class Plantsim:
         response = self.execute_sim_talk(simtalk)
 
         if not response:
-            raise Exception("Could not create Error Handler")
+            raise ErrorHandlerException("Could not create error handler.")
 
         self._error_handler = "basis.ErrorHandler"
 
@@ -763,7 +770,7 @@ class Plantsim:
         :raises Exception: If no error handler is installed or removal fails.
         """
         if not self._error_handler:
-            raise Exception("Not error handler has been installed")
+            raise ErrorHandlerException("No error handler has been installed.")
 
         simtalk = self._load_simtalk_script("remove_error_handler")
 
@@ -823,7 +830,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         self._instance.ResetSimulation(self._event_controller)
 
@@ -854,7 +861,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         self._simulation_finished_event.clear()
         self._simulation_error_event.clear()
@@ -952,7 +959,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         return self._str_to_datetime(
             self.get_value(PlantsimPath(self._event_controller, "AbsSimTime"))
@@ -980,7 +987,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         attribute_name = "StartDate"
         if self._version < Version(PlantsimVersion.V_MJ_25_MI_4.value):
@@ -1027,7 +1034,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         attribute_name = "EndTime"
         if self._version < Version(PlantsimVersion.V_MJ_25_MI_4.value):
@@ -1044,7 +1051,7 @@ class Plantsim:
         :raises Exception: If EventController is not set.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set.")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         self._instance.StopSimulation(self._event_controller)
 
@@ -1075,7 +1082,7 @@ class Plantsim:
         :raises Exception: If no model is loaded.
         """
         if not self.model_loaded:
-            raise Exception("No model is loaded.")
+            raise ModelNotLoadedException("No model is loaded.")
 
         simtalk = self._load_simtalk_script("exists_path")
         return bool(self.execute_sim_talk(simtalk, path))

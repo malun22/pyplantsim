@@ -78,3 +78,42 @@ class SimulationException(Exception):
         :rtype: str
         """
         return f"Method {self._method_path} crashed on line {self._line_number}."
+
+
+class PlantsimStateException(Exception):
+    """Base for state-related errors that don't wrap a COM exception."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self._message = message
+
+    def __str__(self) -> str:
+        return self._message
+
+
+class PlantsimAlreadyRunningException(PlantsimStateException):
+    """Raised when start() is called on an already-running instance."""
+
+
+class PlantsimNotRunningException(PlantsimStateException):
+    """Raised when an operation is attempted on a closed instance."""
+
+
+class ModelAlreadyLoadedException(PlantsimStateException):
+    """Raised when load_model() is called while another model is open."""
+
+
+class ModelNotFoundException(PlantsimStateException):
+    """Raised when the model file does not exist."""
+
+
+class ModelNotLoadedException(PlantsimStateException):
+    """Raised when an operation requires a loaded model but none is present."""
+
+
+class EventControllerNotSetException(PlantsimStateException):
+    """Raised when an operation requires the EventController to be set."""
+
+
+class ErrorHandlerException(PlantsimStateException):
+    """Raised when installing or removing the error handler fails."""
