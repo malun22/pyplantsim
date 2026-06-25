@@ -1008,7 +1008,11 @@ class Plantsim:
             case 3:  # Chinese
                 self._datetime_format = "%Y/%m/%d %H:%M:%S.%f"
             case _:
-                raise NotImplementedError()
+                raise NotImplementedError(
+                    f"Datetime format not implemented for language code {language!r}. "
+                    "Please open an issue at https://github.com/malun22/pyplantsim/issues "
+                    "and include your Plant Simulation model language setting."
+                )
 
     def get_end_time(self) -> timedelta:
         """
