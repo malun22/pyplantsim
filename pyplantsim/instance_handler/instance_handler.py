@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from collections import deque
+import functools
 import gc
 import queue
 import threading
@@ -26,9 +27,12 @@ from .job import SimulationJob
 
 
 def requires_initialized(method: Callable[..., Any]) -> Callable[..., Any]:
+    @functools.wraps(method)
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
         if not self._initialized:
-            raise InstanceHandlerNotInitializedException("initialize() not called")
+            raise InstanceHandlerNotInitializedException(
+                f"{method.__qualname__} called before initialize()"
+            )
         return method(self, *args, **kwargs)
 
     return wrapper
