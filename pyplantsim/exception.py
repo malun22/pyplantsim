@@ -26,8 +26,8 @@ class PlantsimException(Exception):
         :type args: Any
         """
         super().__init__(args)
-        self._message = e.args[1]
-        self._id = e.args[0]
+        self._id: int = e.args[0] if len(e.args) > 0 else -1
+        self._message: str = e.args[1] if len(e.args) > 1 else str(e)
 
     def __str__(self) -> str:
         """
