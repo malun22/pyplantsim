@@ -56,8 +56,6 @@ class BaseInstanceHandlerKwargs(TypedDict, total=False):
     :type show_msg_box: bool
     :key event_polling_interval: Interval for event polling (seconds).
     :type event_polling_interval: float
-    :key disable_log_message: Disable log messages.
-    :type disable_log_message: bool
     :key simulation_finished_callback: Callback for finished simulation.
     :type simulation_finished_callback: Callable[[], None] | None
     :key simtalk_msg_callback: Callback for SimTalk messages.
@@ -75,7 +73,6 @@ class BaseInstanceHandlerKwargs(TypedDict, total=False):
     suppress_3d: bool
     show_msg_box: bool
     event_polling_interval: float
-    disable_log_message: bool
     simulation_finished_callback: Callable[[], None] | None
     simtalk_msg_callback: Callable[[str], None] | None
     fire_simtalk_msg_callback: Callable[[str], None] | None
@@ -100,8 +97,6 @@ class BaseInstanceHandler(ABC):
     :type show_msg_box: bool
     :param event_polling_interval: Interval for event polling.
     :type event_polling_interval: float
-    :param disable_log_message: Disable log messages.
-    :type disable_log_message: bool
     :param simulation_finished_callback: Callback for finished simulation.
     :type simulation_finished_callback: Callable[[], None] | None
     :param simtalk_msg_callback: Callback for SimTalk messages.
@@ -121,7 +116,6 @@ class BaseInstanceHandler(ABC):
         suppress_3d: bool = False,
         show_msg_box: bool = False,
         event_polling_interval: float = 0.05,
-        disable_log_message: bool = False,
         simulation_finished_callback: Callable[[], None] | None = None,
         simtalk_msg_callback: Callable[[str], None] | None = None,
         fire_simtalk_msg_callback: Callable[[str], None] | None = None,
@@ -144,8 +138,6 @@ class BaseInstanceHandler(ABC):
         :type show_msg_box: bool
         :param event_polling_interval: Interval for event polling.
         :type event_polling_interval: float
-        :param disable_log_message: Disable log messages.
-        :type disable_log_message: bool
         :param simulation_finished_callback: Callback for finished simulation.
         :type simulation_finished_callback: Callable[[], None] | None
         :param simtalk_msg_callback: Callback for SimTalk messages.
@@ -170,7 +162,6 @@ class BaseInstanceHandler(ABC):
             suppress_3d=suppress_3d,
             show_msg_box=show_msg_box,
             event_polling_interval=event_polling_interval,
-            disable_log_message=disable_log_message,
             simulation_finished_callback=simulation_finished_callback,
             simtalk_msg_callback=simtalk_msg_callback,
             fire_simtalk_msg_callback=fire_simtalk_msg_callback,
