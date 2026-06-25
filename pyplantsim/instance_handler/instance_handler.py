@@ -226,7 +226,7 @@ class BaseInstanceHandler(ABC):
         num_workers = self.number_instances
         jobs: List[ShutdownWorkerJob] = []
         for _ in range(num_workers):
-            jobs.append(self._shotdown_next_worker())
+            jobs.append(self._shutdown_next_worker())
 
         for job in jobs:
             self.wait_for(job)
@@ -240,7 +240,7 @@ class BaseInstanceHandler(ABC):
         self._initialized = False
 
     @requires_initialized
-    def _shotdown_next_worker(self) -> ShutdownWorkerJob:
+    def _shutdown_next_worker(self) -> ShutdownWorkerJob:
         """
         Shuts down the next available worker by queueing a ShutdownWorkerJob
         """
@@ -542,7 +542,7 @@ class DynamicInstanceHandler(BaseInstanceHandler):
             elif (current_instances > self.min_instances) and (
                 cpu > self.max_cpu or mem > self.max_memory
             ):
-                job = self._shotdown_next_worker()
+                job = self._shutdown_next_worker()
                 self.wait_for(
                     job
                 )  # Wait for the worker to shut down before continuing the scaling process
