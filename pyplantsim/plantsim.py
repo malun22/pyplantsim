@@ -12,7 +12,6 @@ from types import TracebackType
 from typing import Any
 from typing import Callable
 from typing import cast
-from typing import List
 from typing import Optional
 from typing import Union
 
@@ -595,14 +594,14 @@ class Plantsim:
 
         # Check if indexes are active
         row_index_active = self.get_value(PlantsimPath(path, "rowIndex"))
-        index: Optional[List[Any]] = None
+        index: Optional[list[Any]] = None
         if row_index_active:
             index = [
                 self.get_value(PlantsimPath(path, f"[0,{row}]")) for row in range(1, y_dim + 1)
             ]
 
         col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
-        columns: Optional[List[str]] = None
+        columns: Optional[list[str]] = None
         index_name: Optional[str] = None
         if col_index_active:
             if row_index_active:
@@ -1104,8 +1103,8 @@ class Plantsim:
         if old_error_handler:
             self.install_error_handler()
 
-    def get_call_cycles(self) -> List[CallCycle]:
-        result: List[CallCycle] = []
+    def get_call_cycles(self) -> list[CallCycle]:
+        result: list[CallCycle] = []
 
         def on_init(instance: Plantsim) -> None:
             simtalk = self._load_simtalk_script("activate_profiler")
@@ -1118,7 +1117,7 @@ class Plantsim:
         self.run_simulation(on_init=on_init, on_endsim=on_endsim)
         return result
 
-    def read_call_cycles(self, max_num_cycles: Optional[int] = None) -> List[CallCycle]:
+    def read_call_cycles(self, max_num_cycles: Optional[int] = None) -> list[CallCycle]:
         simtalk = self._load_simtalk_script("get_call_cycles")
         if max_num_cycles:
             raw = self.execute_sim_talk(simtalk, max_num_cycles)

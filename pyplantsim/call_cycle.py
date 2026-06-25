@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any
-from typing import List
 
 
 class MissingMethodError(ValueError):
@@ -46,7 +47,7 @@ class CallCycleMethod:
 @dataclass
 class CallCycle:
     method: CallCycleMethod
-    callers: List[CallerEntry]
+    callers: list[CallerEntry]
 
     @staticmethod
     def from_dict(d: dict[str, Any]) -> "CallCycle":

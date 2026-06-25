@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class PlantsimException(Exception):
     """
     Exception raised when dispatching the Plant Simulation instance fails.

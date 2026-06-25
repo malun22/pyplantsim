@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC
 from collections import deque
 import gc
@@ -9,7 +11,6 @@ from typing import Any
 from typing import Callable
 from typing import Deque
 from typing import Dict
-from typing import List
 from typing import Optional
 from typing import TypedDict
 from typing import Union
@@ -156,7 +157,7 @@ class BaseInstanceHandler(ABC):
         """
         self._job_queue: queue.Queue[Job] = queue.Queue()
         self._shutdown_event = threading.Event()
-        self._workers: List[threading.Thread] = []
+        self._workers: list[threading.Thread] = []
         self._workers_lock = threading.Lock()
         self._results: Dict[str, threading.Event] = {}
         self._cancel_flags: Dict[str, threading.Event] = {}
@@ -224,7 +225,7 @@ class BaseInstanceHandler(ABC):
         self._job_queue.join()
 
         num_workers = self.number_instances
-        jobs: List[ShutdownWorkerJob] = []
+        jobs: list[ShutdownWorkerJob] = []
         for _ in range(num_workers):
             jobs.append(self._shutdown_next_worker())
 
