@@ -4,6 +4,7 @@ from datetime import datetime
 from datetime import timedelta
 import importlib.resources
 import json
+import logging
 import os
 from pathlib import Path
 import threading
@@ -13,7 +14,6 @@ from typing import Any
 from typing import Callable
 from typing import cast
 
-from loguru import logger
 from packaging.version import Version
 import pandas as pd
 from plantsimpath import PlantsimPath
@@ -34,6 +34,9 @@ from .exception import PlantsimNotRunningException
 from .exception import SimulationException
 from .licenses import PlantsimLicense
 from .versions import PlantsimVersion
+
+
+logger = logging.getLogger(__name__)
 
 
 class Plantsim:
@@ -99,7 +102,6 @@ class Plantsim:
         suppress_3d: bool = False,
         show_msg_box: bool = False,
         event_polling_interval: float = 0.05,
-        disable_log_message: bool = False,
         simulation_finished_callback: Callable[[], None] | None = None,
         simtalk_msg_callback: Callable[[str], None] | None = None,
         fire_simtalk_msg_callback: Callable[[str], None] | None = None,
@@ -107,6 +109,10 @@ class Plantsim:
     ) -> None:
         """
         Initialize the Siemens Tecnomatix Plant Simulation instance.
+        pyplantsim uses the standard logging module under the logger name 'pyplantsim.plantsim'.
+        To see log output, configure a handler in your application:
+            import logging
+            logging.basicConfig(level=logging.INFO)
 
         :param version: Plant Simulation version to use.
         :type version: PlantsimVersion or str, optional
@@ -130,8 +136,6 @@ class Plantsim:
         :type simulation_error_callback: Callable[[SimulationException], None], optional
         :param event_polling_interval: Interval (in seconds) for polling events.
         :type event_polling_interval: float, optional
-        :param disable_log_message: Disable log messages.
-        :type disable_log_message: bool, optional
         """
         self._dispatch_id: str = self._DISPATCH_ID
         self._event_controller: PlantsimPath | None = None
@@ -150,9 +154,6 @@ class Plantsim:
         self._user_simulation_error_cb: Callable[[SimulationException], None] | None = None
 
         # Inits
-        if disable_log_message:
-            logger.disable(__name__)
-
         self.set_version(version)
         self._visible = visible
         self._trusted = trusted
