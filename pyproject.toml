@@ -32,7 +32,6 @@ dev = [
     "types-pywin32",
     "pandas-stubs",
     "types-psutil",
-    "packaging",
 ]
 docs = [
     "sphinx",
