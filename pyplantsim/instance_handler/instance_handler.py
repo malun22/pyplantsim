@@ -335,8 +335,7 @@ class BaseInstanceHandler(ABC):
         event = self._results.get(job.job_id)
         if event is not None:
             event.wait()
-        else:
-            raise ValueError(f"No such job id: {job.job_id}")
+        # If event is None the job already finished and was cleaned up. nothing to wait for
 
     @requires_initialized
     def wait_all(self) -> None:
