@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "pyplantsim"
 copyright = "2025, Luca Bernstiel"
 author = "Luca Bernstiel"
-release = "0.4.9"
+release = "1.0.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
