@@ -796,7 +796,7 @@ class Plantsim:
         except Exception as e:
             raise PlantsimException(e)
 
-        self._model_loaded = False
+        self._model_loaded = True
 
     def open_console_log_file(self, filepath: str) -> None:
         """
