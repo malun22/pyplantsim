@@ -1106,6 +1106,19 @@ class Plantsim:
             self.install_error_handler()
 
     def get_call_cycles(self) -> list[CallCycle]:
+        """
+        Run a full simulation with the SimTalk profiler enabled and return
+        the resulting call cycles.
+
+        The profiler is activated before the simulation starts and the results
+        are collected once the simulation ends. The model must have an
+        EventController with an end date set.
+
+        :return: List of call cycles recorded during the simulation run.
+        :rtype: List[CallCycle]
+        :raises SimulationException: If the simulation encounters an error.
+        :raises Exception: If the EventController is not set.
+        """
         result: list[CallCycle] = []
 
         def on_init(instance: Plantsim) -> None:
@@ -1120,6 +1133,21 @@ class Plantsim:
         return result
 
     def read_call_cycles(self, max_num_cycles: int | None = None) -> list[CallCycle]:
+        """
+        Read the call cycles currently stored in the model's profiler without
+        running a new simulation.
+
+        This is useful when the profiler has already been activated externally,
+        or when calling from within an ``on_endsim`` callback. For a
+        self-contained profiling run use :meth:`get_call_cycles` instead.
+
+        :param max_num_cycles: Maximum number of call cycles to retrieve.
+            If ``None``, all available cycles are returned.
+        :type max_num_cycles: int, optional
+        :return: List of call cycles from the profiler output.
+        :rtype: List[CallCycle]
+        :raises SimulationException: If the SimTalk script execution fails.
+        """
         simtalk = self._load_simtalk_script("get_call_cycles")
         if max_num_cycles:
             raw = self.execute_sim_talk(simtalk, max_num_cycles)
