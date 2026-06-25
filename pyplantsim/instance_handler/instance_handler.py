@@ -300,6 +300,10 @@ class BaseInstanceHandler(ABC):
             finished_event.set()
         self._job_queue.task_done()
 
+        # Clean up to prevent unbounded memory growth over many jobs
+        self._results.pop(job.job_id, None)
+        self._cancel_flags.pop(job.job_id, None)
+
     @requires_initialized
     def queue_job(self, job: Job) -> Job:
         """
