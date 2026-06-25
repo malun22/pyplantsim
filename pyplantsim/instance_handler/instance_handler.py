@@ -9,7 +9,6 @@ import time
 from types import TracebackType
 from typing import Any
 from typing import Callable
-from typing import Deque
 from typing import Optional
 from typing import TypedDict
 from typing import Union
@@ -364,7 +363,7 @@ class BaseInstanceHandler(ABC):
         """
         removed = False
         with self._job_queue.mutex:
-            new_queue: Deque[Job] = deque()
+            new_queue: deque[Job] = deque()
             while self._job_queue.queue:
                 queued_job = self._job_queue.queue.popleft()
                 if queued_job is not None and queued_job.job_id == job.job_id:
