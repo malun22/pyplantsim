@@ -10,7 +10,6 @@ from types import TracebackType
 from typing import Any
 from typing import Callable
 from typing import Deque
-from typing import Dict
 from typing import Optional
 from typing import TypedDict
 from typing import Union
@@ -159,8 +158,8 @@ class BaseInstanceHandler(ABC):
         self._shutdown_event = threading.Event()
         self._workers: list[threading.Thread] = []
         self._workers_lock = threading.Lock()
-        self._results: Dict[str, threading.Event] = {}
-        self._cancel_flags: Dict[str, threading.Event] = {}
+        self._results: dict[str, threading.Event] = {}
+        self._cancel_flags: dict[str, threading.Event] = {}
 
         self._plantsim_kwargs = dict(
             version=version,
