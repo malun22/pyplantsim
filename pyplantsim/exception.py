@@ -120,3 +120,15 @@ class EventControllerNotSetException(PlantsimStateException):
 
 class ErrorHandlerException(PlantsimStateException):
     """Raised when installing or removing the error handler fails."""
+
+
+class DatetimeFormatNotSetException(PlantsimStateException):
+    """Raised when a datetime conversion is attempted before the format has been set."""
+
+
+class SeedOutOfRangeException(PlantsimStateException):
+    """Raised when the provided random seed is outside the allowed range."""
+
+
+class UnknownSimulationErrorException(PlantsimStateException):
+    """Raised when a simulation error event is set but carries no error detail."""

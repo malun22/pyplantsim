@@ -23,6 +23,7 @@ import win32com.client
 from .call_cycle import CallCycle
 from .events import ErrorEvent
 from .events import PlantSimEvents
+from .exception import DatetimeFormatNotSetException
 from .exception import ErrorHandlerException
 from .exception import EventControllerNotSetException
 from .exception import ModelAlreadyLoadedException
@@ -31,7 +32,9 @@ from .exception import ModelNotLoadedException
 from .exception import PlantsimAlreadyRunningException
 from .exception import PlantsimException
 from .exception import PlantsimNotRunningException
+from .exception import SeedOutOfRangeException
 from .exception import SimulationException
+from .exception import UnknownSimulationErrorException
 from .licenses import PlantsimLicense
 from .versions import PlantsimVersion
 
@@ -763,7 +766,7 @@ class Plantsim:
         response = self.execute_sim_talk(simtalk)
 
         if not response:
-            raise Exception("Could not remove the error handler")
+            raise ErrorHandlerException("Could not create error handler.")
 
         self._error_handler = None
 
@@ -894,7 +897,7 @@ class Plantsim:
             if self._simulation_error_event.error is not None:
                 raise self._simulation_error_event.error
             else:
-                raise Exception("Unknown simulation error")
+                raise UnknownSimulationErrorException("Unknown simulation error.")
 
         if cancel_event is not None and cancel_event.is_set():
             self.stop_simulation()
@@ -961,7 +964,7 @@ class Plantsim:
         :rtype: datetime
         """
         if not self._datetime_format:
-            raise Exception("Datetime format needs to be set.")
+            raise DatetimeFormatNotSetException("Datetime format needs to be set.")
         return datetime.strptime(date_str, self._datetime_format)
 
     def get_start_date(self) -> datetime:
@@ -1054,10 +1057,10 @@ class Plantsim:
         :raises Exception: If EventController is not set or seed is out of range.
         """
         if not self._event_controller:
-            raise Exception("EventController needs to be set")
+            raise EventControllerNotSetException("EventController needs to be set.")
 
         if seed > 2147483647 or seed < -2147483647:
-            raise Exception("Seed must be between -2147483647 and 2147483647")
+            raise SeedOutOfRangeException("Seed must be between -2147483647 and 2147483647.")
 
         self.set_value(PlantsimPath(self._event_controller, "RandomNumbersVariant"), seed)
 
