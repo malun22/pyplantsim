@@ -525,13 +525,7 @@ class Plantsim:
         if not self._instance:
             raise Exception("Instance has been closed before already.")
 
-        logger.info(
-            f"""Closing Siemens Tecnomatix Plant Simulation {
-                self._version.value
-                if isinstance(self._version, PlantsimVersion)
-                else self._version
-            } instance."""
-        )
+        logger.info(f"""Closing Siemens Tecnomatix Plant Simulation {self._version} instance.""")
 
         try:
             self._instance.Quit()
