@@ -210,7 +210,7 @@ class Plantsim:
             f"trusted={self._trusted!r}, "
             f"license={self._license!r}, "
             f"suppress_3d={self._suppress_3d!r}, "
-            f"show_msg_box={self._show_msg_box!r}, "
+            f"show_msg_box={self._show_msg_box!r})"
         )
 
     def start(self) -> "Plantsim":
