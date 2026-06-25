@@ -224,7 +224,6 @@ class Plantsim:
             self._dispatch_id += f".{str(self._version)}"
 
         # Initialize the Event Handler
-        pythoncom.CoInitialize()
         self._event_handler = PlantSimEvents(
             on_simulation_finished=self._internal_simulation_finished,
             on_simtalk_message=self._user_simtalk_msg_cb,
@@ -289,8 +288,6 @@ class Plantsim:
 
         if self._instance:
             self.quit()
-
-        pythoncom.CoUninitialize()
 
     def set_network(
         self,
@@ -504,9 +501,12 @@ class Plantsim:
         Listen to events and handle COM messages.
         """
         pythoncom.CoInitialize()
-        while self._running:
-            pythoncom.PumpWaitingMessages()
-            time.sleep(self._event_polling_interval)
+        try:
+            while self._running:
+                pythoncom.PumpWaitingMessages()
+                time.sleep(self._event_polling_interval)
+        finally:
+            pythoncom.CoUninitialize()
 
     def quit(self) -> None:
         """
