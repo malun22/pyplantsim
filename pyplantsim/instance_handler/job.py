@@ -4,7 +4,6 @@ from abc import ABC
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Callable
-from typing import Optional
 import uuid
 
 from ..exception import SimulationException
@@ -37,20 +36,20 @@ class SimulationJob(Job):
     :ivar without_animation: If True, run the simulation without animation.
     :vartype without_animation: bool
     :ivar on_init: Callback to be called at simulation initialization.
-    :vartype on_init: Optional[Callable]
+    :vartype on_init: Callable[[Plantsim], None] | None = None
     :ivar on_endsim: Callback to be called at simulation end.
-    :vartype on_endsim: Optional[Callable]
+    :vartype on_endsim: Callable[[Plantsim], None] | None = None
     :ivar on_simulation_error: Callback to be called on simulation error.
-    :vartype on_simulation_error: Optional[Callable]
+    :vartype on_simulation_error: Callable[[Plantsim, SimulationException], None] | None = None
     :ivar on_progress: Callback to be called to report progress.
-    :vartype on_progress: Optional[Callable]
+    :vartype on_progress: Callable[[Plantsim, float], None] | None = None
     """
 
     without_animation: bool = True
-    on_init: Optional[Callable[[Plantsim], None]] = None
-    on_endsim: Optional[Callable[[Plantsim], None]] = None
-    on_simulation_error: Optional[Callable[[Plantsim, SimulationException], None]] = None
-    on_progress: Optional[Callable[[Plantsim, float], None]] = None
+    on_init: Callable[[Plantsim], None] | None = None
+    on_endsim: Callable[[Plantsim], None] | None = None
+    on_simulation_error: Callable[[Plantsim, SimulationException], None] | None = None
+    on_progress: Callable[[Plantsim, float], None] | None = None
 
 
 class ShutdownWorkerJob(Job):

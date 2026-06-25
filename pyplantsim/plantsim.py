@@ -12,7 +12,6 @@ from types import TracebackType
 from typing import Any
 from typing import Callable
 from typing import cast
-from typing import Optional
 from typing import Union
 
 from loguru import logger
@@ -74,19 +73,19 @@ class Plantsim:
     :ivar _running: Simulation status.
     :vartype _running: bool
     :ivar _simulation_error: Simulation error details.
-    :vartype _simulation_error: Optional[dict]
+    :vartype _simulation_error: dict[str, Any] | None
     :ivar _simulation_finished_event: Event triggered when the simulation finishes.
     :vartype _simulation_finished_event: threading.Event
     :ivar _error_handler: The path to the installed error handler.
-    :vartype _error_handler: Optional[str]
+    :vartype _error_handler: str | None
     :ivar _user_simulation_finished_cb: Callback for when the simulation finishes.
-    :vartype _user_simulation_finished_cb: Optional[Callable[[], None]]
+    :vartype _user_simulation_finished_cb: Callable[[], None] | None
     :ivar _user_simtalk_msg_cb: Callback for SimTalk messages.
-    :vartype _user_simtalk_msg_cb: Optional[Callable[[str], None]]
+    :vartype _user_simtalk_msg_cb: Callable[[str], None] | None
     :ivar _user_fire_simtalk_msg_cb: Callback to fire SimTalk messages.
-    :vartype _user_fire_simtalk_msg_cb: Optional[Callable[[str], None]]
+    :vartype _user_fire_simtalk_msg_cb: Callable[[str], None] | None
     :ivar _user_simulation_error_cb: Callback for simulation errors.
-    :vartype _user_simulation_error_cb: Optional[Callable[[SimulationException], None]]
+    :vartype _user_simulation_error_cb: Callable[[SimulationException], None] | None
     """
 
     # Defaults
@@ -102,10 +101,10 @@ class Plantsim:
         show_msg_box: bool = False,
         event_polling_interval: float = 0.05,
         disable_log_message: bool = False,
-        simulation_finished_callback: Optional[Callable[[], None]] = None,
-        simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-        fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-        simulation_error_callback: Optional[Callable[[SimulationException], None]] = None,
+        simulation_finished_callback: Callable[[], None] | None = None,
+        simtalk_msg_callback: Callable[[str], None] | None = None,
+        fire_simtalk_msg_callback: Callable[[str], None] | None = None,
+        simulation_error_callback: Callable[[SimulationException], None] | None = None,
     ) -> None:
         """
         Initialize the Siemens Tecnomatix Plant Simulation instance.
@@ -136,20 +135,20 @@ class Plantsim:
         :type disable_log_message: bool, optional
         """
         self._dispatch_id: str = self._DISPATCH_ID
-        self._event_controller: Optional[PlantsimPath] = None
-        self._network_path: Optional[PlantsimPath] = None
-        self._event_thread: Optional[threading.Thread] = None
-        self._event_handler: Optional[PlantSimEvents] = None
-        self._datetime_format: Optional[str] = None
+        self._event_controller: PlantsimPath | None = None
+        self._network_path: PlantsimPath | None = None
+        self._event_thread: threading.Thread | None = None
+        self._event_handler: PlantSimEvents | None = None
+        self._datetime_format: str | None = None
         self._model_loaded: bool = False
-        self._model_path: Optional[str] = None
+        self._model_path: str | None = None
         self._running: bool = False
-        self._simulation_error: Optional[dict[str, Any]] = None
-        self._error_handler: Optional[str] = None
-        self._user_simulation_finished_cb: Optional[Callable[[], None]] = None
-        self._user_simtalk_msg_cb: Optional[Callable[[str], None]] = None
-        self._user_fire_simtalk_msg_cb: Optional[Callable[[str], None]] = None
-        self._user_simulation_error_cb: Optional[Callable[[SimulationException], None]] = None
+        self._simulation_error: dict[str, Any] | None = None
+        self._error_handler: str | None = None
+        self._user_simulation_finished_cb: Callable[[], None] | None = None
+        self._user_simtalk_msg_cb: Callable[[str], None] | None = None
+        self._user_fire_simtalk_msg_cb: Callable[[str], None] | None = None
+        self._user_simulation_error_cb: Callable[[SimulationException], None] | None = None
 
         # Inits
         if disable_log_message:
@@ -404,12 +403,12 @@ class Plantsim:
         if self._user_simulation_finished_cb:
             self._user_simulation_finished_cb()
 
-    def register_on_simulation_finished(self, callback: Optional[Callable[[], None]]) -> None:
+    def register_on_simulation_finished(self, callback: Callable[[], None] | None) -> None:
         """
         Set callback for OnSimulationFinished event.
 
         :param callback: Callback function.
-        :type callback: Optional[Callable[[], None]]
+        :type callback: Callable[[], None] | None
         """
         self._user_simulation_finished_cb = callback
 
@@ -463,34 +462,34 @@ class Plantsim:
             return False
         return True
 
-    def register_on_simtalk_message(self, callback: Optional[Callable[[str], None]]) -> None:
+    def register_on_simtalk_message(self, callback: Callable[[str], None] | None) -> None:
         """
         Set callback for OnSimTalkMessage event.
 
         :param callback: Callback function.
-        :type callback: Optional[Callable[[str], None]]
+        :type callback: Callable[[str], None] | None
         """
         self._user_simtalk_msg_cb = callback
 
-    def register_on_fire_simtalk_message(self, callback: Optional[Callable[[str], None]]) -> None:
+    def register_on_fire_simtalk_message(self, callback: Callable[[str], None] | None) -> None:
         """
         Set callback for FireSimTalkMessage event.
 
         :param callback: Callback function.
-        :type callback: Optional[Callable[[str], None]]
+        :type callback: Callable[[str], None] | None
         """
         self._user_fire_simtalk_msg_cb = callback
         if self._event_handler:
             self._event_handler.on_fire_simtalk_message = callback
 
     def register_on_simulation_error(
-        self, callback: Optional[Callable[[SimulationException], None]]
+        self, callback: Callable[[SimulationException], None] | None
     ) -> None:
         """
         Set callback for simulation errors.
 
         :param callback: Callback function.
-        :type callback: Optional[Callable[[SimulationException], None]]
+        :type callback: Callable[[SimulationException], None] | None
         """
         self._user_simulation_error_cb = callback
 
@@ -538,7 +537,7 @@ class Plantsim:
         self._model_loaded = False
         self._model_path = None
 
-    def set_event_controller(self, path: Optional[PlantsimPath] = None) -> None:
+    def set_event_controller(self, path: PlantsimPath | None = None) -> None:
         """
         Set the path of the Event Controller.
 
@@ -594,15 +593,15 @@ class Plantsim:
 
         # Check if indexes are active
         row_index_active = self.get_value(PlantsimPath(path, "rowIndex"))
-        index: Optional[list[Any]] = None
+        index: list[Any] | None = None
         if row_index_active:
             index = [
                 self.get_value(PlantsimPath(path, f"[0,{row}]")) for row in range(1, y_dim + 1)
             ]
 
         col_index_active = self.get_value(PlantsimPath(path, "columnIndex"))
-        columns: Optional[list[str]] = None
-        index_name: Optional[str] = None
+        columns: list[str] | None = None
+        index_name: str | None = None
         if col_index_active:
             if row_index_active:
                 index_name = self.get_value(PlantsimPath(path, "[0,0]"))
@@ -687,7 +686,7 @@ class Plantsim:
         return bool(self._instance.IsSimulationRunning())
 
     def load_model(
-        self, filepath: str, password: Optional[str] = None, close_other: bool = False
+        self, filepath: str, password: str | None = None, close_other: bool = False
     ) -> None:
         """
         Load a model into the current instance.
@@ -857,11 +856,11 @@ class Plantsim:
     def run_simulation(
         self,
         without_animation: bool = True,
-        on_init: Optional[Callable[["Plantsim"], None]] = None,
-        on_endsim: Optional[Callable[["Plantsim"], None]] = None,
-        on_simulation_error: Optional[Callable[["Plantsim", SimulationException], None]] = None,
-        on_progress: Optional[Callable[["Plantsim", float], None]] = None,
-        cancel_event: Optional[threading.Event] = None,
+        on_init: Callable[["Plantsim"], None] | None = None,
+        on_endsim: Callable[["Plantsim"], None] | None = None,
+        on_simulation_error: Callable[["Plantsim", SimulationException], None] | None = None,
+        on_progress: Callable[["Plantsim", float], None] | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> None:
         """
         Run a full simulation and return after the run is over. This method suggests, that the
@@ -870,15 +869,15 @@ class Plantsim:
         :param without_animation: Run without animation.
         :type without_animation: bool, optional
         :param on_init: Callback before simulation starts.
-        :type on_init: Optional[Callable[[Plantsim], None]]
+        :type on_init: Callable[[Plantsim], None] | None
         :param on_endsim: Callback after simulation ends.
-        :type on_endsim: Optional[Callable[[Plantsim], None]]
+        :type on_endsim: Callable[[Plantsim], None] | None
         :param on_simulation_error: Callback on simulation error.
-        :type on_simulation_error: Optional[Callable[[Plantsim, SimulationException], None]]
+        :type on_simulation_error: Callable[[Plantsim, SimulationException], None] | None
         :param on_progress: Progress callback (receives percent complete).
-        :type on_progress: Optional[Callable[[Plantsim, float], None]]
+        :type on_progress: Callable[[Plantsim, float], None] | None
         :param cancel_event: Event to cancel the run.
-        :type cancel_event: Optional[threading.Event]
+        :type cancel_event: threading.Event | None
         :raises SimulationException: If a simulation error occurs.
         """
         if on_init:
@@ -906,16 +905,16 @@ class Plantsim:
 
     def _run_simulation_event_loop(
         self,
-        on_progress: Optional[Callable[["Plantsim", float], None]] = None,
-        cancel_event: Optional[threading.Event] = None,
+        on_progress: Callable[["Plantsim", float], None] | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> None:
         """
         Internal loop to handle simulation events and progress callbacks.
 
         :param on_progress: Progress callback.
-        :type on_progress: Optional[Callable[[Plantsim, float], None]]
+        :type on_progress: Callable[[Plantsim, float], None] | None
         :param cancel_event: Event to cancel the simulation.
-        :type cancel_event: Optional[threading.Event]
+        :type cancel_event: threading.Event | None
         """
         start_date = self.get_start_date()
         end_time = self.get_end_time()
@@ -1117,7 +1116,7 @@ class Plantsim:
         self.run_simulation(on_init=on_init, on_endsim=on_endsim)
         return result
 
-    def read_call_cycles(self, max_num_cycles: Optional[int] = None) -> list[CallCycle]:
+    def read_call_cycles(self, max_num_cycles: int | None = None) -> list[CallCycle]:
         simtalk = self._load_simtalk_script("get_call_cycles")
         if max_num_cycles:
             raw = self.execute_sim_talk(simtalk, max_num_cycles)

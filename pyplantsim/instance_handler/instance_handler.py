@@ -9,7 +9,6 @@ import time
 from types import TracebackType
 from typing import Any
 from typing import Callable
-from typing import Optional
 from typing import TypedDict
 from typing import Union
 from typing import Unpack
@@ -57,13 +56,13 @@ class BaseInstanceHandlerKwargs(TypedDict, total=False):
     :key disable_log_message: Disable log messages.
     :type disable_log_message: bool
     :key simulation_finished_callback: Callback for finished simulation.
-    :type simulation_finished_callback: Optional[Callable[[], None]]
+    :type simulation_finished_callback: Callable[[], None] | None
     :key simtalk_msg_callback: Callback for SimTalk messages.
-    :type simtalk_msg_callback: Optional[Callable[[str], None]]
+    :type simtalk_msg_callback: Callable[[str], None] | None
     :key fire_simtalk_msg_callback: Callback for fired SimTalk messages.
-    :type fire_simtalk_msg_callback: Optional[Callable[[str], None]]
+    :type fire_simtalk_msg_callback: Callable[[str], None] | None
     :key simulation_error_callback: Callback for simulation errors.
-    :type simulation_error_callback: Optional[Callable[[SimulationException], None]]
+    :type simulation_error_callback: Callable[[SimulationException], None] | None
     """
 
     version: Union[PlantsimVersion, str]
@@ -74,10 +73,10 @@ class BaseInstanceHandlerKwargs(TypedDict, total=False):
     show_msg_box: bool
     event_polling_interval: float
     disable_log_message: bool
-    simulation_finished_callback: Optional[Callable[[], None]]
-    simtalk_msg_callback: Optional[Callable[[str], None]]
-    fire_simtalk_msg_callback: Optional[Callable[[str], None]]
-    simulation_error_callback: Optional[Callable[[SimulationException], None]]
+    simulation_finished_callback: Callable[[], None] | None
+    simtalk_msg_callback: Callable[[str], None] | None
+    fire_simtalk_msg_callback: Callable[[str], None] | None
+    simulation_error_callback: Callable[[SimulationException], None] | None
 
 
 class BaseInstanceHandler(ABC):
@@ -101,13 +100,13 @@ class BaseInstanceHandler(ABC):
     :param disable_log_message: Disable log messages.
     :type disable_log_message: bool
     :param simulation_finished_callback: Callback for finished simulation.
-    :type simulation_finished_callback: Optional[Callable[[], None]]
+    :type simulation_finished_callback: Callable[[], None] | None
     :param simtalk_msg_callback: Callback for SimTalk messages.
-    :type simtalk_msg_callback: Optional[Callable[[str], None]]
+    :type simtalk_msg_callback: Callable[[str], None] | None
     :param fire_simtalk_msg_callback: Callback for fired SimTalk messages.
-    :type fire_simtalk_msg_callback: Optional[Callable[[str], None]]
+    :type fire_simtalk_msg_callback: Callable[[str], None] | None
     :param simulation_error_callback: Callback for simulation errors.
-    :type simulation_error_callback: Optional[Callable[[SimulationException], None]]
+    :type simulation_error_callback: Callable[[SimulationException], None] | None
     """
 
     def __init__(
@@ -120,10 +119,10 @@ class BaseInstanceHandler(ABC):
         show_msg_box: bool = False,
         event_polling_interval: float = 0.05,
         disable_log_message: bool = False,
-        simulation_finished_callback: Optional[Callable[[], None]] = None,
-        simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-        fire_simtalk_msg_callback: Optional[Callable[[str], None]] = None,
-        simulation_error_callback: Optional[Callable[[SimulationException], None]] = None,
+        simulation_finished_callback: Callable[[], None] | None = None,
+        simtalk_msg_callback: Callable[[str], None] | None = None,
+        fire_simtalk_msg_callback: Callable[[str], None] | None = None,
+        simulation_error_callback: Callable[[SimulationException], None] | None = None,
     ):
         """
         Initialize the InstanceHandler with the given parameters.
@@ -145,13 +144,13 @@ class BaseInstanceHandler(ABC):
         :param disable_log_message: Disable log messages.
         :type disable_log_message: bool
         :param simulation_finished_callback: Callback for finished simulation.
-        :type simulation_finished_callback: Optional[Callable[[], None]]
+        :type simulation_finished_callback: Callable[[], None] | None
         :param simtalk_msg_callback: Callback for SimTalk messages.
-        :type simtalk_msg_callback: Optional[Callable[[str], None]]
+        :type simtalk_msg_callback: Callable[[str], None] | None
         :param fire_simtalk_msg_callback: Callback for fired SimTalk messages.
-        :type fire_simtalk_msg_callback: Optional[Callable[[str], None]]
+        :type fire_simtalk_msg_callback: Callable[[str], None] | None
         :param simulation_error_callback: Callback for simulation errors.
-        :type simulation_error_callback: Optional[Callable[[SimulationException], None]]
+        :type simulation_error_callback: Callable[[SimulationException], None] | None
         """
         self._job_queue: queue.Queue[Job] = queue.Queue()
         self._shutdown_event = threading.Event()
@@ -470,7 +469,7 @@ class DynamicInstanceHandler(BaseInstanceHandler):
     :param min_instances: Minimum number of PlantSim worker instances.
     :type min_instances: int
     :param max_instances: Maximum number of PlantSim worker instances.
-    :type max_instances: Optional[int]
+    :type max_instances: int | None
     :param scale_interval: Seconds between resource checks and scaling decisions.
     :type scale_interval: float
     :param kwargs: Additional keyword arguments forwarded to the PlantSim instance.
@@ -482,7 +481,7 @@ class DynamicInstanceHandler(BaseInstanceHandler):
         max_cpu: float = 0.8,
         max_memory: float = 0.8,
         min_instances: int = 1,
-        max_instances: Optional[int] = None,
+        max_instances: int | None = None,
         scale_interval: float = 15.0,
         **kwargs: Unpack[BaseInstanceHandlerKwargs],
     ):

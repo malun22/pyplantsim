@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import threading
 from typing import Callable
-from typing import Optional
 
 from .exception import SimulationException
 
@@ -12,39 +11,39 @@ class PlantSimEvents:
     Event handler class for Plant Simulation COM events.
 
     :param on_simulation_finished: Callback for when the simulation is finished.
-    :type on_simulation_finished: Optional[Callable[[], None]]
+    :type on_simulation_finished: Callable[[], None] | None
     :param on_simtalk_message: Callback for when a SimTalk message is received.
-    :type on_simtalk_message: Optional[Callable[[str], None]]
+    :type on_simtalk_message: Callable[[str], None] | None
     :param on_fire_simtalk_message: Callback for when a SimTalk message is fired.
-    :type on_fire_simtalk_message: Optional[Callable[[str], None]]
+    :type on_fire_simtalk_message: Callable[[str], None] | None
 
     :ivar on_simulation_finished: Callback for simulation finished event.
-    :vartype on_simulation_finished: Optional[Callable[[], None]]
+    :vartype on_simulation_finished: Callable[[], None] | None
     :ivar on_simtalk_message: Callback for SimTalk message event.
-    :vartype on_simtalk_message: Optional[Callable[[str], None]]
+    :vartype on_simtalk_message: Callable[[str], None] | None
     :ivar on_fire_simtalk_message: Callback for fired SimTalk message event.
-    :vartype on_fire_simtalk_message: Optional[Callable[[str], None]]
+    :vartype on_fire_simtalk_message: Callable[[str], None] | None
     """
 
-    on_simulation_finished: Optional[Callable[[], None]]
-    on_simtalk_message: Optional[Callable[[str], None]]
-    on_fire_simtalk_message: Optional[Callable[[str], None]]
+    on_simulation_finished: Callable[[], None] | None
+    on_simtalk_message: Callable[[str], None] | None
+    on_fire_simtalk_message: Callable[[str], None] | None
 
     def __init__(
         self,
-        on_simulation_finished: Optional[Callable[[], None]] = None,
-        on_simtalk_message: Optional[Callable[[str], None]] = None,
-        on_fire_simtalk_message: Optional[Callable[[str], None]] = None,
+        on_simulation_finished: Callable[[], None] | None = None,
+        on_simtalk_message: Callable[[str], None] | None = None,
+        on_fire_simtalk_message: Callable[[str], None] | None = None,
     ) -> None:
         """
         Initialize the PlantSimEvents event handler.
 
         :param on_simulation_finished: Callback for simulation finished event.
-        :type on_simulation_finished: Optional[Callable[[], None]]
+        :type on_simulation_finished: Callable[[], None] | None
         :param on_simtalk_message: Callback for SimTalk message event.
-        :type on_simtalk_message: Optional[Callable[[str], None]]
+        :type on_simtalk_message: Callable[[str], None] | None
         :param on_fire_simtalk_message: Callback for fired SimTalk message event.
-        :type on_fire_simtalk_message: Optional[Callable[[str], None]]
+        :type on_fire_simtalk_message: Callable[[str], None] | None
         """
         self.on_simulation_finished = on_simulation_finished
         self.on_simtalk_message = on_simtalk_message
@@ -81,4 +80,4 @@ class PlantSimEvents:
 class ErrorEvent(threading.Event):
     def __init__(self) -> None:
         super().__init__()
-        self.error: Optional[SimulationException] = None
+        self.error: SimulationException | None = None
